@@ -1,10 +1,10 @@
-package fr.evercraft.everkits;
+package fr.evercraft.eversanctions;
 
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 
 import fr.evercraft.everapi.plugin.EPlugin;
-import fr.evercraft.everkits.command.sub.EKReload;
+import fr.evercraft.eversanctions.command.sub.ESReload;
 
 @Plugin(id = "fr.evercraft.everkits", 
 		name = "EverKits", 
@@ -15,25 +15,25 @@ import fr.evercraft.everkits.command.sub.EKReload;
 		dependencies = {
 		    @Dependency(id = "fr.evercraft.everapi", version = "1.2")
 		})
-public class EverKits extends EPlugin {
-	private EKConfig configs;
+public class EverSanctions extends EPlugin {
+	private ESConfig configs;
 	
-	private EKMessage messages;
+	private ESMessage messages;
 	
 	@Override
 	protected void onPreEnable() {		
-		this.configs = new EKConfig(this);
+		this.configs = new ESConfig(this);
 		
-		this.messages = new EKMessage(this);
+		this.messages = new ESMessage(this);
 		
-		this.getGame().getEventManager().registerListeners(this, new EKListener(this));
+		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
 	
 	@Override
 	protected void onCompleteEnable() {
-		EKCommand command = new EKCommand(this);
+		ESCommand command = new ESCommand(this);
 		
-		command.add(new EKReload(this, command));
+		command.add(new ESReload(this, command));
 	}
 
 	protected void onReload(){
@@ -47,11 +47,11 @@ public class EverKits extends EPlugin {
 	 * Accesseurs
 	 */
 	
-	public EKMessage getMessages(){
+	public ESMessage getMessages(){
 		return this.messages;
 	}
 	
-	public EKConfig getConfigs() {
+	public ESConfig getConfigs() {
 		return this.configs;
 	}
 }

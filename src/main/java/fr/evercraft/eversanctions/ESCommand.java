@@ -1,20 +1,20 @@
-package fr.evercraft.everkits;
+package fr.evercraft.eversanctions;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.plugin.command.EParentCommand;
-import fr.evercraft.everkits.EKMessage.EKMessages;
+import fr.evercraft.eversanctions.ESMessage.EKMessages;
 
-public class EKCommand extends EParentCommand<EverKits> {
+public class ESCommand extends EParentCommand<EverSanctions> {
 	
-	public EKCommand(final EverKits plugin) {
+	public ESCommand(final EverSanctions plugin) {
         super(plugin, "everkits");
     }
 	
 	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(EKPermissions.EVERKITS.get());
+		return source.hasPermission(ESPermissions.EVERKITS.get());
 	}
 
 	@Override
@@ -24,6 +24,6 @@ public class EKCommand extends EParentCommand<EverKits> {
 
 	@Override
 	public boolean testPermissionHelp(final CommandSource source) {
-		return source.hasPermission(EKPermissions.HELP.get());
+		return source.hasPermission(ESPermissions.HELP.get());
 	}
 }

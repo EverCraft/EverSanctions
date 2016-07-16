@@ -1,4 +1,4 @@
-package fr.evercraft.everkits;
+package fr.evercraft.eversanctions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +9,9 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
 
-public class EKConfig extends EConfig {
+public class ESConfig extends EConfig {
 
-	public EKConfig(final EverKits plugin) {
+	public ESConfig(final EverSanctions plugin) {
 		super(plugin);
 	}
 	

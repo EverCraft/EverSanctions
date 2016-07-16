@@ -1,4 +1,4 @@
-package fr.evercraft.everkits;
+package fr.evercraft.eversanctions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,9 +12,9 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.plugin.file.EnumMessage;
 
-public class EKMessage extends EMessage {
+public class ESMessage extends EMessage {
 
-	public EKMessage(final EverKits plugin) {
+	public ESMessage(final EverSanctions plugin) {
 		super(plugin, EKMessages.values());
 	}
 	
