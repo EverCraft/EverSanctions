@@ -20,9 +20,9 @@ public class ESMessage extends EMessage {
 	
 	public enum EKMessages implements EnumMessage {
 		PREFIX("prefix",  							
-				"[&4Ever&6&lKits&f] "),
+				"[&4Ever&6&lSanctions&f] "),
 		DESCRIPTION("description", 
-				"Gestionnaire des kits");
+				"Gestionnaire des sanctions");
 		
 		private final String path;
 	    private final Object french;

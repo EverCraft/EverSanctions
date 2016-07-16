@@ -7,12 +7,12 @@ import com.google.common.base.Preconditions;
 import fr.evercraft.everapi.plugin.EnumPermission;
 
 public enum ESPermissions implements EnumPermission {
-	EVERKITS("command"),
+	EVERSANCTIONS("command"),
 	
 	HELP("help"),
 	RELOAD("reload");
 	
-	private final static String prefix = "everkits";
+	private final static String prefix = "eversanctions";
 	
 	private final String permission;
     

@@ -9,12 +9,12 @@ import fr.evercraft.eversanctions.ESMessage.EKMessages;
 public class ESCommand extends EParentCommand<EverSanctions> {
 	
 	public ESCommand(final EverSanctions plugin) {
-        super(plugin, "everkits");
+        super(plugin, "eversanctions");
     }
 	
 	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(ESPermissions.EVERKITS.get());
+		return source.hasPermission(ESPermissions.EVERSANCTIONS.get());
 	}
 
 	@Override
