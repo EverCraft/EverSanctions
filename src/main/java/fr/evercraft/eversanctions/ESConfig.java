@@ -39,7 +39,7 @@ public class ESConfig extends EConfig {
 	@Override
 	public void loadDefault() {
 		addDefault("debug", false, "Displays plugin performance in the logs");
-		addDefault("language", EMessage.ENGLISH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
+		addDefault("language", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
 		
 		addDefault("enable-format", true);
 		addDefault("enable-icons", true);
