@@ -75,7 +75,7 @@ public class ESMessage extends EMessage {
 		}
 		
 		public String get() {
-			if(this.message instanceof String) {
+			if (this.message instanceof String) {
 				return (String) this.message;
 			}
 			return this.message.toString();
@@ -83,7 +83,7 @@ public class ESMessage extends EMessage {
 			
 		@SuppressWarnings("unchecked")
 		public List<String> getList() {
-			if(this.message instanceof List) {
+			if (this.message instanceof List) {
 				return (List<String>) this.message;
 			}
 			return Arrays.asList(this.message.toString());

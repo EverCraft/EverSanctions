@@ -45,7 +45,7 @@ public class ESConfig extends EConfig {
 		addDefault("enable-icons", true);
 		
 		ConfigurationNode replaces = this.get("replaces");
-		if(replaces.getValue() == null) {
+		if (replaces.getValue() == null) {
 			replaces.getNode("[<3]").setValue("\u2764");
 			replaces.getNode("[check]").setValue("\u2714");
 			replaces.getNode("[*]").setValue("\u2716");
@@ -57,7 +57,7 @@ public class ESConfig extends EConfig {
 		addDefault("format-default", "<DISPLAYNAME_FORMAT> &7:&f <MESSAGE>");
 		
 		ConfigurationNode formats = this.get("format-groups");
-		if(formats.getValue() == null) {
+		if (formats.getValue() == null) {
 			formats.getNode("Admin").setValue("&f[&4Admin&f] <DISPLAYNAME_FORMAT> &7:&f <MESSAGE>");
 			formats.getNode("Moderator").setValue("&f[&5Moderator&f] <DISPLAYNAME_FORMAT> &7:&f <MESSAGE>");
 		}
@@ -65,8 +65,8 @@ public class ESConfig extends EConfig {
 	
 	public Map<String, String> getReplaces() {
 		Map<String, String> replaces = new HashMap<String, String>();
-		for(Entry<Object, ? extends CommentedConfigurationNode> node : this.get("replaces").getChildrenMap().entrySet()) {
-			if(node.getKey() instanceof String) {
+		for (Entry<Object, ? extends CommentedConfigurationNode> node : this.get("replaces").getChildrenMap().entrySet()) {
+			if (node.getKey() instanceof String) {
 				replaces.put((String) node.getKey(), node.getValue().getString(""));
 			}
 		}
@@ -75,9 +75,9 @@ public class ESConfig extends EConfig {
 	
 	public Map<String, String> getFormatGroups() {
 		Map<String, String> replaces = new HashMap<String, String>();
-		for(Entry<Object, ? extends CommentedConfigurationNode> node : this.get("format-groups").getChildrenMap().entrySet()) {
+		for (Entry<Object, ? extends CommentedConfigurationNode> node : this.get("format-groups").getChildrenMap().entrySet()) {
 			String value = node.getValue().getString(null);
-			if(node.getKey() instanceof String && value != null) {
+			if (node.getKey() instanceof String && value != null) {
 				replaces.put((String) node.getKey(), value);
 			}
 		}
