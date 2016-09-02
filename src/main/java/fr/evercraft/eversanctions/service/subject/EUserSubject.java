@@ -3,6 +3,8 @@ package fr.evercraft.eversanctions.service.subject;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import org.spongepowered.api.text.Text;
+
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.auto.EAuto;
@@ -47,7 +49,13 @@ public class EUserSubject implements SubjectUserSanction {
 	public boolean isJail() {
 		return this.jail;
 	}
+
+	public boolean addBan(long creation, long duration, Text reason, final String source) {
+		return false;
+	}
 	
-	
+	public boolean pardon(Text reason, String source) {
+		return false;
+	}
 
 }

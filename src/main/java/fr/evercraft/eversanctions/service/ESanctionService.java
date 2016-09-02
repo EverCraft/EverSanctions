@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
 import com.google.common.base.Preconditions;
@@ -30,7 +31,7 @@ import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public abstract class ESanctionService implements SanctionService {
 	
-	private final EverSanctions plugin;
+	protected final EverSanctions plugin;
 	
 	private final ConcurrentMap<UUID, EUserSubject> subjects;
 	private final LoadingCache<UUID, EUserSubject> cache;
@@ -152,5 +153,13 @@ public abstract class ESanctionService implements SanctionService {
 			//this.plugin.getManagerEvent().post(player, PermUserEvent.Action.USER_REMOVED);
 			this.plugin.getLogger().debug("Unloading the player : " + uuid.toString());
 		}
+	}
+	
+	public boolean addBan(InetAddress address, long creation, long duration, Text reason, final String source) {
+		return true;
+	}
+	
+	public boolean pardon(InetAddress address, Text reason, String source) {
+		return false;
 	}
 }

@@ -1,41 +1,23 @@
 package fr.evercraft.eversanctions.service;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.Ban.Ip;
 import org.spongepowered.api.util.ban.Ban.Profile;
+import org.spongepowered.api.util.ban.BanTypes;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-
-import fr.evercraft.everapi.java.Chronometer;
-import fr.evercraft.everapi.services.essentials.SubjectUserEssentials;
-import fr.evercraft.everapi.services.sanction.SanctionService;
-import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
 import fr.evercraft.eversanctions.EverSanctions;
-import fr.evercraft.eversanctions.service.manual.EManual;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public class EBanService extends ESanctionService {
+	
+	private static final String UNKNOWN = "unknown";
 	
 	// Ordre décroissant
 	private final ConcurrentSkipListSet<? extends Ban> bans;
@@ -56,30 +38,30 @@ public class EBanService extends ESanctionService {
 	@SuppressWarnings("unchecked")
 	public Collection<Profile> getProfileBans() {
 		this.removeExpired();
-		return (Collection<Profile>) this.bans.stream().filter(ban -> ban instanceof Profile);
+		return (Collection<Profile>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE));
 	}
 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Collection<Ip> getIpBans() {
+	public Collection<Ban.Ip> getIpBans() {
 		this.removeExpired();
-		return (Collection<Ip>) this.bans.stream().filter(ban -> ban instanceof Ip);
+		return (Collection<Ban.Ip>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.IP));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Optional<Profile> getBanFor(GameProfile profile) {
+	public Optional<Ban.Profile> getBanFor(GameProfile profile) {
 		this.removeExpired();
-		return (Optional<Profile>) this.bans.stream().filter(ban -> ban instanceof Profile && ((Profile)ban).getProfile().equals(profile)).findFirst();
+		return (Optional<Ban.Profile>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE) && ((Ban.Profile)ban).getProfile().equals(profile)).findFirst();
 	}
 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Optional<Ip> getBanFor(InetAddress address) {
+	public Optional<Ban.Ip> getBanFor(InetAddress address) {
 		this.removeExpired();
-		return (Optional<Ip>) this.bans.stream().filter(ban -> ban instanceof Ip && ((Ip)ban).getAddress().equals(address)).findFirst();
+		return (Optional<Ban.Ip>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.IP) && ((Ip)ban).getAddress().equals(address)).findFirst();
 	}
 
 
@@ -99,9 +81,10 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(GameProfile profile) {
 		Optional<EUserSubject> subject = this.getSubject(profile.getUniqueId());
 		if(subject.isPresent()) {
-			//return subject.pardon();
-		}
-		return false;
+			return subject.get().pardon(Text.EMPTY, EBanService.UNKNOWN);
+		} else {
+        	throw new IllegalArgumentException(String.format("User not found : %s", profile.getUniqueId()));
+        }
 	}
 
 
@@ -114,15 +97,49 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public boolean removeBan(Ban ban) {
-		// TODO Auto-generated method stub
+		if (this.bans.contains(ban)) {
+			if (ban.getType().equals(BanTypes.PROFILE)) {
+	            return this.pardon(((Ban.Profile) ban).getProfile());
+	        } else if (ban.getType().equals(BanTypes.IP)) {
+	            return this.pardon(((Ban.Ip) ban).getAddress());
+	        }
+	        throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
+		} 
 		return false;
 	}
 
 
 	@Override
 	public Optional<? extends Ban> addBan(Ban ban) {
-		// TODO Auto-generated method stub
-		return null;
+		Optional<? extends Ban> before;
+		
+		long creation = ban.getCreationDate().toEpochMilli();
+    	Text reason = ban.getReason().orElse(Text.EMPTY);
+    	String source = ban.getBanSource().orElse(Text.of(EBanService.UNKNOWN)).toPlain();
+		long duration = -1;
+    	if(ban.getExpirationDate().isPresent()) {
+    		duration = ban.getCreationDate().toEpochMilli() - ban.getExpirationDate().get().toEpochMilli();
+    	}
+
+        if (ban.getType().equals(BanTypes.PROFILE)) {
+        	Ban.Profile profile = (Ban.Profile) ban;
+        	before = this.getBanFor(profile.getProfile());
+
+            Optional<EUserSubject> subject = this.getSubject(profile.getProfile().getUniqueId());
+            if(subject.isPresent()) {
+            	subject.get().addBan(creation, duration, reason, source);
+            } else {
+            	throw new IllegalArgumentException(String.format("User not found : %s", profile.getProfile().getUniqueId()));
+            }
+        } else if (ban.getType().equals(BanTypes.IP)) {
+        	Ban.Ip ip = (Ban.Ip) ban;
+        	before = this.getBanFor(ip.getAddress());
+            
+            this.addBan(ip.getAddress(), creation, duration, reason, source);
+        } else {
+            throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
+        }
+        return before;
 	}
 
 
