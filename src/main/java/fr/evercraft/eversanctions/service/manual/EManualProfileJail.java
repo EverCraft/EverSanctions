@@ -6,9 +6,9 @@ import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
-public class EManualJail extends EManual implements SanctionManualProfile.Jail {
+public class EManualProfileJail extends EManual implements SanctionManualProfile.Jail {
 	
-	public EManualJail(final long date_start, final long date_end, final Text reason, final String source) {
+	public EManualProfileJail(final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
 	}
 

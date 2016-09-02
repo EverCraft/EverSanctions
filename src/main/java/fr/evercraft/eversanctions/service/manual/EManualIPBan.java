@@ -6,11 +6,11 @@ import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 
-public class EManualIP extends EManual implements SanctionManualIP.Ban {
+public class EManualIPBan extends EManual implements SanctionManualIP.Ban {
 	
 	private final InetAddress address;
 	
-	public EManualIP(final InetAddress address,final long date_start, final long date_end, final Text reason, final String source) {
+	public EManualIPBan(final InetAddress address,final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
 		
 		this.address = address;

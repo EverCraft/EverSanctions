@@ -26,7 +26,7 @@ import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
 import fr.evercraft.eversanctions.EverSanctions;
-import fr.evercraft.eversanctions.service.manual.EManualIP;
+import fr.evercraft.eversanctions.service.manual.EManualIPBan;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public abstract class ESanctionService implements SanctionService {
@@ -36,12 +36,12 @@ public abstract class ESanctionService implements SanctionService {
 	private final ConcurrentMap<UUID, EUserSubject> subjects;
 	private final LoadingCache<UUID, EUserSubject> cache;
 
-	private final ConcurrentSkipListSet<EManualIP> ips;
+	private final ConcurrentSkipListSet<EManualIPBan> ips;
 	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
-		this.ips = new ConcurrentSkipListSet<EManualIP>((EManualIP o1, EManualIP o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
+		this.ips = new ConcurrentSkipListSet<EManualIPBan>((EManualIPBan o1, EManualIPBan o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 		this.subjects = new ConcurrentHashMap<UUID, EUserSubject>();
 		this.cache = CacheBuilder.newBuilder()
 					    .maximumSize(100)
