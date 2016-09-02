@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions;
 
 public class ESListener {
+	@SuppressWarnings("unused")
 	private EverSanctions plugin;
 	
 	public ESListener(final EverSanctions plugin) {

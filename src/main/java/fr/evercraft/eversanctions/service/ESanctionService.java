@@ -1,10 +1,24 @@
+/*
+ * This file is part of EverSanctions.
+ *
+ * EverSanctions is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * EverSanctions is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package fr.evercraft.eversanctions.service;
 
 import java.net.InetAddress;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -12,8 +26,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.world.World;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -23,6 +38,8 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
 import fr.evercraft.everapi.java.Chronometer;
+import fr.evercraft.everapi.server.location.LocationSQL;
+import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -38,11 +55,14 @@ public abstract class ESanctionService implements SanctionService {
 
 	private final ConcurrentSkipListSet<EManualIPBan> ips;
 	
+	private final ConcurrentMap<String, EJail> jails;
+	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
 		this.ips = new ConcurrentSkipListSet<EManualIPBan>((EManualIPBan o1, EManualIPBan o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 		this.subjects = new ConcurrentHashMap<UUID, EUserSubject>();
+		this.jails = new ConcurrentHashMap<String, EJail>();
 		this.cache = CacheBuilder.newBuilder()
 					    .maximumSize(100)
 					    .expireAfterAccess(5, TimeUnit.MINUTES)
@@ -160,6 +180,82 @@ public abstract class ESanctionService implements SanctionService {
 	}
 	
 	public boolean pardon(InetAddress address, Text reason, String source) {
+		return false;
+	}
+	
+	/*
+	 * Jails
+	 */
+	
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Collection<Jail> getAllJails() {
+		return (Collection) this.jails.values();
+	}
+
+	@Override
+	public boolean hasJail(String identifier) {
+		Preconditions.checkNotNull(identifier, "identifier");
+		
+		return this.jails.containsKey(identifier);
+	}
+
+	@Override
+	public Optional<Jail> getJail(String identifier) {
+		Preconditions.checkNotNull(identifier, "identifier");
+		
+		return Optional.ofNullable(this.jails.get(identifier));
+	}
+
+	@Override
+	public boolean addJail(String identifier, int radius, Transform<World> location) {
+		Preconditions.checkNotNull(identifier, "identifier");
+		Preconditions.checkNotNull(radius, "radius");
+		Preconditions.checkNotNull(location, "location");
+		
+		if (!this.jails.containsKey(identifier)) {
+			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
+			this.jails.put(identifier, jail);
+			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().addJail(jail));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean updateJail(String identifier, int radius, Transform<World> location) {
+		Preconditions.checkNotNull(identifier, "identifier");
+		Preconditions.checkNotNull(radius, "radius");
+		Preconditions.checkNotNull(location, "location");
+		
+		if (this.jails.containsKey(identifier)) {
+			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
+			this.jails.put(identifier, jail);
+			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().updateJail(jail));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean removeJail(String identifier) {
+		Preconditions.checkNotNull(identifier, "identifier");
+		
+		if (this.jails.containsKey(identifier)) {
+			this.jails.remove(identifier);
+			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().removeJail(identifier));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean clearAllJails() {
+		if (!this.jails.isEmpty()) {
+			this.jails.clear();
+			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().clearJail());
+			return true;
+		}
 		return false;
 	}
 }

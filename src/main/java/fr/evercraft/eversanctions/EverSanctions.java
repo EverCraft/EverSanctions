@@ -19,6 +19,7 @@ package fr.evercraft.eversanctions;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 
+import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 
@@ -33,14 +34,16 @@ import fr.evercraft.eversanctions.command.sub.ESReload;
 		})
 public class EverSanctions extends EPlugin {
 	private ESConfig configs;
-	
 	private ESMessage messages;
 	
+	private ESDataBase database;
+	
 	@Override
-	protected void onPreEnable() {		
+	protected void onPreEnable() throws PluginDisableException {		
 		this.configs = new ESConfig(this);
-		
 		this.messages = new ESMessage(this);
+		
+		this.database = new ESDataBase(this);
 		
 		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
@@ -52,8 +55,10 @@ public class EverSanctions extends EPlugin {
 		command.add(new ESReload(this, command));
 	}
 
-	protected void onReload(){
+	protected void onReload() throws PluginDisableException{
 		this.reloadConfigurations();
+		
+		this.database.reload();
 	}
 	
 	protected void onDisable() {
@@ -69,5 +74,9 @@ public class EverSanctions extends EPlugin {
 	
 	public ESConfig getConfigs() {
 		return this.configs;
+	}
+
+	public ESDataBase getDataBase() {
+		return this.database;
 	}
 }
