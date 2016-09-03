@@ -32,28 +32,29 @@ public class EAuto implements SanctionAuto {
 	private final SanctionAutoType type;
 	private final int level;
 	private final String source;
+	private final Optional<String> option;
 	
 	private final Optional<Long> pardon_date;
 	private final Optional<Text> pardon_reason;
 	private final Optional<String> pardon_source;
 	
-	public EAuto(final long date_start, final long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source) {
-		this(date_start, duration, reason, type, level, source, null, null, null);
+	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source) {
+		this(date_start, duration, reason, type, level, source, null, null, null, null);
 	}
 	
-	public EAuto(final long date_start, final long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source, 
+	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source, final String option) {
+		this(date_start, duration, reason, type, level, source, null, null, null, null);
+	}
+	
+	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source, final String option, 
 				final Long pardon_date, final Text pardon_reason, final String pardon_source) {
 		this.date_start = date_start;
 		this.reason = reason;
 		this.type = type;
 		this.level = level;
 		this.source = source;
-		
-		if (duration <= 0) {
-			this.duration = Optional.empty();
-		} else {
-			this.duration = Optional.of(duration);
-		}
+		this.option = Optional.ofNullable(option);
+		this.duration = Optional.ofNullable(duration);
 		
 		this.pardon_date = Optional.ofNullable(pardon_date);
 		this.pardon_reason = Optional.ofNullable(pardon_reason);
@@ -96,6 +97,11 @@ public class EAuto implements SanctionAuto {
 	@Override
 	public SanctionAutoReason getReason() {
 		return this.reason;
+	}
+	
+	@Override
+	public Optional<String> getOption() {
+		return this.option;
 	}
 
 	@Override

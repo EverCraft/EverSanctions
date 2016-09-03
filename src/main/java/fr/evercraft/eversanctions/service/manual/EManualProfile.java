@@ -20,9 +20,9 @@ import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
-public class EManualProfileBan extends EManualProfile implements SanctionManualProfile.Ban {
+public abstract class EManualProfile extends EManual implements SanctionManualProfile {
 	
-	public EManualProfileBan(final long date_start, final long date_end, final Text reason, final String source) {
+	public EManualProfile(final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
 	}
 }

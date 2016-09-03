@@ -16,12 +16,15 @@
  */
 package fr.evercraft.eversanctions.service.subject;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
+import fr.evercraft.everapi.services.sanction.manual.SanctionManual;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.auto.EAuto;
 import fr.evercraft.eversanctions.service.manual.EManual;
@@ -72,6 +75,18 @@ public class EUserSubject implements SubjectUserSanction {
 	
 	public boolean pardon(Text reason, String source) {
 		return false;
+	}
+
+	@Override
+	public Collection<SanctionManual> getAllManual() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<SanctionAuto> getAllAuto() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

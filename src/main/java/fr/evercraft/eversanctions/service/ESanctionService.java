@@ -17,7 +17,6 @@
 package fr.evercraft.eversanctions.service;
 
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,24 +25,18 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.World;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 import fr.evercraft.everapi.java.Chronometer;
-import fr.evercraft.everapi.server.location.LocationSQL;
-import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
 import fr.evercraft.eversanctions.EverSanctions;
-import fr.evercraft.eversanctions.service.manual.EManualIPBan;
+import fr.evercraft.eversanctions.service.manual.EManualIP;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public abstract class ESanctionService implements SanctionService {
@@ -53,29 +46,16 @@ public abstract class ESanctionService implements SanctionService {
 	private final ConcurrentMap<UUID, EUserSubject> subjects;
 	private final LoadingCache<UUID, EUserSubject> cache;
 
-	private final ConcurrentSkipListSet<EManualIPBan> ips;
-	
-	private final ConcurrentMap<String, EJail> jails;
+	private final ConcurrentSkipListSet<EManualIP> ips;
 	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
-		this.ips = new ConcurrentSkipListSet<EManualIPBan>((EManualIPBan o1, EManualIPBan o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
+		this.ips = new ConcurrentSkipListSet<EManualIP>((EManualIP o1, EManualIP o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 		this.subjects = new ConcurrentHashMap<UUID, EUserSubject>();
-		this.jails = new ConcurrentHashMap<String, EJail>();
 		this.cache = CacheBuilder.newBuilder()
 					    .maximumSize(100)
 					    .expireAfterAccess(5, TimeUnit.MINUTES)
-					    .removalListener(new RemovalListener<UUID, EUserSubject>() {
-					    	/**
-					    	 * Supprime un joueur du cache
-					    	 */
-							@Override
-							public void onRemoval(RemovalNotification<UUID, EUserSubject> notification) {
-								//EssentialsSubject.this.plugin.getManagerEvent().post(notification.getValue(), PermUserEvent.Action.USER_REMOVED);
-							}
-					    	
-					    })
 					    .build(new CacheLoader<UUID, EUserSubject>() {
 					    	/**
 					    	 * Ajoute un joueur au cache
@@ -86,8 +66,6 @@ public abstract class ESanctionService implements SanctionService {
 					        	
 					        	EUserSubject subject = new EUserSubject(ESanctionService.this.plugin, uuid);
 					        	ESanctionService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
-					            
-					            //EssentialsSubject.this.plugin.getManagerEvent().post(subject, PermUserEvent.Action.USER_ADDED);
 					            return subject;
 					        }
 					    });
@@ -110,11 +88,6 @@ public abstract class ESanctionService implements SanctionService {
 			this.plugin.getLogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
 			return Optional.empty();
 		}
-	}
-	
-	public Optional<EUserSubject> getOnline(UUID uuid) {
-		Preconditions.checkNotNull(uuid, "uuid");
-		return Optional.ofNullable(this.subjects.get(uuid));
 	}
 	
 	@Override
@@ -181,81 +154,5 @@ public abstract class ESanctionService implements SanctionService {
 	
 	public boolean pardon(InetAddress address, Text reason, String source) {
 		return false;
-	}
-	
-	/*
-	 * Jails
-	 */
-	
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Collection<Jail> getAllJails() {
-		return (Collection) this.jails.values();
-	}
-
-	@Override
-	public boolean hasJail(String identifier) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		
-		return this.jails.containsKey(identifier);
-	}
-
-	@Override
-	public Optional<Jail> getJail(String identifier) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		
-		return Optional.ofNullable(this.jails.get(identifier));
-	}
-
-	@Override
-	public boolean addJail(String identifier, int radius, Transform<World> location) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		Preconditions.checkNotNull(radius, "radius");
-		Preconditions.checkNotNull(location, "location");
-		
-		if (!this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
-			this.jails.put(identifier, jail);
-			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().addJail(jail));
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean updateJail(String identifier, int radius, Transform<World> location) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		Preconditions.checkNotNull(radius, "radius");
-		Preconditions.checkNotNull(location, "location");
-		
-		if (this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
-			this.jails.put(identifier, jail);
-			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().updateJail(jail));
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean removeJail(String identifier) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		
-		if (this.jails.containsKey(identifier)) {
-			this.jails.remove(identifier);
-			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().removeJail(identifier));
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean clearAllJails() {
-		if (!this.jails.isEmpty()) {
-			this.jails.clear();
-			this.plugin.getThreadAsync().execute(() -> this.plugin.getDataBase().clearJail());
-			return true;
-		}
-		return false;
-	}
+	}	
 }

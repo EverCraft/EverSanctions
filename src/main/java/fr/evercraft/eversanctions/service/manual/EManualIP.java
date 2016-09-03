@@ -18,11 +18,11 @@ package fr.evercraft.eversanctions.service.manual;
 
 import org.spongepowered.api.text.Text;
 
-import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
+import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 
-public class EManualProfileBan extends EManualProfile implements SanctionManualProfile.Ban {
+public class EManualIP extends EManual implements SanctionManualIP {
 	
-	public EManualProfileBan(final long date_start, final long date_end, final Text reason, final String source) {
+	public EManualIP(final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
 	}
 }

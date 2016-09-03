@@ -20,7 +20,7 @@ import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
-public class EManualProfileMute extends EManual implements SanctionManualProfile.Mute {
+public class EManualProfileMute extends EManualProfile implements SanctionManualProfile.Mute {
 	
 	public EManualProfileMute(final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);

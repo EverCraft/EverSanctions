@@ -29,25 +29,20 @@ public abstract class EManual implements SanctionManual {
 	private final Text reason;
 	private final String source;
 	
-	private final Optional<Long> pardon_date;
-	private final Optional<Text> pardon_reason;
-	private final Optional<String> pardon_source;
+	private Optional<Long> pardon_date;
+	private Optional<Text> pardon_reason;
+	private Optional<String> pardon_source;
 	
-	public EManual(final long date_start, final long duration, final Text reason, final String source) {
+	public EManual(final long date_start, final Long duration, final Text reason, final String source) {
 		this(date_start, duration, reason, source, null, null, null);
 	}
 	
-	public EManual(final long date_start, final long duration, final Text reason, final String source, 
+	public EManual(final long date_start, final Long duration, final Text reason, final String source, 
 			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
 		this.date_start = date_start;
 		this.reason = reason;
 		this.source = source;
-		
-		if (duration <= 0) {
-			this.duration = Optional.empty();
-		} else {
-			this.duration = Optional.of(duration);
-		}
+		this.duration = Optional.ofNullable(duration);
 		
 		this.pardon_date = Optional.ofNullable(pardon_date);
 		this.pardon_reason = Optional.ofNullable(pardon_reason);
@@ -95,5 +90,11 @@ public abstract class EManual implements SanctionManual {
 	@Override
 	public Optional<String> getPardonSource() {
 		return this.pardon_source;
+	}
+	
+	public void pardon(long date, Text reason, String source) {
+		this.pardon_date = Optional.ofNullable(date);
+		this.pardon_reason = Optional.ofNullable(reason);
+		this.pardon_source = Optional.ofNullable(source);
 	}
 }
