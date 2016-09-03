@@ -25,4 +25,9 @@ public abstract class EManualProfile extends EManual implements SanctionManualPr
 	public EManualProfile(final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
 	}
+	
+	public EManualProfile(final long date_start, final long date_end, final Text reason, final String source, 
+			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
+		super(date_start, date_end, reason, source, pardon_date, pardon_reason, pardon_source);
+	}
 }

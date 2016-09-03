@@ -22,6 +22,9 @@ import org.spongepowered.api.plugin.Plugin;
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.eversanctions.command.sub.ESReload;
+import fr.evercraft.eversanctions.service.EBanService;
+import fr.evercraft.eversanctions.service.EJailService;
+import fr.evercraft.eversanctions.service.ESanctionService;
 
 @Plugin(id = "fr.evercraft.eversanctions", 
 		name = "EverSanctions", 
@@ -38,12 +41,18 @@ public class EverSanctions extends EPlugin {
 	
 	private ESDataBase database;
 	
+	private EBanService ban_service;
+	private EJailService jail_service;
+	
 	@Override
 	protected void onPreEnable() throws PluginDisableException {		
 		this.configs = new ESConfig(this);
 		this.messages = new ESMessage(this);
 		
 		this.database = new ESDataBase(this);
+		
+		this.ban_service = new EBanService(this);
+		this.jail_service = new EJailService(this);
 		
 		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
@@ -78,5 +87,13 @@ public class EverSanctions extends EPlugin {
 
 	public ESDataBase getDataBase() {
 		return this.database;
+	}
+
+	public EBanService getSanctionService() {
+		return this.ban_service;
+	}
+	
+	public EJailService getJailService() {
+		return this.jail_service;
 	}
 }

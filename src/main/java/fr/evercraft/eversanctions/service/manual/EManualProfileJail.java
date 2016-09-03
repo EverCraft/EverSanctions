@@ -24,8 +24,13 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public class EManualProfileJail extends EManualProfile implements SanctionManualProfile.Jail {
 	
-	public EManualProfileJail(final long date_start, final long date_end, final Text reason, final String source) {
+	public EManualProfileJail(final String jail, final long date_start, final long date_end, final Text reason, final String source) {
 		super(date_start, date_end, reason, source);
+	}
+	
+	public EManualProfileJail(final String jail, final long date_start, final long date_end, final Text reason, final String source, 
+			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
+		super(date_start, date_end, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 
 	@Override

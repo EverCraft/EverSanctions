@@ -42,6 +42,7 @@ import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.services.sanction.SubjectIpSanction;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
+import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.manual.EManualIP;
 
@@ -77,11 +78,11 @@ public class EIpSubject implements SubjectIpSanction {
 	}
 	
 	public Collection<SanctionManualIP> getAll() {
-		Builder<SanctionManualIP> builder = new ImmutableList.Builder<SanctionManualIP>().addAll(this.manual_expiry);
+		Builder<SanctionManualIP> builder = new ImmutableList.Builder<SanctionManualIP>();
 		if(this.manual.isPresent()) {
 			builder = builder.add(this.manual.get());
 		}
-		return builder.build();
+		return builder.addAll(this.manual_expiry).build();
 	}
 
 	@Override
@@ -162,6 +163,10 @@ public class EIpSubject implements SubjectIpSanction {
 		return this.address;
 	}
 	
+	public String getAddressString() {
+		return UtilsNetwork.getHostString(this.address);
+	}
+	
 	/*
 	 * Database
 	 */
@@ -176,21 +181,28 @@ public class EIpSubject implements SubjectIpSanction {
 						+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
 						+ "WHERE `identifier` = ? ;";
 			preparedStatement = this.plugin.getDataBase().getConnection().prepareStatement(query);
-			preparedStatement.setString(1, this.address.getHostAddress());
+			preparedStatement.setString(1, this.getAddressString());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
+				Long creation = list.getTimestamp("creation").getTime();
+				Text reason = EChat.of(list.getString("reason"));
+				String source = list.getString("source");
+				Text pardon_reason = EChat.of(list.getString("pardon_reason"));
+				String pardon_source = list.getString("pardon_source");
+				
 				Long duration = list.getLong("duration");
 				if(list.wasNull()) {
 					duration = null;
 				}
+				Long pardon_date = list.getLong("pardon_date");
+				if(list.wasNull()) {
+					pardon_date = null;
+				}
 				
-				ips.add(new EManualIP(list.getTimestamp("creation").getTime(), 
-										duration, 
-										EChat.of(list.getString("reason")),
-										list.getString("source")));
+				ips.add(new EManualIP(creation, duration, reason, source, pardon_date, pardon_reason, pardon_source));
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier:'" + this.address.getHostAddress() + "'): " + e.getMessage());
+	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getAddressString() + "'): " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -209,9 +221,9 @@ public class EIpSubject implements SubjectIpSanction {
     	try {    		
     		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "INSERT INTO `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-    						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.address.getHostAddress());
+			preparedStatement.setString(1, this.getAddressString());
 			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
 			preparedStatement.setLong(3, ban.getDuration().orElse(null));
 			preparedStatement.setString(4, EChat.serialize(ban.getReason()));
@@ -227,7 +239,7 @@ public class EIpSubject implements SubjectIpSanction {
 				preparedStatement.setString(8, null);
 			}
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.address.getHostAddress() + "';"
+			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getAddressString() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "duration='" + ban.getDuration().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
@@ -269,10 +281,10 @@ public class EIpSubject implements SubjectIpSanction {
 				preparedStatement.setString(2, null);
 				preparedStatement.setString(3, null);
 			}
-			preparedStatement.setString(4, this.address.getHostAddress());
+			preparedStatement.setString(4, this.getAddressString());
 			preparedStatement.setTimestamp(5, new Timestamp(ban.getCreationDate()));
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (identifier='" + this.address.getHostAddress() + "';"
+			this.plugin.getLogger().debug("Updating to the database : (identifier='" + this.getAddressString() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
@@ -298,11 +310,11 @@ public class EIpSubject implements SubjectIpSanction {
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
 		    				+ "WHERE `identifier` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.address.getHostAddress());
+			preparedStatement.setString(1, this.getAddressString());
 			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.address.getHostAddress() + "';"
+			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getAddressString() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "duration='" + ban.getDuration().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
@@ -331,10 +343,10 @@ public class EIpSubject implements SubjectIpSanction {
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 		    				+ "WHERE `identifier` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.address.getHostAddress());
+			preparedStatement.setString(1, this.getAddressString());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.address.getHostAddress() + "';");
+			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getAddressString() + "';");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {

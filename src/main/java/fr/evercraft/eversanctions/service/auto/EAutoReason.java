@@ -21,10 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoLevel;
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoReason;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 
-public class EAutoReason implements SanctionAutoReason {
+public class EAutoReason implements SanctionAuto.Reason {
 	
 	private final String name;
 	private final ConcurrentSkipListMap<Integer, EAutoLevel> levels;
@@ -40,7 +39,7 @@ public class EAutoReason implements SanctionAutoReason {
 	}
 	
 	@Override
-	public Optional<SanctionAutoLevel> getLevel(int level) {
+	public Optional<SanctionAuto.Level> getLevel(int level) {
 		if(level < 0) {
 			new IllegalArgumentException("Level is negative");
 		}
@@ -50,7 +49,7 @@ public class EAutoReason implements SanctionAutoReason {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Collection<SanctionAutoLevel> getLevels() {
+	public Collection<SanctionAuto.Level> getLevels() {
 		return (Collection) this.levels.values();
 	}
 	
