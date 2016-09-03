@@ -28,7 +28,9 @@ import org.spongepowered.api.util.ban.Ban.Ip;
 import org.spongepowered.api.util.ban.Ban.Profile;
 import org.spongepowered.api.util.ban.BanTypes;
 
+import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
+import fr.evercraft.eversanctions.service.subject.EIpSubject;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public class EBanService extends ESanctionService {
@@ -99,14 +101,19 @@ public class EBanService extends ESanctionService {
 		if(subject.isPresent()) {
 			return subject.get().pardon(Text.EMPTY, EBanService.UNKNOWN);
 		} else {
-        	throw new IllegalArgumentException(String.format("User not found : %s", profile.getUniqueId()));
+        	throw new IllegalArgumentException(String.format("UserSubject not found : %s", profile.getUniqueId()));
         }
 	}
 
 
 	@Override
 	public boolean pardon(InetAddress address) {
-		return this.pardon(address, Text.EMPTY, EBanService.UNKNOWN);
+		Optional<EIpSubject> subject = this.getSubject(address);
+		if(subject.isPresent()) {
+			return subject.get().pardon(System.currentTimeMillis(), Text.EMPTY, EBanService.UNKNOWN);
+		} else {
+        	throw new IllegalArgumentException(String.format("IPSubject not found : %s", address.toString()));
+        }
 	}
 
 
@@ -127,11 +134,10 @@ public class EBanService extends ESanctionService {
 	@Override
 	public Optional<? extends Ban> addBan(Ban ban) {
 		Optional<? extends Ban> before;
-		
 		long time = ban.getCreationDate().toEpochMilli();
     	Text reason = ban.getReason().orElse(Text.EMPTY);
     	String source = ban.getBanSource().orElse(Text.of(EBanService.UNKNOWN)).toPlain();
-		long duration = -1;
+		Long duration = null;
     	if(ban.getExpirationDate().isPresent()) {
     		duration = ban.getCreationDate().toEpochMilli() - ban.getExpirationDate().get().toEpochMilli();
     	}
@@ -149,8 +155,13 @@ public class EBanService extends ESanctionService {
         } else if (ban.getType().equals(BanTypes.IP)) {
         	Ban.Ip ip = (Ban.Ip) ban;
         	before = this.getBanFor(ip.getAddress());
-            
-            this.addBan(ip.getAddress(), time, duration, reason, source);
+        	
+        	Optional<EIpSubject> subject = this.getSubject(ip.getAddress());
+    		if(subject.isPresent()) {
+    			subject.get().add(time, duration, reason, source);
+    		} else {
+            	throw new IllegalArgumentException(String.format("IPSubject not found : %s", UtilsNetwork.getHostString(ip.getAddress())));
+            }
         } else {
             throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
         }

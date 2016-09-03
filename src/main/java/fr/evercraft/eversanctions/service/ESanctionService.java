@@ -21,11 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import org.spongepowered.api.text.Text;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -34,43 +31,78 @@ import com.google.common.cache.LoadingCache;
 
 import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.everapi.services.sanction.SubjectIpSanction;
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
+import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
-import fr.evercraft.eversanctions.service.manual.EManualIP;
+import fr.evercraft.eversanctions.service.subject.EIpSubject;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public abstract class ESanctionService implements SanctionService {
 	
 	protected final EverSanctions plugin;
 	
-	private final ConcurrentMap<UUID, EUserSubject> subjects;
-	private final LoadingCache<UUID, EUserSubject> cache;
+	private final ConcurrentMap<UUID, EUserSubject> users;
+	private final LoadingCache<UUID, EUserSubject> users_cache;
 
-	private final ConcurrentSkipListSet<EManualIP> ips;
+	private final LoadingCache<String, EIpSubject> ips_cache;
 	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
-		this.ips = new ConcurrentSkipListSet<EManualIP>((EManualIP o1, EManualIP o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
-		this.subjects = new ConcurrentHashMap<UUID, EUserSubject>();
-		this.cache = CacheBuilder.newBuilder()
+		this.users = new ConcurrentHashMap<UUID, EUserSubject>();
+		this.users_cache = CacheBuilder.newBuilder()
+			    .maximumSize(100)
+			    .expireAfterAccess(5, TimeUnit.MINUTES)
+			    .build(new CacheLoader<UUID, EUserSubject>() {
+			    	/**
+			    	 * Ajoute un joueur au cache
+			    	 */
+			        @Override
+			        public EUserSubject load(UUID uuid){
+			        	Chronometer chronometer = new Chronometer();
+			        	
+			        	EUserSubject subject = new EUserSubject(ESanctionService.this.plugin, uuid);
+			        	ESanctionService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+			            return subject;
+			        }
+			    });
+		this.ips_cache = CacheBuilder.newBuilder()
 					    .maximumSize(100)
-					    .expireAfterAccess(5, TimeUnit.MINUTES)
-					    .build(new CacheLoader<UUID, EUserSubject>() {
+					    .expireAfterAccess(10, TimeUnit.MINUTES)
+					    .build(new CacheLoader<String, EIpSubject>() {
 					    	/**
 					    	 * Ajoute un joueur au cache
 					    	 */
 					        @Override
-					        public EUserSubject load(UUID uuid){
+					        public EIpSubject load(String address_string){
 					        	Chronometer chronometer = new Chronometer();
 					        	
-					        	EUserSubject subject = new EUserSubject(ESanctionService.this.plugin, uuid);
-					        	ESanctionService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
-					            return subject;
+					        	Optional<InetAddress> address = UtilsNetwork.getHost(address_string);
+					        	if(address.isPresent()) {
+						        	EIpSubject subject = new EIpSubject(ESanctionService.this.plugin, address.get());
+						        	ESanctionService.this.plugin.getLogger().debug("Loading ip '" + address_string + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+						            return subject;
+					        	}
+					        	return null;
 					        }
 					    });
 	}
 	
+	/**
+	 * Rechargement : Vide le cache et recharge tous les joueurs
+	 */
+	public void reload() {
+		this.users_cache.cleanUp();
+		this.ips_cache.cleanUp();
+		for (EUserSubject subject : this.users.values()) {
+			subject.reload();
+		}
+	}
+	
+	/*
+	 * User
+	 */
 
 	@Override
 	public Optional<SubjectUserSanction> get(UUID uuid) {
@@ -80,10 +112,10 @@ public abstract class ESanctionService implements SanctionService {
 	public Optional<EUserSubject> getSubject(UUID uuid) {
 		Preconditions.checkNotNull(uuid, "uuid");
 		try {
-			if (!this.subjects.containsKey(uuid)) {
-				return Optional.of(this.cache.get(uuid));
+			if (!this.users.containsKey(uuid)) {
+				return Optional.of(this.users_cache.get(uuid));
 	    	}
-	    	return Optional.ofNullable(this.subjects.get(uuid));
+	    	return Optional.ofNullable(this.users.get(uuid));
 		} catch (ExecutionException e) {
 			this.plugin.getLogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
 			return Optional.empty();
@@ -101,32 +133,22 @@ public abstract class ESanctionService implements SanctionService {
 	}
 	
 	/**
-	 * Rechargement : Vide le cache et recharge tous les joueurs
-	 */
-	public void reload() {
-		this.cache.cleanUp();
-		for (EUserSubject subject : this.subjects.values()) {
-			subject.reload();
-		}
-	}
-	
-	/**
 	 * Ajoute un joueur à la liste
 	 * @param identifier L'UUID du joueur
 	 */
 	public void registerPlayer(UUID uuid) {
 		Preconditions.checkNotNull(uuid, "uuid");
 		
-		EUserSubject player = this.cache.getIfPresent(uuid);
+		EUserSubject player = this.users_cache.getIfPresent(uuid);
 		// Si le joueur est dans le cache
 		if (player != null) {
-			this.subjects.putIfAbsent(uuid, player);
+			this.users.putIfAbsent(uuid, player);
 			this.plugin.getLogger().debug("Loading player cache : " + uuid.toString());
 		// Si le joueur n'est pas dans le cache
 		} else {
 			Chronometer chronometer = new Chronometer();
 			player = new EUserSubject(this.plugin, uuid);
-			this.subjects.putIfAbsent(uuid, player);
+			this.users.putIfAbsent(uuid, player);
 			this.plugin.getLogger().debug("Loading player '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 		}
 		//this.plugin.getManagerEvent().post(player, PermUserEvent.Action.USER_ADDED);
@@ -139,20 +161,38 @@ public abstract class ESanctionService implements SanctionService {
 	public void removePlayer(UUID uuid) {
 		Preconditions.checkNotNull(uuid, "uuid");
 		
-		EUserSubject player = this.subjects.remove(uuid);
+		EUserSubject player = this.users.remove(uuid);
 		// Si le joueur existe
 		if (player != null) {
-			this.cache.put(uuid, player);
+			this.users_cache.put(uuid, player);
 			//this.plugin.getManagerEvent().post(player, PermUserEvent.Action.USER_REMOVED);
 			this.plugin.getLogger().debug("Unloading the player : " + uuid.toString());
 		}
 	}
 	
-	public boolean addBan(InetAddress address, long creation, long duration, Text reason, final String source) {
-		return true;
+	/*
+	 * Ip
+	 */
+
+	@Override
+	public Optional<SubjectIpSanction> get(InetAddress address) {
+		return Optional.ofNullable(this.getSubject(address).orElse(null));
 	}
 	
-	public boolean pardon(InetAddress address, Text reason, String source) {
-		return false;
-	}	
+	public Optional<EIpSubject> getSubject(InetAddress address) {
+		Preconditions.checkNotNull(address, "address");
+		try {
+			return Optional.of(this.ips_cache.get(UtilsNetwork.getHostString(address)));
+		} catch (ExecutionException e) {
+			this.plugin.getLogger().warn("Error : Loading user (identifier='" + address.toString() + "';message='" + e.getMessage() + "')");
+			return Optional.empty();
+		}
+	}
+	
+	@Override
+	public boolean hasRegistered(InetAddress address) {
+		Preconditions.checkNotNull(address, "address");
+		
+		return this.ips_cache.getIfPresent(UtilsNetwork.getHostString(address)) != null;
+	}
 }

@@ -90,12 +90,12 @@ public class EIpSubject implements SubjectIpSanction {
 	}
 	
 	@Override
-	public boolean addBan(final Long creation, final Text reason, final String source) {
-		return this.addBan(creation, null, reason, source);
+	public boolean add(final Long creation, final Text reason, final String source) {
+		return this.add(creation, null, reason, source);
 	}
 
 	@Override
-	public boolean addBan(final Long creation, @Nullable final Long duration, final Text reason, final String source) {
+	public boolean add(final Long creation, @Nullable final Long duration, final Text reason, final String source) {
 		Preconditions.checkNotNull(creation, "creation");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
