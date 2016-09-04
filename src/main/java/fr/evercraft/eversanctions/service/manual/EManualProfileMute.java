@@ -16,18 +16,20 @@
  */
 package fr.evercraft.eversanctions.service.manual;
 
+import java.util.Optional;
+
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public class EManualProfileMute extends EManualProfile implements SanctionManualProfile.Mute {
 	
-	public EManualProfileMute(final long date_start, final long date_end, final Text reason, final String source) {
-		super(date_start, date_end, reason, source);
+	public EManualProfileMute(final long date_start, final Optional<Long> duration, final Text reason, final String source) {
+		this(date_start, duration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfileMute(final long date_start, final long date_end, final Text reason, final String source, 
-			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
-		super(date_start, date_end, reason, source, pardon_date, pardon_reason, pardon_source);
+	public EManualProfileMute(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
+			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
+		super(date_start, duration, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 }

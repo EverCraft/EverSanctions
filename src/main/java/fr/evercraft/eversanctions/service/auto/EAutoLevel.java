@@ -16,10 +16,12 @@
  */
 package fr.evercraft.eversanctions.service.auto;
 
+import java.net.InetAddress;
 import java.util.Optional;
 
 import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
+import fr.evercraft.everapi.sponge.UtilsNetwork;
 
 public class EAutoLevel implements SanctionAuto.Level {
 	
@@ -27,9 +29,14 @@ public class EAutoLevel implements SanctionAuto.Level {
 	private final Optional<Long> duration;
 	private final String reason;
 	private final Optional<Jail> jail;
+	private final Optional<InetAddress> address;
 	
 	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason) {
-		this(type, duration, reason, null);
+		this.type = type;
+		this.duration = duration;
+		this.reason = reason;
+		this.jail = Optional.empty();
+		this.address = Optional.empty();
 	}
 	
 	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason, Jail jail) {
@@ -37,6 +44,15 @@ public class EAutoLevel implements SanctionAuto.Level {
 		this.duration = duration;
 		this.reason = reason;
 		this.jail = Optional.ofNullable(jail);
+		this.address = Optional.empty();
+	}
+	
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason, InetAddress address) {
+		this.type = type;
+		this.duration = duration;
+		this.reason = reason;
+		this.jail = Optional.empty();
+		this.address = Optional.ofNullable(address);
 	}
 
 	@Override
@@ -57,5 +73,20 @@ public class EAutoLevel implements SanctionAuto.Level {
 	@Override
 	public Optional<Jail> getJail() {
 		return this.jail;
+	}
+
+	@Override
+	public Optional<InetAddress> getAddress() {
+		return this.address;
+	}
+
+	@Override
+	public Optional<String> getOption() {
+		if(this.jail.isPresent()) {
+			return Optional.of(this.jail.get().getName());
+		} else if(this.jail.isPresent()) {
+			return Optional.of(UtilsNetwork.getHostString(this.address.get()));
+		}
+		return Optional.empty();
 	}
 }

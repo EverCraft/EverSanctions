@@ -40,7 +40,7 @@ public class EAutoReason implements SanctionAuto.Reason {
 	
 	@Override
 	public Optional<SanctionAuto.Level> getLevel(int level) {
-		if(level < 0) {
+		if(level <= 0) {
 			new IllegalArgumentException("Level is negative");
 		}
 		

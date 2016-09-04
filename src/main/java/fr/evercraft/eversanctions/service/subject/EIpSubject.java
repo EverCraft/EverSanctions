@@ -91,12 +91,16 @@ public class EIpSubject implements SubjectIpSanction {
 	}
 	
 	@Override
-	public boolean add(final Long creation, final Text reason, final String source) {
-		return this.add(creation, null, reason, source);
+	public boolean add(final long creation, final Text reason, final String source) {
+		return this.add(creation, Optional.empty(), reason, source);
 	}
-
+	
 	@Override
-	public boolean add(final Long creation, @Nullable final Long duration, final Text reason, final String source) {
+	public boolean add(final long creation, final long duration, final Text reason, final String source) {
+		return this.add(creation, Optional.of(duration), reason, source);
+	}
+	
+	public boolean add(final Long creation, final Optional<Long> duration, final Text reason, final String source) {
 		Preconditions.checkNotNull(creation, "creation");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
@@ -120,6 +124,7 @@ public class EIpSubject implements SubjectIpSanction {
 		
 		if(this.manual.isPresent()) {
 			final EManualIP ban = this.manual.get();
+			ban.pardon(date, reason, source);
 			this.plugin.getThreadAsync().execute(() -> this.pardonSQL(ban));
 			
 		}
@@ -187,16 +192,16 @@ public class EIpSubject implements SubjectIpSanction {
 				Long creation = list.getTimestamp("creation").getTime();
 				Text reason = EChat.of(list.getString("reason"));
 				String source = list.getString("source");
-				Text pardon_reason = EChat.of(list.getString("pardon_reason"));
-				String pardon_source = list.getString("pardon_source");
+				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
+				Optional<String> pardon_source = Optional.ofNullable(list.getString("pardon_source"));
 				
-				Long duration = list.getLong("duration");
+				Optional<Long> duration = Optional.of(list.getLong("duration"));
 				if(list.wasNull()) {
-					duration = null;
+					duration = Optional.empty();
 				}
-				Long pardon_date = list.getLong("pardon_date");
+				Optional<Long> pardon_date = Optional.of(list.getLong("pardon_date"));
 				if(list.wasNull()) {
-					pardon_date = null;
+					pardon_date = Optional.empty();
 				}
 				
 				ips.add(new EManualIP(creation, duration, reason, source, pardon_date, pardon_reason, pardon_source));

@@ -16,18 +16,40 @@
  */
 package fr.evercraft.eversanctions.service.manual;
 
-import org.spongepowered.api.text.Text;
+import java.time.Instant;
+import java.util.Optional;
 
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.api.util.ban.Ban.Builder;
+import org.spongepowered.api.util.ban.Ban.Profile;
+
+import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public class EManualProfileBan extends EManualProfile implements SanctionManualProfile.Ban {
 	
-	public EManualProfileBan(final long date_start, final long date_end, final Text reason, final String source) {
-		super(date_start, date_end, reason, source);
+	public EManualProfileBan(final long date_start, final Optional<Long> duration, final Text reason, final String source) {
+		super(date_start, duration, reason, source);
 	}
 	
-	public EManualProfileBan(final long date_start, final long date_end, final Text reason, final String source, 
-			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
-		super(date_start, date_end, reason, source, pardon_date, pardon_reason, pardon_source);
+	public EManualProfileBan(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
+			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
+		super(date_start, duration, reason, source, pardon_date, pardon_reason, pardon_source);
+	}
+	
+	public Profile getBan(GameProfile profile) {
+		Builder builder = org.spongepowered.api.util.ban.Ban.builder()
+				.profile(profile)
+				.reason(this.getReason())
+				.startDate(Instant.ofEpochMilli(this.getCreationDate()))
+				.type(BanTypes.PROFILE)
+				.source(EChat.of(this.getSource()));
+		
+		if(this.getExpirationDate().isPresent()) {
+			builder = builder.expirationDate(Instant.ofEpochMilli(this.getExpirationDate().get()));
+		}
+		return (Profile) builder.build();
 	}
 }

@@ -99,7 +99,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(GameProfile profile) {
 		Optional<EUserSubject> subject = this.getSubject(profile.getUniqueId());
 		if(subject.isPresent()) {
-			return subject.get().pardon(Text.EMPTY, EBanService.UNKNOWN);
+			return subject.get().pardonBan(Text.EMPTY, EBanService.UNKNOWN);
 		} else {
         	throw new IllegalArgumentException(String.format("UserSubject not found : %s", profile.getUniqueId()));
         }
@@ -137,9 +137,9 @@ public class EBanService extends ESanctionService {
 		long time = ban.getCreationDate().toEpochMilli();
     	Text reason = ban.getReason().orElse(Text.EMPTY);
     	String source = ban.getBanSource().orElse(Text.of(EBanService.UNKNOWN)).toPlain();
-		Long duration = null;
+    	Optional<Long> duration = Optional.empty();
     	if(ban.getExpirationDate().isPresent()) {
-    		duration = ban.getCreationDate().toEpochMilli() - ban.getExpirationDate().get().toEpochMilli();
+    		duration = Optional.of(ban.getCreationDate().toEpochMilli() - ban.getExpirationDate().get().toEpochMilli());
     	}
 
         if (ban.getType().equals(BanTypes.PROFILE)) {
@@ -148,7 +148,7 @@ public class EBanService extends ESanctionService {
 
             Optional<EUserSubject> subject = this.getSubject(profile.getProfile().getUniqueId());
             if(subject.isPresent()) {
-            	subject.get().addBan(time, duration, reason, source);
+            	subject.get().ban(time, duration, reason, source);
             } else {
             	throw new IllegalArgumentException(String.format("User not found : %s", profile.getProfile().getUniqueId()));
             }

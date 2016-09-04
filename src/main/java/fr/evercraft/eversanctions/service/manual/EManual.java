@@ -33,20 +33,16 @@ public abstract class EManual implements SanctionManual {
 	private Optional<Text> pardon_reason;
 	private Optional<String> pardon_source;
 	
-	public EManual(final long date_start, final Long duration, final Text reason, final String source) {
-		this(date_start, duration, reason, source, null, null, null);
-	}
-	
-	public EManual(final long date_start, final Long duration, final Text reason, final String source, 
-			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
+	public EManual(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
+			Optional<Long> pardon_date, Optional<Text> pardon_reason, Optional<String> pardon_source) {
 		this.date_start = date_start;
 		this.reason = reason;
 		this.source = source;
-		this.duration = Optional.ofNullable(duration);
+		this.duration = duration;
 		
-		this.pardon_date = Optional.ofNullable(pardon_date);
-		this.pardon_reason = Optional.ofNullable(pardon_reason);
-		this.pardon_source = Optional.ofNullable(pardon_source);
+		this.pardon_date = pardon_date;
+		this.pardon_reason = pardon_reason;
+		this.pardon_source = pardon_source;
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 
 public class EAuto implements SanctionAuto {
 
-	private final Long date_start;
+	private final Long creation;
 	private Optional<Long> duration;
 	private final SanctionAuto.Reason reason;
 	private final SanctionAuto.Type type;
@@ -36,38 +36,39 @@ public class EAuto implements SanctionAuto {
 	private final Optional<Text> pardon_reason;
 	private final Optional<String> pardon_source;
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source) {
-		this(date_start, duration, reason, type, level, source, null, null, null, null);
+	public EAuto(final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source) {
+		this(date_start, duration, reason, type, level, source, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, final String option) {
-		this(date_start, duration, reason, type, level, source, null, null, null, null);
+	public EAuto(final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
+			final Optional<String> option) {
+		this(date_start, duration, reason, type, level, source, option, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, final String option, 
-				final Long pardon_date, final Text pardon_reason, final String pardon_source) {
-		this.date_start = date_start;
+	public EAuto(final long creation, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
+			final Optional<String> option, final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
+		this.creation = creation;
 		this.reason = reason;
 		this.type = type;
 		this.level = level;
 		this.source = source;
-		this.option = Optional.ofNullable(option);
-		this.duration = Optional.ofNullable(duration);
+		this.option = option;
+		this.duration = duration;
 		
-		this.pardon_date = Optional.ofNullable(pardon_date);
-		this.pardon_reason = Optional.ofNullable(pardon_reason);
-		this.pardon_source = Optional.ofNullable(pardon_source);
+		this.pardon_date = pardon_date;
+		this.pardon_reason = pardon_reason;
+		this.pardon_source = pardon_source;
 	}
 
 	@Override
 	public Long getCreationDate() {
-		return this.date_start;
+		return this.creation;
 	}
 	
 	@Override
 	public Optional<Long> getExpirationDate() {
 		if(this.getDuration().isPresent()) {
-			return Optional.of(this.date_start + this.getDuration().get());
+			return Optional.of(this.creation + this.getDuration().get());
 		}
 		return Optional.empty();
 	}
