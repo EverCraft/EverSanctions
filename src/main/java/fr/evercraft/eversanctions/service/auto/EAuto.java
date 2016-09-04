@@ -21,15 +21,13 @@ import java.util.Optional;
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoReason;
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoType;
 
 public class EAuto implements SanctionAuto {
 
 	private final Long date_start;
 	private Optional<Long> duration;
-	private final SanctionAutoReason reason;
-	private final SanctionAutoType type;
+	private final SanctionAuto.Reason reason;
+	private final SanctionAuto.Type type;
 	private final int level;
 	private final String source;
 	private final Optional<String> option;
@@ -38,15 +36,15 @@ public class EAuto implements SanctionAuto {
 	private final Optional<Text> pardon_reason;
 	private final Optional<String> pardon_source;
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source) {
+	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source) {
 		this(date_start, duration, reason, type, level, source, null, null, null, null);
 	}
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source, final String option) {
+	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, final String option) {
 		this(date_start, duration, reason, type, level, source, null, null, null, null);
 	}
 	
-	public EAuto(final long date_start, final Long duration, final SanctionAutoReason reason, final SanctionAutoType type, final int level, final String source, final String option, 
+	public EAuto(final long date_start, final Long duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, final String option, 
 				final Long pardon_date, final Text pardon_reason, final String pardon_source) {
 		this.date_start = date_start;
 		this.reason = reason;
@@ -90,12 +88,12 @@ public class EAuto implements SanctionAuto {
 	}
 
 	@Override
-	public SanctionAutoType getType() {
+	public SanctionAuto.Type getType() {
 		return this.type;
 	}
 	
 	@Override
-	public SanctionAutoReason getReason() {
+	public SanctionAuto.Reason getReason() {
 		return this.reason;
 	}
 	

@@ -19,21 +19,20 @@ package fr.evercraft.eversanctions.service.auto;
 import java.util.Optional;
 
 import fr.evercraft.everapi.services.sanction.Jail;
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoLevel;
-import fr.evercraft.everapi.services.sanction.auto.SanctionAutoType;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 
-public class EAutoLevel implements SanctionAutoLevel {
+public class EAutoLevel implements SanctionAuto.Level {
 	
-	private final SanctionAutoType type;
+	private final SanctionAuto.Type type;
 	private final Optional<Long> duration;
 	private final String reason;
 	private final Optional<Jail> jail;
 	
-	public EAutoLevel(final SanctionAutoType type, final Optional<Long> duration, String reason) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason) {
 		this(type, duration, reason, null);
 	}
 	
-	public EAutoLevel(final SanctionAutoType type, final Optional<Long> duration, String reason, Jail jail) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason, Jail jail) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
@@ -41,7 +40,7 @@ public class EAutoLevel implements SanctionAutoLevel {
 	}
 
 	@Override
-	public SanctionAutoType getType() {
+	public SanctionAuto.Type getType() {
 		return this.type;
 	}
 

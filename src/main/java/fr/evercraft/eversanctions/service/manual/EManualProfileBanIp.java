@@ -27,7 +27,12 @@ public class EManualProfileBanIp extends EManualProfile implements SanctionManua
 	private InetAddress address;
 	
 	public EManualProfileBanIp(final InetAddress address, final long date_start, final long date_end, final Text reason, final String source) {
-		super(date_start, date_end, reason, source);
+		this(address, date_start, date_end, reason, source, null, null, null);
+	}
+	
+	public EManualProfileBanIp(final InetAddress address, final long date_start, final long date_end, final Text reason, final String source, 
+			final Long pardon_date, final Text pardon_reason, final String pardon_source) {
+		super(date_start, date_end, reason, source, pardon_date, pardon_reason, pardon_source);
 		
 		this.address = address;
 	}

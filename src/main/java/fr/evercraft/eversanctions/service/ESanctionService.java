@@ -33,8 +33,10 @@ import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.SubjectIpSanction;
 import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
+import fr.evercraft.eversanctions.service.auto.EAutoReason;
 import fr.evercraft.eversanctions.service.subject.EIpSubject;
 import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
@@ -47,9 +49,12 @@ public abstract class ESanctionService implements SanctionService {
 
 	private final LoadingCache<String, EIpSubject> ips_cache;
 	
+	private final ConcurrentMap<String, EAutoReason> reasons;
+	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
+		this.reasons = new ConcurrentHashMap<String, EAutoReason>();
 		this.users = new ConcurrentHashMap<UUID, EUserSubject>();
 		this.users_cache = CacheBuilder.newBuilder()
 			    .maximumSize(100)
@@ -194,5 +199,14 @@ public abstract class ESanctionService implements SanctionService {
 		Preconditions.checkNotNull(address, "address");
 		
 		return this.ips_cache.getIfPresent(UtilsNetwork.getHostString(address)) != null;
+	}
+	
+	/*
+	 * Reason
+	 */
+	
+	@Override
+	public Optional<SanctionAuto.Reason> getReason(String identifier) {
+		return Optional.ofNullable(this.reasons.get(identifier.toLowerCase()));
 	}
 }
