@@ -20,7 +20,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.plugin.command.EParentCommand;
-import fr.evercraft.eversanctions.ESMessage.EKMessages;
+import fr.evercraft.eversanctions.ESMessage.ESMessages;
 
 public class ESCommand extends EParentCommand<EverSanctions> {
 	
@@ -35,7 +35,7 @@ public class ESCommand extends EParentCommand<EverSanctions> {
 
 	@Override
 	public Text description(final CommandSource source) {
-		return EKMessages.DESCRIPTION.getText();
+		return ESMessages.DESCRIPTION.getText();
 	}
 
 	@Override

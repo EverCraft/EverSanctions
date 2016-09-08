@@ -17,8 +17,13 @@
 package fr.evercraft.eversanctions.service;
 
 import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.spongepowered.api.profile.GameProfile;
@@ -28,6 +33,8 @@ import org.spongepowered.api.util.ban.Ban.Ip;
 import org.spongepowered.api.util.ban.Ban.Profile;
 import org.spongepowered.api.util.ban.BanTypes;
 
+import fr.evercraft.everapi.exception.ServerDisableException;
+import fr.evercraft.everapi.java.UtilsMap;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.subject.EIpSubject;
@@ -36,14 +43,50 @@ import fr.evercraft.eversanctions.service.subject.EUserSubject;
 public class EBanService extends ESanctionService {
 	
 	private static final String UNKNOWN = "unknown";
+	private static final Comparator<Ban> COMPARATOR_BAN = 
+			(Ban o1, Ban o2) -> {
+				if (o1.isIndefinite() && o2.isIndefinite()) {
+					return 0;
+				}
+				
+				if (o1.isIndefinite() && !o2.isIndefinite()) {
+					return -1;
+				}
+				
+				if (!o1.isIndefinite() && o2.isIndefinite()) {
+					return 1;
+				}
+				return o2.getExpirationDate().get().compareTo(o1.getExpirationDate().get());
+			};
 	
 	// Ordre décroissant
-	private final ConcurrentSkipListSet<? extends Ban> bans;
+	private final ConcurrentSkipListSet<Ban.Profile> bans_profile;
+	private final ConcurrentSkipListMap<Ban.Ip, Optional<UUID>> bans_ip;
 	
 	public EBanService(final EverSanctions plugin) {
 		super(plugin);
 		
-		this.bans = new ConcurrentSkipListSet<Ban>((Ban o1, Ban o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
+		this.bans_profile = new ConcurrentSkipListSet<Ban.Profile>(EBanService.COMPARATOR_BAN);
+		this.bans_ip = new ConcurrentSkipListMap<Ban.Ip, Optional<UUID>>(EBanService.COMPARATOR_BAN);
+	}
+	
+	public void reload() {
+		this.bans_profile.clear();
+		this.bans_ip.clear();
+		
+		Connection connection = null;
+		try {
+			connection = this.plugin.getDataBase().getConnection();
+			
+			this.bans_profile.addAll(this.plugin.getDataBase().getBansProfile(connection));
+			this.bans_ip.putAll(this.plugin.getDataBase().getBansIp(connection));
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try { if (connection != null) connection.close(); } catch (SQLException e) {}
+	    }
+		
+		super.reload();
 	}
 	
 	@Override
@@ -56,7 +99,7 @@ public class EBanService extends ESanctionService {
 	@SuppressWarnings("unchecked")
 	public Collection<Profile> getProfileBans() {
 		this.removeExpired();
-		return (Collection<Profile>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE));
+		return (Collection<Profile>) this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE));
 	}
 
 
@@ -64,22 +107,20 @@ public class EBanService extends ESanctionService {
 	@SuppressWarnings("unchecked")
 	public Collection<Ban.Ip> getIpBans() {
 		this.removeExpired();
-		return (Collection<Ban.Ip>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.IP));
+		return (Collection<Ban.Ip>) this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Optional<Ban.Profile> getBanFor(GameProfile profile) {
 		this.removeExpired();
-		return (Optional<Ban.Profile>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE) && ((Ban.Profile)ban).getProfile().equals(profile)).findFirst();
+		return this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE) && ((Ban.Profile)ban).getProfile().equals(profile)).findFirst();
 	}
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Optional<Ban.Ip> getBanFor(InetAddress address) {
 		this.removeExpired();
-		return (Optional<Ban.Ip>) this.bans.stream().filter(ban -> ban.getType().equals(BanTypes.IP) && ((Ip)ban).getAddress().equals(address)).findFirst();
+		return this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP) && ((Ip)ban).getAddress().equals(address)).findFirst();
 	}
 
 
@@ -119,14 +160,17 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public boolean removeBan(Ban ban) {
-		if (this.bans.contains(ban)) {
-			if (ban.getType().equals(BanTypes.PROFILE)) {
-	            return this.pardon(((Ban.Profile) ban).getProfile());
-	        } else if (ban.getType().equals(BanTypes.IP)) {
-	            return this.pardon(((Ban.Ip) ban).getAddress());
-	        }
-	        throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
-		} 
+		if (ban.getType().equals(BanTypes.PROFILE)) {
+			if(this.bans_profile.contains(ban)) {
+				return this.pardon(((Ban.Profile) ban).getProfile());
+			}
+        } else if (ban.getType().equals(BanTypes.IP)) {
+        	if(this.bans_ip.containsKey(ban)) {
+        		return this.pardon(((Ban.Ip) ban).getAddress());
+        	}
+        } else {
+        	throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
+        }
 		return false;
 	}
 
@@ -171,11 +215,12 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public boolean hasBan(Ban ban) {
-		return this.bans.contains(ban);
+		return this.bans_profile.contains(ban) || this.bans_ip.containsKey(ban);
 	}
 	
 	public void removeExpired() {
 		long time = System.currentTimeMillis();
-		this.bans.removeIf(ban -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
+		this.bans_profile.removeIf(ban -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
+		UtilsMap.removeIf(this.bans_ip, (ban,  uuid) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 	}
 }

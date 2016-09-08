@@ -30,9 +30,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import fr.evercraft.everapi.java.Chronometer;
+import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
 import fr.evercraft.everapi.services.sanction.SanctionService;
-import fr.evercraft.everapi.services.sanction.SubjectIpSanction;
-import fr.evercraft.everapi.services.sanction.SubjectUserSanction;
+import fr.evercraft.everapi.services.sanction.SanctionUserSubject;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -110,7 +110,7 @@ public abstract class ESanctionService implements SanctionService {
 	 */
 
 	@Override
-	public Optional<SubjectUserSanction> get(UUID uuid) {
+	public Optional<SanctionUserSubject> get(UUID uuid) {
 		return Optional.ofNullable(this.getSubject(uuid).orElse(null));
 	}
 	
@@ -180,7 +180,7 @@ public abstract class ESanctionService implements SanctionService {
 	 */
 
 	@Override
-	public Optional<SubjectIpSanction> get(InetAddress address) {
+	public Optional<SanctionIpSubject> get(InetAddress address) {
 		return Optional.ofNullable(this.getSubject(address).orElse(null));
 	}
 	

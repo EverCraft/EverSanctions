@@ -16,10 +16,17 @@
  */
 package fr.evercraft.eversanctions.service.auto;
 
+import java.net.InetAddress;
+import java.time.Instant;
 import java.util.Optional;
 
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.api.util.ban.Ban.Builder;
 
+import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 
 public class EAuto implements SanctionAuto {
@@ -82,9 +89,14 @@ public class EAuto implements SanctionAuto {
 	public String getSource() {
 		return this.source;
 	}
+	
+	@Override
+	public Optional<SanctionAuto.Level> getLevel() {
+		return this.getReason().getLevel(this.getLevelNumber());
+	}
 
 	@Override
-	public int getLevel() {
+	public int getLevelNumber() {
 		return this.level;
 	}
 
@@ -96,6 +108,15 @@ public class EAuto implements SanctionAuto {
 	@Override
 	public SanctionAuto.Reason getReason() {
 		return this.reason;
+	}
+	
+	@Override
+	public Text getReasonText() {
+		Optional<SanctionAuto.Level> level = this.getLevel();
+		if(level.isPresent()) {
+			return EChat.of(level.get().getReason());
+		}
+		return Text.EMPTY;
 	}
 	
 	@Override
@@ -116,5 +137,42 @@ public class EAuto implements SanctionAuto {
 	@Override
 	public Optional<String> getPardonSource() {
 		return this.pardon_source;
+	}
+
+	@Override
+	public Optional<Ban.Profile> getBan(GameProfile profile) {
+		if(this.isBan()) {
+			Builder builder = Ban.builder()
+					.profile(profile)
+					.reason(this.getReasonText())
+					.startDate(Instant.ofEpochMilli(this.getCreationDate()))
+					.type(BanTypes.PROFILE)
+					.source(EChat.of(this.getSource()));
+			
+			if(this.getExpirationDate().isPresent()) {
+				builder = builder.expirationDate(Instant.ofEpochMilli(this.getExpirationDate().get()));
+			}
+			return Optional.of((Ban.Profile) builder.build());
+		}
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<Ban.Ip> getBan(GameProfile profile, InetAddress address) {
+		if(this.isBanIP()) {
+			Builder builder = Ban.builder()
+					.profile(profile)
+					.address(address)
+					.reason(this.getReasonText())
+					.startDate(Instant.ofEpochMilli(this.getCreationDate()))
+					.type(BanTypes.IP)
+					.source(EChat.of(this.getSource()));
+			
+			if(this.getExpirationDate().isPresent()) {
+				builder = builder.expirationDate(Instant.ofEpochMilli(this.getExpirationDate().get()));
+			}
+			return Optional.of((Ban.Ip) builder.build());
+		}
+		return Optional.empty();
 	}
 }

@@ -24,7 +24,6 @@ import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
-import fr.evercraft.eversanctions.service.ESanctionService;
 
 @Plugin(id = "fr.evercraft.eversanctions", 
 		name = "EverSanctions", 

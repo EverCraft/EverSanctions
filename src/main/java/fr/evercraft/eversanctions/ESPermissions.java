@@ -26,7 +26,11 @@ public enum ESPermissions implements EnumPermission {
 	EVERSANCTIONS("command"),
 	
 	HELP("help"),
-	RELOAD("reload");
+	RELOAD("reload"),
+	
+	BAN("ban.command"),
+	MUTE("mute.command"),
+	JAIL("jail.command");
 	
 	private final static String prefix = "eversanctions";
 	

@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import javax.annotation.Nullable;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -40,13 +38,13 @@ import com.google.common.collect.ImmutableList.Builder;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
-import fr.evercraft.everapi.services.sanction.SubjectIpSanction;
+import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.manual.EManualIP;
 
-public class EIpSubject implements SubjectIpSanction {
+public class EIpSubject implements SanctionIpSubject {
 	
 	private final EverSanctions plugin;
 	private final InetAddress address;
