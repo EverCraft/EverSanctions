@@ -56,50 +56,50 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		this.table_manual_profile = "manual_profile";
 		String manual_profile = "CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
-							"`creation` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," + 
-							"`duration` DOUBLE," +
+							"`creation` DOUBLE NOT NULL," + 
+							"`duration` DOUBLE DEFAULT NULL," +
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(255) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
-							"`option` VARCHAR(36)," +
-							"`pardon_date` TIMESTAMP NOT NULL," +
-							"`pardon_reason` VARCHAR(255) NOT NULL," +
-							"`pardon_source` VARCHAR(36) NOT NULL," +
+							"`option` VARCHAR(36) DEFAULT NULL," +
+							"`pardon_date` DOUBLE DEFAULT NULL," +
+							"`pardon_reason` VARCHAR(255) DEFAULT NULL," +
+							"`pardon_source` VARCHAR(36) DEFAULT NULL," +
 							"PRIMARY KEY (`identifier`, `creation`));";
 		initTable(this.getTableManualProfile(), manual_profile);
 		
 		this.table_manual_ip = "manual_ip";
 		String manual_ip = 	"CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
-							"`creation` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," + 
-							"`duration` DOUBLE," +
+							"`creation` DOUBLE NOT NULL," + 
+							"`duration` DOUBLE DEFAULT NULL," +
 							"`reason` VARCHAR(255) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
-							"`pardon_date` TIMESTAMP NOT NULL," +
-							"`pardon_reason` VARCHAR(255) NOT NULL," +
-							"`pardon_source` VARCHAR(36) NOT NULL," +
+							"`pardon_date` DOUBLE DEFAULT NULL," +
+							"`pardon_reason` VARCHAR(255) DEFAULT NULL," +
+							"`pardon_source` VARCHAR(36) DEFAULT NULL," +
 							"PRIMARY KEY (`identifier`, `creation`));";
 		initTable(this.getTableManualIp(), manual_ip);
 		
 		this.table_auto = "auto";
 		String auto = 	"CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
-							"`creation` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," + 
-							"`duration` DOUBLE," +
+							"`creation` DOUBLE NOT NULL," + 
+							"`duration` DOUBLE DEFAULT NULL," +
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(36) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
-							"`option` VARCHAR(36)," +
-							"`pardon_date` TIMESTAMP," +
-							"`pardon_reason` VARCHAR(255)," +
-							"`pardon_source` VARCHAR(36)," +
+							"`option` VARCHAR(36) DEFAULT NULL," +
+							"`pardon_date` DOUBLE DEFAULT NULL," +
+							"`pardon_reason` VARCHAR(255) DEFAULT NULL," +
+							"`pardon_source` VARCHAR(36) DEFAULT NULL," +
 							"PRIMARY KEY (`identifier`, `creation`));";
 		initTable(this.getTableAuto(), auto);
 		
 		this.table_jails = "jails";
 		String ignores = 	"CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
-							"`radius` INTEGER," +
+							"`radius` INTEGER DEFAULT NULL," +
 							"`world` VARCHAR(36) NOT NULL," +
 							"`x` DOUBLE NOT NULL," +
 							"`y` DOUBLE NOT NULL," +

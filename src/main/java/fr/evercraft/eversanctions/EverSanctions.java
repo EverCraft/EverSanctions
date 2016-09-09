@@ -18,9 +18,13 @@ package fr.evercraft.eversanctions;
 
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.service.ban.BanService;
 
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
+import fr.evercraft.everapi.services.sanction.JailService;
+import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.eversanctions.command.ESBan;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
@@ -53,17 +57,22 @@ public class EverSanctions extends EPlugin {
 		this.ban_service = new EBanService(this);
 		this.jail_service = new EJailService(this);
 		
+		this.getGame().getServiceManager().setProvider(this, BanService.class, this.ban_service);
+		this.getGame().getServiceManager().setProvider(this, SanctionService.class, this.ban_service);
+		this.getGame().getServiceManager().setProvider(this, JailService.class, this.jail_service);
+		
 		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
 	
 	@Override
 	protected void onCompleteEnable() {
 		ESCommand command = new ESCommand(this);
-		
 		command.add(new ESReload(this, command));
+		
+		new ESBan(this);
 	}
 
-	protected void onReload() throws PluginDisableException{
+	protected void onReload() throws PluginDisableException {
 		this.reloadConfigurations();
 		
 		this.database.reload();

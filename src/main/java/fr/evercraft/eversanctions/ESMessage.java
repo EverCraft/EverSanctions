@@ -38,13 +38,13 @@ public class ESMessage extends EMessage {
 		PREFIX("prefix",  							
 				"[&4Ever&6&lSanctions&f] "),
 		DESCRIPTION("description", 
-				"Gestionnaire des sanctions"),
+				"Gestionnaire de sanction"),
 		
-		BAN_DESCRIPTION("ban.description", ""),
-		BAN_STAFF("ban.staff", ""),
-		BAN_PLAYER("ban.player", ""),
-		BAN_REASON_EMPTY("ban.reasonEmpty", ""),
-		BAN_CANCEL("ban.cancel", ""),
+		BAN_DESCRIPTION("ban.description", "ban.description"),
+		BAN_STAFF("ban.staff", "ban.staff"),
+		BAN_PLAYER("ban.player", "ban.player"),
+		BAN_REASON_EMPTY("ban.reasonEmpty", "ban.reasonEmpty"),
+		BAN_CANCEL("ban.cancel", "ban.cancel"),
 		
 		BANIP_DESCRIPTION("banip.description", ""),
 		

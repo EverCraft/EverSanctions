@@ -21,13 +21,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
@@ -36,6 +35,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.Ban;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -159,33 +159,42 @@ public class EUserSubject implements SanctionUserSubject {
 	
 	@Override
 	public boolean ban(long creation, Optional<Long> duration, Text reason, final String source) {
-		Preconditions.checkNotNull(creation, "creation");
+		Preconditions.checkNotNull(duration, "duration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		if(!this.get(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
-			final EManualProfileBan ban = new EManualProfileBan(creation, duration, reason, source);
-			Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
-			if(user.isPresent() && !Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), ban.getBan(user.get().getProfile()), user.get()))) {
-				this.manual.add(ban);
-				this.plugin.getThreadAsync().execute(() -> this.addManual(ban));
-				return true;
-			}
+		if (this.get(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+			return false;
 		}
-		return false;
+		
+		final Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return false;
+		}
+		
+		final EManualProfileBan manual = new EManualProfileBan(creation, duration, reason, source);
+		final Ban.Profile ban = manual.getBan(user.get().getProfile());
+		if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), ban, user.get()))) {
+			return false;
+		}
+		
+		this.plugin.getSanctionService().add(ban);
+		this.manual.add(manual);
+		this.plugin.getThreadAsync().execute(() -> this.addManual(manual));
+		return true;
 	}
 	
 	@Override
 	public boolean banIp(InetAddress address, long creation, Optional<Long> duration, Text reason, final String source) {
 		Preconditions.checkNotNull(address, "address");
-		Preconditions.checkNotNull(creation, "creation");
+		Preconditions.checkNotNull(duration, "duration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		if(!this.get(SanctionManualProfile.Type.BAN_IP).isPresent()) {
 			final EManualProfileBanIp ban = new EManualProfileBanIp(address, creation, duration, reason, source);
 			Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
-			if(user.isPresent() && !Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(user.get().getProfile(), address)))) {
+			if(user.isPresent() && !Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(address)))) {
 				this.manual.add(ban);
 				this.plugin.getThreadAsync().execute(() -> this.addManual(ban));
 				return true;
@@ -196,7 +205,7 @@ public class EUserSubject implements SanctionUserSubject {
 	
 	@Override
 	public boolean mute(long creation, Optional<Long> duration, Text reason, final String source) {
-		Preconditions.checkNotNull(creation, "creation");
+		Preconditions.checkNotNull(duration, "duration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
@@ -212,7 +221,7 @@ public class EUserSubject implements SanctionUserSubject {
 	@Override
 	public boolean jail(Jail jail, long creation, Optional<Long> duration, Text reason, final String source) {
 		Preconditions.checkNotNull(jail, "jail");
-		Preconditions.checkNotNull(creation, "creation");
+		Preconditions.checkNotNull(duration, "duration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
@@ -342,11 +351,11 @@ public class EUserSubject implements SanctionUserSubject {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 						+ "WHERE `identifier` = ? ;";
-			preparedStatement = this.plugin.getDataBase().getConnection().prepareStatement(query);
+			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
-				Long creation = list.getTimestamp("creation").getTime();
+				Long creation = list.getLong("creation");
 				Text reason = EChat.of(list.getString("reason"));
 				String source = list.getString("source");
 				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
@@ -407,19 +416,23 @@ public class EUserSubject implements SanctionUserSubject {
     						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
-			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
-			preparedStatement.setLong(3, ban.getDuration().orElse(null));
+			preparedStatement.setDouble(2, ban.getCreationDate());
+			if (ban.getDuration().isPresent()) {
+				preparedStatement.setDouble(3, ban.getDuration().get());
+			} else {
+				preparedStatement.setNull(3, Types.DOUBLE);
+			}
 			preparedStatement.setString(4, ban.getType().name());
 			preparedStatement.setString(5, EChat.serialize(ban.getReason()));
 			preparedStatement.setString(6, ban.getSource());
 			preparedStatement.setString(7, option.orElse(null));
 			
 			if(ban.isPardon()) {
-				preparedStatement.setTimestamp(8, new Timestamp(ban.getPardonDate().get()));
+				preparedStatement.setDouble(8, ban.getPardonDate().get());
 				preparedStatement.setString(9, EChat.serialize(ban.getPardonReason().get()));
 				preparedStatement.setString(10, ban.getPardonSource().get());
 			} else {
-				preparedStatement.setTimestamp(8, null);
+				preparedStatement.setNull(8, Types.DOUBLE);
 				preparedStatement.setString(9, null);
 				preparedStatement.setString(10, null);
 			}
@@ -460,16 +473,16 @@ public class EUserSubject implements SanctionUserSubject {
     		preparedStatement = connection.prepareStatement(query);
 
 			if(ban.isPardon()) {
-				preparedStatement.setTimestamp(1, new Timestamp(ban.getPardonDate().get()));
+				preparedStatement.setDouble(1, ban.getPardonDate().get());
 				preparedStatement.setString(2, EChat.serialize(ban.getPardonReason().get()));
 				preparedStatement.setString(3, ban.getPardonSource().get());
 			} else {
-				preparedStatement.setTimestamp(1, null);
+				preparedStatement.setNull(1, Types.DOUBLE);
 				preparedStatement.setString(2, null);
 				preparedStatement.setString(3, null);
 			}
 			preparedStatement.setString(4, this.getIdentifier());
-			preparedStatement.setTimestamp(5, new Timestamp(ban.getCreationDate()));
+			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Updating to the database : (uuid ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
@@ -498,7 +511,7 @@ public class EUserSubject implements SanctionUserSubject {
 		    				+ "WHERE `uuid` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
-			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
+			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';"
@@ -560,13 +573,13 @@ public class EUserSubject implements SanctionUserSubject {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 						+ "WHERE `identifier` = ? ;";
-			preparedStatement = this.plugin.getDataBase().getConnection().prepareStatement(query);
+			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
 			
 			Map<SanctionAuto.Type, Integer> levels = new HashMap<SanctionAuto.Type, Integer>();
 			while(list.next()) {
-				long creation = list.getTimestamp("creation").getTime();
+				long creation = list.getLong("creation");
 				String source = list.getString("source");
 				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
 				Optional<String> pardon_source = Optional.ofNullable(list.getString("pardon_source"));
@@ -614,19 +627,23 @@ public class EUserSubject implements SanctionUserSubject {
     						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
-			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
-			preparedStatement.setLong(3, ban.getDuration().orElse(null));
+			preparedStatement.setDouble(2, ban.getCreationDate());
+			if (ban.getDuration().isPresent()) {
+				preparedStatement.setDouble(3, ban.getDuration().get());
+			} else {
+				preparedStatement.setNull(3, Types.DOUBLE);
+			}
 			preparedStatement.setString(4, ban.getType().name());
 			preparedStatement.setString(5, ban.getReason().getName());
 			preparedStatement.setString(6, ban.getSource());
 			preparedStatement.setString(7, ban.getOption().orElse(null));
 			
 			if(ban.isPardon()) {
-				preparedStatement.setTimestamp(8, new Timestamp(ban.getPardonDate().get()));
+				preparedStatement.setDouble(8, ban.getPardonDate().get());
 				preparedStatement.setString(9, EChat.serialize(ban.getPardonReason().get()));
 				preparedStatement.setString(10, ban.getPardonSource().get());
 			} else {
-				preparedStatement.setTimestamp(8, null);
+				preparedStatement.setNull(8, Types.DOUBLE);
 				preparedStatement.setString(9, null);
 				preparedStatement.setString(10, null);
 			}
@@ -667,16 +684,16 @@ public class EUserSubject implements SanctionUserSubject {
     		preparedStatement = connection.prepareStatement(query);
 
 			if(ban.isPardon()) {
-				preparedStatement.setTimestamp(1, new Timestamp(ban.getPardonDate().get()));
+				preparedStatement.setDouble(1, ban.getPardonDate().get());
 				preparedStatement.setString(2, EChat.serialize(ban.getPardonReason().get()));
 				preparedStatement.setString(3, ban.getPardonSource().get());
 			} else {
-				preparedStatement.setTimestamp(1, null);
+				preparedStatement.setNull(1, Types.DOUBLE);
 				preparedStatement.setString(2, null);
 				preparedStatement.setString(3, null);
 			}
 			preparedStatement.setString(4, this.getIdentifier());
-			preparedStatement.setTimestamp(5, new Timestamp(ban.getCreationDate()));
+			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Updating to the database : (uuid ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
@@ -705,7 +722,7 @@ public class EUserSubject implements SanctionUserSubject {
 		    				+ "WHERE `uuid` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
-			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
+			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';"

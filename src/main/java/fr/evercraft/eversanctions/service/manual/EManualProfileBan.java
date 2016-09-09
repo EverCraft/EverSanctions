@@ -22,6 +22,9 @@ import java.util.Optional;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.BanTypes;
+
+import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.util.ban.Ban.Builder;
 import org.spongepowered.api.util.ban.Ban.Profile;
 
@@ -31,7 +34,7 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 public class EManualProfileBan extends EManualProfile implements SanctionManualProfile.Ban {
 	
 	public EManualProfileBan(final long date_start, final Optional<Long> duration, final Text reason, final String source) {
-		super(date_start, duration, reason, source);
+		super(date_start, duration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
 	public EManualProfileBan(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
@@ -40,11 +43,13 @@ public class EManualProfileBan extends EManualProfile implements SanctionManualP
 	}
 	
 	public Profile getBan(GameProfile profile) {
+		Preconditions.checkNotNull(profile, "profile");
+		
 		Builder builder = org.spongepowered.api.util.ban.Ban.builder()
+				.type(BanTypes.PROFILE)
 				.profile(profile)
 				.reason(this.getReason())
 				.startDate(Instant.ofEpochMilli(this.getCreationDate()))
-				.type(BanTypes.PROFILE)
 				.source(EChat.of(this.getSource()));
 		
 		if(this.getExpirationDate().isPresent()) {

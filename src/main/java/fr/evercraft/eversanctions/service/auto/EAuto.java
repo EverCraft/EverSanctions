@@ -143,10 +143,10 @@ public class EAuto implements SanctionAuto {
 	public Optional<Ban.Profile> getBan(GameProfile profile) {
 		if(this.isBan()) {
 			Builder builder = Ban.builder()
+					.type(BanTypes.PROFILE)
 					.profile(profile)
 					.reason(this.getReasonText())
 					.startDate(Instant.ofEpochMilli(this.getCreationDate()))
-					.type(BanTypes.PROFILE)
 					.source(EChat.of(this.getSource()));
 			
 			if(this.getExpirationDate().isPresent()) {
@@ -161,11 +161,10 @@ public class EAuto implements SanctionAuto {
 	public Optional<Ban.Ip> getBan(GameProfile profile, InetAddress address) {
 		if(this.isBanIP()) {
 			Builder builder = Ban.builder()
-					.profile(profile)
+					.type(BanTypes.IP)
 					.address(address)
 					.reason(this.getReasonText())
 					.startDate(Instant.ofEpochMilli(this.getCreationDate()))
-					.type(BanTypes.IP)
 					.source(EChat.of(this.getSource()));
 			
 			if(this.getExpirationDate().isPresent()) {

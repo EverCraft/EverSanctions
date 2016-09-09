@@ -68,6 +68,7 @@ public abstract class ESanctionService implements SanctionService {
 			        	Chronometer chronometer = new Chronometer();
 			        	
 			        	EUserSubject subject = new EUserSubject(ESanctionService.this.plugin, uuid);
+			        	
 			        	ESanctionService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 			            return subject;
 			        }

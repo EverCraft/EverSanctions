@@ -20,7 +20,6 @@ import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.api.util.ban.Ban.Builder;
@@ -49,13 +48,12 @@ public class EManualProfileBanIp extends EManualProfile implements SanctionManua
 		return this.address;
 	}
 	
-	public Ip getBan(GameProfile profile, InetAddress address) {
+	@Override
+	public Ip getBan(InetAddress address) {
 		Builder builder =  org.spongepowered.api.util.ban.Ban.builder()
-				.profile(profile)
+				.type(BanTypes.IP)
 				.reason(this.getReason())
 				.startDate(Instant.ofEpochMilli(this.getCreationDate()))
-				.profile(profile)
-				.type(BanTypes.IP)
 				.address(address)
 				.source(EChat.of(this.getSource()));
 		

@@ -68,6 +68,8 @@ public class EBanService extends ESanctionService {
 		
 		this.bans_profile = new ConcurrentSkipListSet<Ban.Profile>(EBanService.COMPARATOR_BAN);
 		this.bans_ip = new ConcurrentSkipListMap<Ban.Ip, Optional<UUID>>(EBanService.COMPARATOR_BAN);
+		
+		this.reload();
 	}
 	
 	public void reload() {
@@ -222,5 +224,9 @@ public class EBanService extends ESanctionService {
 		long time = System.currentTimeMillis();
 		this.bans_profile.removeIf(ban -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 		UtilsMap.removeIf(this.bans_ip, (ban,  uuid) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
+	}
+
+	public void add(Ban.Profile ban) {
+		this.bans_profile.add(ban);
 	}
 }
