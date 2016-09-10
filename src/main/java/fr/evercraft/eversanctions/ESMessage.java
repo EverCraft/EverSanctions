@@ -42,30 +42,30 @@ public class ESMessage extends EMessage {
 		
 		CONNECTION_BAN_UNLIMITED("connection.banUnlimited", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
 		CONNECTION_BAN_TEMP("connection.banTemp", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
-		CONNECTION_BANIP_UNLIMITED("connection.banipUnlimited", "&c&lIp banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		CONNECTION_BANIP_TEMP("connection.banipTemp", "&c&lIp banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<time>"),
+		CONNECTION_BANIP_UNLIMITED("connection.banipUnlimited", "&c&lIP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		CONNECTION_BANIP_TEMP("connection.banipTemp", "&c&lIP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<time>"),
 		
 		// Ban		
-		BAN_DESCRIPTION("ban.description", "ban.description"),
-		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", "ban.unlimitedStaff"),
+		BAN_DESCRIPTION("ban.description", "Banni le joueur du serveur"),
+		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", "&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>&7."),
 		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BAN_TEMP_STAFF("ban.tempStaff", "ban.tempStaff"),
+		BAN_TEMP_STAFF("ban.tempStaff", "&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>&7."),
 		BAN_TEMP_PLAYER("ban.tempPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BAN_ERROR_TIME("ban.errorTime", "ban.errorTime"),
-		BAN_ERROR_REASON("ban.errorReason", "ban.errorReason"),
-		BAN_ERROR_CANCEL("ban.errorCancel", "ban.cancel"),
+		BAN_ERROR_TIME("ban.errorTime", "&cErreur : '<number>' n'est pas une durée."),
+		BAN_ERROR_REASON("ban.errorReason", "&cErreur : La raison est obligatoire."),
+		BAN_ERROR_CANCEL("ban.errorCancel", "&cErreur : Impossible de bannir <player> pour le moment."),
 		
-		UNBAN_DESCRIPTION("unban.description", "pardonBan.description"),
-		UNBAN_STAFF("unban.staff", "pardonBan.staff"),
-		UNBAN_REASON_EMPTY("unban.reasonEmpty", "ban.reasonEmpty"),
-		UNBAN_CANCEL("unban.cancel", "ban.cancel"),
+		UNBAN_DESCRIPTION("unban.description", "Débanni le joueur du serveur"),
+		UNBAN_STAFF("unban.staff", "&7Vous avez débanni &6<player>&7."),
+		UNBAN_REASON_EMPTY("unban.reasonEmpty", "&cErreur : La raison est obligatoire."),
+		UNBAN_CANCEL("unban.cancel", "&cErreur : Impossible de débannir <player> pour le moment."),
 		
 		// Banip
-		BANIP_DESCRIPTION("banip.description", ""),
+		BANIP_DESCRIPTION("banip.description", "Banni l'adresse IP du joueur"),
 		
-		MUTE_DESCRIPTION("mute.description", ""),
+		MUTE_DESCRIPTION("mute.description", "Mute le joueur"),
 		
-		JAIL_DESCRIPTION("jail.description", "");
+		JAIL_DESCRIPTION("jail.description", "Emprisonne le joueur");
 		
 		private final String path;
 	    private final Object french;
