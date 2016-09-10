@@ -64,7 +64,7 @@ public class ESBan extends ECommand<EverSanctions> {
 	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1){
-			suggests.addAll(this.getAllPlayers());
+			suggests.addAll(this.getAllUsers(source));
 		}
 		return suggests;
 	}
