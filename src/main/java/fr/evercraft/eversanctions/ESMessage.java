@@ -51,9 +51,11 @@ public class ESMessage extends EMessage {
 		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
 		BAN_TEMP_STAFF("ban.tempStaff", "&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>&7."),
 		BAN_TEMP_PLAYER("ban.tempPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BAN_ERROR_TIME("ban.errorTime", "&cErreur : '<number>' n'est pas une durée."),
+		BAN_ERROR_TIME("ban.errorTime", "&cErreur : '<time>' n'est pas une durée."),
 		BAN_ERROR_REASON("ban.errorReason", "&cErreur : La raison est obligatoire."),
 		BAN_ERROR_CANCEL("ban.errorCancel", "&cErreur : Impossible de bannir <player> pour le moment."),
+		BAN_ERROR_EQUALS("ban.errorEquals", "&cErreur : Impossible de vous bannir vous-même."),
+		BAN_ERROR_NOEMPTY("ban.errorNoEmpty", "&cErreur : &6<player> &cest déjà banni."),
 		
 		UNBAN_DESCRIPTION("unban.description", "Débanni le joueur du serveur"),
 		UNBAN_STAFF("unban.staff", "&7Vous avez débanni &6<player>&7."),
