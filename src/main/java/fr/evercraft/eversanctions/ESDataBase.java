@@ -127,19 +127,56 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 	public String getTableJails() {
 		return this.getPrefix() + this.table_jails;
 	}	
-	
-	public Map<Ban.Ip, Optional<UUID>> getBansIp(Connection connection) {
-		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
-		bans.putAll(this.getBanIpManualProfile(connection));
-		bans.putAll(this.getBanIpAuto(connection));
-		bans.putAll(this.getBanIpManualIp(connection));
-		return bans;
-	}
 
 	public Set<Ban.Profile> getBansProfile(Connection connection) {
 		Set<Ban.Profile> bans = new HashSet<Ban.Profile>();
-		bans.addAll(this.getBanProfileManual(connection));
-		bans.addAll(this.getBanProfileAuto(connection));
+		PreparedStatement preparedStatement = null;
+		try {
+			String query = "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+					+ "		FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
+					+ "		WHERE `type` = ? "
+					+ "			AND `pardon_date` IS NULL "
+					+ "			AND (`duration` IS NULL OR (`duration` + `creation`) > ?))"
+					+ "UNION"
+					+ "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+					+ "		FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
+					+ "		WHERE (`type` = ? OR `type` = ?) "
+					+ "			AND `pardon_date` IS NULL "
+					+ "			AND (`duration` IS NULL OR (`duration` + `creation`)  > ?));";
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_PROFILE.name());
+			preparedStatement.setLong(2, System.currentTimeMillis());
+			preparedStatement.setString(3, SanctionAuto.Type.BAN_PROFILE.name());
+			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
+			preparedStatement.setLong(5, System.currentTimeMillis());
+			ResultSet list = preparedStatement.executeQuery();
+			while(list.next()) {
+				try {
+					Optional<GameProfile> profile = this.plugin.getEServer().getGameProfile(UUID.fromString(list.getString("identifier")));
+					if(profile.isPresent()) {					
+						long creation = list.getLong("creation");
+						
+						Ban.Builder build = Ban.builder()
+								.type(BanTypes.PROFILE)
+								.profile(profile.get())
+								.startDate(Instant.ofEpochMilli(creation))
+								.reason(EChat.of(list.getString("reason")))
+								.source(Text.of(list.getString("source")));
+						
+						long duration = list.getLong("duration");
+						if(!list.wasNull()) {
+							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
+						}
+						
+						bans.add((Ban.Profile) build.build());
+					}
+				} catch (IllegalArgumentException e) {}
+			}
+		} catch (SQLException e) {
+	    	this.plugin.getLogger().warn(" : " + e.getMessage());
+		} finally {
+			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
+	    }
 		return bans;
 	}
 	
@@ -147,28 +184,46 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 	 * Ip
 	 */
 	
-	public Map<Ban.Ip, Optional<UUID>> getBanIpManualProfile(Connection connection) {
+	public Map<Ban.Ip, Optional<UUID>> getBansIp(Connection connection) {
+		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
+		bans.putAll(this.getBanIpProfile(connection));
+		bans.putAll(this.getBanIp(connection));
+		return bans;
+	}
+	
+	public Map<Ban.Ip, Optional<UUID>> getBanIpProfile(Connection connection) {
 		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
 		PreparedStatement preparedStatement = null;
 		try {
-			String query = "SELECT * "
-						+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-						+ "WHERE `type` = ? "
-						+ "	AND `pardon_date` IS NULL "
-						+ "	AND `option` IS NOT NULL "
-						+ " AND (`duration` IS NULL OR DATEADD(millisecond,`duration`,`creation`)  > NOW());";
+			String query = "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+						+ "		FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
+						+ "		WHERE `type` = ? "
+						+ "			AND `pardon_date` IS NULL "
+						+ "			AND `option` IS NOT NULL "
+						+ "			AND (`duration` IS NULL OR (`duration` + `creation`) > ?))"
+						+ "UNION"
+						+ "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+						+ "		FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
+						+ "		WHERE (`type` = ? OR `type` = ?) "
+						+ "			AND `pardon_date` IS NULL "
+						+ "			AND `option` IS NOT NULL "
+						+ "			AND (`duration` IS NULL OR (`duration` + `creation`)  > ?));";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
+			preparedStatement.setLong(2, System.currentTimeMillis());
+			preparedStatement.setString(3, SanctionAuto.Type.BAN_IP.name());
+			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
+			preparedStatement.setLong(5, System.currentTimeMillis());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
 				try {
 					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("option"));
 					if(address.isPresent()) {					
-						long creation = list.getTimestamp("creation").getTime();
+						long creation = list.getLong("creation");
 						
 						Ban.Builder build = Ban.builder()
-								.address(address.get())
 								.type(BanTypes.IP)
+								.address(address.get())
 								.startDate(Instant.ofEpochMilli(creation))
 								.reason(EChat.of(list.getString("reason")))
 								.source(Text.of(list.getString("source")));
@@ -190,51 +245,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		return bans;
 	}
 	
-	public Map<Ban.Ip, Optional<UUID>> getBanIpAuto(Connection connection) {
-		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
-		PreparedStatement preparedStatement = null;
-		try {
-			String query = "SELECT * "
-						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
-						+ "WHERE (`type` = ? OR `type` = ?) "
-						+ "	AND `pardon_date` IS NULL "
-						+ "	AND `option` IS NOT NULL "
-						+ " AND (`duration` IS NULL OR DATEADD(millisecond,`duration`,`creation`)  > NOW());";
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, SanctionAuto.Type.BAN_IP.name());
-			preparedStatement.setString(2, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
-			ResultSet list = preparedStatement.executeQuery();
-			while(list.next()) {
-				try {
-					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("option"));
-					if(address.isPresent()) {					
-						long creation = list.getTimestamp("creation").getTime();
-						
-						Ban.Builder build = Ban.builder()
-								.address(address.get())
-								.type(BanTypes.IP)
-								.startDate(Instant.ofEpochMilli(creation))
-								.reason(EChat.of(list.getString("reason")))
-								.source(Text.of(list.getString("source")));
-						
-						long duration = list.getLong("duration");
-						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
-						}
-						
-						bans.put((Ban.Ip) build.build(), Optional.of(UUID.fromString(list.getString("identifier"))));
-					}
-				} catch (IllegalArgumentException e) {}
-			}
-		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
-		} finally {
-			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
-	    }
-		return bans;
-	}
-	
-	public Map<Ban.Ip, Optional<UUID>> getBanIpManualIp(Connection connection) {
+	public Map<Ban.Ip, Optional<UUID>> getBanIp(Connection connection) {
 		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
 		PreparedStatement preparedStatement = null;
 		try {
@@ -250,11 +261,11 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				try {
 					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("identifier"));
 					if(address.isPresent()) {					
-						long creation = list.getTimestamp("creation").getTime();
+						long creation = list.getLong("creation");
 						
 						Ban.Builder build = Ban.builder()
-								.address(address.get())
 								.type(BanTypes.IP)
+								.address(address.get())
 								.startDate(Instant.ofEpochMilli(creation))
 								.reason(EChat.of(list.getString("reason")))
 								.source(Text.of(list.getString("source")));
@@ -265,96 +276,6 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 						}
 						
 						bans.put((Ban.Ip) build.build(), Optional.empty());
-					}
-				} catch (IllegalArgumentException e) {}
-			}
-		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
-		} finally {
-			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
-	    }
-		return bans;
-	}
-	
-	/*
-	 * Profile
-	 */
-	
-	public Set<Ban.Profile> getBanProfileManual(Connection connection) {
-		Set<Ban.Profile> bans = new HashSet<Ban.Profile>();
-		PreparedStatement preparedStatement = null;
-		try {
-			String query = "SELECT * "
-						+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-						+ "WHERE `type` = ? "
-						+ "	AND `pardon_date` IS NULL "
-						+ " AND (`duration` IS NULL OR DATEADD(millisecond,`duration`,`creation`)  > NOW());";
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
-			ResultSet list = preparedStatement.executeQuery();
-			while(list.next()) {
-				try {
-					Optional<GameProfile> profile = this.plugin.getEServer().getGameProfile(UUID.fromString(list.getString("identifier")));
-					if(profile.isPresent()) {					
-						long creation = list.getTimestamp("creation").getTime();
-						
-						Ban.Builder build = Ban.builder()
-								.profile(profile.get())
-								.type(BanTypes.PROFILE)
-								.startDate(Instant.ofEpochMilli(creation))
-								.reason(EChat.of(list.getString("reason")))
-								.source(Text.of(list.getString("source")));
-						
-						long duration = list.getLong("duration");
-						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
-						}
-						
-						bans.add((Ban.Profile) build.build());
-					}
-				} catch (IllegalArgumentException e) {}
-			}
-		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
-		} finally {
-			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
-	    }
-		return bans;
-	}
-	
-	public Set<Ban.Profile> getBanProfileAuto(Connection connection) {
-		Set<Ban.Profile> bans = new HashSet<Ban.Profile>();
-		PreparedStatement preparedStatement = null;
-		try {
-			String query = "SELECT * "
-						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
-						+ "WHERE (`type` = ? OR `type` = ?) "
-						+ "	AND `pardon_date` IS NULL "
-						+ "	AND `option` IS NOT NULL "
-						+ " AND (`duration` IS NULL OR DATEADD(millisecond,`duration`,`creation`)  > NOW());";
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, SanctionAuto.Type.BAN_PROFILE.name());
-			preparedStatement.setString(2, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
-			ResultSet list = preparedStatement.executeQuery();
-			while(list.next()) {
-				try {
-					Optional<GameProfile> profile = this.plugin.getEServer().getGameProfile(UUID.fromString(list.getString("identifier")));
-					if(profile.isPresent()) {					
-						long creation = list.getTimestamp("creation").getTime();
-						
-						Ban.Builder build = Ban.builder()
-								.profile(profile.get())
-								.type(BanTypes.PROFILE)
-								.startDate(Instant.ofEpochMilli(creation))
-								.reason(EChat.of(list.getString("reason")))
-								.source(Text.of(list.getString("source")));
-						
-						long duration = list.getLong("duration");
-						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
-						}
-						
-						bans.add((Ban.Profile) build.build());
 					}
 				} catch (IllegalArgumentException e) {}
 			}

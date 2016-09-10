@@ -24,7 +24,8 @@ import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.sanction.JailService;
 import fr.evercraft.everapi.services.sanction.SanctionService;
-import fr.evercraft.eversanctions.command.ESBan;
+import fr.evercraft.eversanctions.command.ban.ESBan;
+import fr.evercraft.eversanctions.command.ban.ESUnBan;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
@@ -53,7 +54,10 @@ public class EverSanctions extends EPlugin {
 		this.messages = new ESMessage(this);
 		
 		this.database = new ESDataBase(this);
-		
+	}
+	
+	@Override
+	protected void onEnable() throws PluginDisableException {
 		this.ban_service = new EBanService(this);
 		this.jail_service = new EJailService(this);
 		
@@ -70,6 +74,7 @@ public class EverSanctions extends EPlugin {
 		command.add(new ESReload(this, command));
 		
 		new ESBan(this);
+		new ESUnBan(this);
 	}
 
 	protected void onReload() throws PluginDisableException {

@@ -42,7 +42,6 @@ import fr.evercraft.eversanctions.service.subject.EUserSubject;
 
 public class EBanService extends ESanctionService {
 	
-	private static final String UNKNOWN = "unknown";
 	private static final Comparator<Ban> COMPARATOR_BAN = 
 			(Ban o1, Ban o2) -> {
 				if (o1.isIndefinite() && o2.isIndefinite()) {

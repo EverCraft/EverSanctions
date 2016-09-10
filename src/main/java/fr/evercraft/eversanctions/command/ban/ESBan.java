@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.evercraft.eversanctions.command;
+package fr.evercraft.eversanctions.command.ban;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,7 @@ import org.spongepowered.api.text.format.TextColors;
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
+import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -38,7 +39,7 @@ import fr.evercraft.eversanctions.EverSanctions;
 public class ESBan extends ECommand<EverSanctions> {
 	
 	public ESBan(final EverSanctions plugin) {
-        super(plugin, "ban");
+        super(plugin, "ban", "tempban");
     }
 	
 	@Override
@@ -53,15 +54,19 @@ public class ESBan extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " " + EAMessages.ARGS_PLAYER.get())
-				.onClick(TextActions.suggestCommand("/" + this.getName()))
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + ">")
+				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
 	}
 	
 	@Override
 	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		return new ArrayList<String>();
+		List<String> suggests = new ArrayList<String>();
+		if (args.size() == 1){
+			suggests.addAll(this.getAllPlayers());
+		}
+		return suggests;
 	}
 	
 	@Override
@@ -98,19 +103,26 @@ public class ESBan extends ECommand<EverSanctions> {
 	private boolean commandBan(final CommandSource staff, EUser user, String reason_string) {
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_REASON_EMPTY.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_REASON.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
 		if (!user.ban(Optional.empty(), reason, staff.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_CANCEL.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_STAFF.get()
+		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_UNLIMITED_STAFF.get()
 			 .replaceAll("<player>", user.getName())));
+		
+		if(user instanceof EPlayer) {
+			EPlayer player = (EPlayer) user;
+			player.kick(EChat.of(ESMessages.BAN_UNLIMITED_PLAYER.get()
+					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<reason>", reason_string)));
+		}
 		return true;
 	}
 }

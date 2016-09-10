@@ -40,12 +40,27 @@ public class ESMessage extends EMessage {
 		DESCRIPTION("description", 
 				"Gestionnaire de sanction"),
 		
-		BAN_DESCRIPTION("ban.description", "ban.description"),
-		BAN_STAFF("ban.staff", "ban.staff"),
-		BAN_PLAYER("ban.player", "ban.player"),
-		BAN_REASON_EMPTY("ban.reasonEmpty", "ban.reasonEmpty"),
-		BAN_CANCEL("ban.cancel", "ban.cancel"),
+		CONNECTION_BAN_UNLIMITED("connection.banUnlimited", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		CONNECTION_BAN_TEMP("connection.banTemp", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
+		CONNECTION_BANIP_UNLIMITED("connection.banipUnlimited", "&c&lIp banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		CONNECTION_BANIP_TEMP("connection.banipTemp", "&c&lIp banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<time>"),
 		
+		// Ban		
+		BAN_DESCRIPTION("ban.description", "ban.description"),
+		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", "ban.unlimitedStaff"),
+		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		BAN_TEMP_STAFF("ban.tempStaff", "ban.tempStaff"),
+		BAN_TEMP_PLAYER("ban.tempPlayer", "&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		BAN_ERROR_TIME("ban.errorTime", "ban.errorTime"),
+		BAN_ERROR_REASON("ban.errorReason", "ban.errorReason"),
+		BAN_ERROR_CANCEL("ban.errorCancel", "ban.cancel"),
+		
+		UNBAN_DESCRIPTION("unban.description", "pardonBan.description"),
+		UNBAN_STAFF("unban.staff", "pardonBan.staff"),
+		UNBAN_REASON_EMPTY("unban.reasonEmpty", "ban.reasonEmpty"),
+		UNBAN_CANCEL("unban.cancel", "ban.cancel"),
+		
+		// Banip
 		BANIP_DESCRIPTION("banip.description", ""),
 		
 		MUTE_DESCRIPTION("mute.description", ""),

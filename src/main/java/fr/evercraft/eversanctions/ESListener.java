@@ -16,11 +16,41 @@
  */
 package fr.evercraft.eversanctions;
 
+import java.util.Optional;
+
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.Ban.Profile;
+
+import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.eversanctions.ESMessage.ESMessages;
+
 public class ESListener {
-	@SuppressWarnings("unused")
 	private EverSanctions plugin;
 	
 	public ESListener(final EverSanctions plugin) {
 		this.plugin = plugin;
+	}
+	
+	@Listener(order=Order.FIRST)
+	public void onPlayerJoin(final ClientConnectionEvent.Auth event) {
+		Optional<Profile> ban = this.plugin.getSanctionService().getBanFor(event.getProfile());
+		if (ban.isPresent()) {
+			if(ban.get().isIndefinite()) {
+				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_UNLIMITED.get()
+						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))));
+			} else {
+				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_UNLIMITED.get()
+						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))
+						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(ban.get().getExpirationDate().get().toEpochMilli()))));
+			}
+			event.setMessageCancelled(false);
+			event.setCancelled(true);
+		}
 	}
 }
