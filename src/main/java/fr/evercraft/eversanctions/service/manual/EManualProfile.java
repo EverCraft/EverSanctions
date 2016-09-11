@@ -24,12 +24,12 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public abstract class EManualProfile extends EManual implements SanctionManualProfile {
 	
-	public EManualProfile(final long date_start, final Optional<Long> duration, final Text reason, final String source) {
-		this(date_start, duration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	public EManualProfile(final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
+		this(date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfile(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
+	public EManualProfile(final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
-		super(date_start, duration, reason, source, pardon_date, pardon_reason, pardon_source);
+		super(date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 }

@@ -30,13 +30,13 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 
 public class EManualIP extends EManual implements SanctionManualIP {
 	
-	public EManualIP(final long date_start, final Optional<Long> duration, final Text reason, final String source) {
-		this(date_start, duration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	public EManualIP(final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
+		this(date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualIP(final Long creation, final Optional<Long> duration, final Text reason, final String source, 
+	public EManualIP(final Long creation, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
-		super(creation, duration, reason, source, pardon_date, pardon_reason, pardon_source);
+		super(creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 
 	public Ban.Ip getBan(InetAddress address) {

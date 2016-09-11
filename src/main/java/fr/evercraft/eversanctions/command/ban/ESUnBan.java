@@ -54,7 +54,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + ">")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + "> <" + EAMessages.ARGS_REASON.get() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -64,7 +64,9 @@ public class ESUnBan extends ECommand<EverSanctions> {
 	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1){
-			suggests.addAll(this.getAllPlayers());
+			suggests.addAll(this.getAllUsers(source));
+		} else if (args.size() == 2) {
+			suggests.add("reason...");
 		}
 		return suggests;
 	}
@@ -97,6 +99,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
+		
 		return resultat;
 	}
 	
@@ -115,7 +118,8 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		}
 		
 		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_STAFF.get()
-			 .replaceAll("<player>", user.getName())));
+			.replaceAll("<reason>", reason_string)
+			.replaceAll("<player>", user.getName())));
 		return true;
 	}
 }

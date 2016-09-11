@@ -25,7 +25,7 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManual;
 public abstract class EManual implements SanctionManual {
 
 	private final Long date_start;
-	private Optional<Long> duration;
+	private Optional<Long> expiration;
 	private final Text reason;
 	private final String source;
 	
@@ -33,12 +33,12 @@ public abstract class EManual implements SanctionManual {
 	private Optional<Text> pardon_reason;
 	private Optional<String> pardon_source;
 	
-	public EManual(final long date_start, final Optional<Long> duration, final Text reason, final String source, 
+	public EManual(final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			Optional<Long> pardon_date, Optional<Text> pardon_reason, Optional<String> pardon_source) {
 		this.date_start = date_start;
 		this.reason = reason;
 		this.source = source;
-		this.duration = duration;
+		this.expiration = expiration;
 		
 		this.pardon_date = pardon_date;
 		this.pardon_reason = pardon_reason;
@@ -52,15 +52,7 @@ public abstract class EManual implements SanctionManual {
 	
 	@Override
 	public Optional<Long> getExpirationDate() {
-		if(this.getDuration().isPresent()) {
-			return Optional.of(this.date_start + this.getDuration().get());
-		}
-		return Optional.empty();
-	}
-	
-	@Override
-	public Optional<Long> getDuration() {
-		return this.duration;
+		return this.expiration;
 	}
 	
 	@Override

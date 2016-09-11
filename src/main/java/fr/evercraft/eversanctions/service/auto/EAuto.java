@@ -32,7 +32,7 @@ import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 public class EAuto implements SanctionAuto {
 
 	private final Long creation;
-	private Optional<Long> duration;
+	private Optional<Long> expiration;
 	private final SanctionAuto.Reason reason;
 	private final SanctionAuto.Type type;
 	private final int level;
@@ -47,12 +47,12 @@ public class EAuto implements SanctionAuto {
 		this(date_start, duration, reason, type, level, source, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
+	public EAuto(final long date_start, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
 			final Optional<String> option) {
-		this(date_start, duration, reason, type, level, source, option, Optional.empty(), Optional.empty(), Optional.empty());
+		this(date_start, expiration, reason, type, level, source, option, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long creation, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
+	public EAuto(final long creation, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
 			final Optional<String> option, final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
 		this.creation = creation;
 		this.reason = reason;
@@ -60,7 +60,7 @@ public class EAuto implements SanctionAuto {
 		this.level = level;
 		this.source = source;
 		this.option = option;
-		this.duration = duration;
+		this.expiration = expiration;
 		
 		this.pardon_date = pardon_date;
 		this.pardon_reason = pardon_reason;
@@ -74,17 +74,9 @@ public class EAuto implements SanctionAuto {
 	
 	@Override
 	public Optional<Long> getExpirationDate() {
-		if(this.getDuration().isPresent()) {
-			return Optional.of(this.creation + this.getDuration().get());
-		}
-		return Optional.empty();
+		return this.expiration;
 	}
-	
-	@Override
-	public Optional<Long> getDuration() {
-		return this.duration;
-	}
-	
+
 	@Override
 	public String getSource() {
 		return this.source;

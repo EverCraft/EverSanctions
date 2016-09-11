@@ -119,10 +119,10 @@ public abstract class ESanctionService implements SanctionService {
 		Preconditions.checkNotNull(uuid, "uuid");
 		try {
 			if (!this.users.containsKey(uuid)) {
-				return Optional.of(this.users_cache.get(uuid));
+				return Optional.ofNullable(this.users_cache.get(uuid));
 	    	}
 	    	return Optional.ofNullable(this.users.get(uuid));
-		} catch (ExecutionException e) {
+		} catch (Exception e) {
 			this.plugin.getLogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
 			return Optional.empty();
 		}

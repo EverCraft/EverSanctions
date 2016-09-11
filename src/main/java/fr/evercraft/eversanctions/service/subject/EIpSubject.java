@@ -94,17 +94,17 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public boolean add(final long creation, final long duration, final Text reason, final String source) {
-		return this.add(creation, Optional.of(duration), reason, source);
+	public boolean add(final long creation, final long expiration, final Text reason, final String source) {
+		return this.add(creation, Optional.of(expiration), reason, source);
 	}
 	
-	public boolean add(final Long creation, final Optional<Long> duration, final Text reason, final String source) {
+	public boolean add(final Long creation, final Optional<Long> expiration, final Text reason, final String source) {
 		Preconditions.checkNotNull(creation, "creation");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		if(!this.isBan()) {
-			final EManualIP ban = new EManualIP(creation, duration, reason, source);
+			final EManualIP ban = new EManualIP(creation, expiration, reason, source);
 			if(!Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.address)))) {
 				this.manual = Optional.of(ban);
 				this.plugin.getThreadAsync().execute(() -> this.addSQL(ban));
@@ -187,22 +187,22 @@ public class EIpSubject implements SanctionIpSubject {
 			preparedStatement.setString(1, this.getAddressString());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
-				Long creation = list.getTimestamp("creation").getTime();
+				Long creation = list.getLong("creation");
 				Text reason = EChat.of(list.getString("reason"));
 				String source = list.getString("source");
 				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
 				Optional<String> pardon_source = Optional.ofNullable(list.getString("pardon_source"));
 				
-				Optional<Long> duration = Optional.of(list.getLong("duration"));
+				Optional<Long> expiration = Optional.of(list.getLong("expiration"));
 				if(list.wasNull()) {
-					duration = Optional.empty();
+					expiration = Optional.empty();
 				}
 				Optional<Long> pardon_date = Optional.of(list.getLong("pardon_date"));
 				if(list.wasNull()) {
 					pardon_date = Optional.empty();
 				}
 				
-				ips.add(new EManualIP(creation, duration, reason, source, pardon_date, pardon_reason, pardon_source));
+				ips.add(new EManualIP(creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 			}
 		} catch (SQLException e) {
 	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getAddressString() + "'): " + e.getMessage());
@@ -228,7 +228,7 @@ public class EIpSubject implements SanctionIpSubject {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getAddressString());
 			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
-			preparedStatement.setLong(3, ban.getDuration().orElse(null));
+			preparedStatement.setLong(3, ban.getExpirationDate().orElse(null));
 			preparedStatement.setString(4, EChat.serialize(ban.getReason()));
 			preparedStatement.setString(5, ban.getSource());
 			
@@ -244,7 +244,7 @@ public class EIpSubject implements SanctionIpSubject {
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getAddressString() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
-					 											  + "duration='" + ban.getDuration().orElse(-1L) + "';"
+					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
 					 											  + "source='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
@@ -319,7 +319,7 @@ public class EIpSubject implements SanctionIpSubject {
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getAddressString() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
-					 											  + "duration='" + ban.getDuration().orElse(-1L) + "';"
+					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
 					 											  + "source='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"

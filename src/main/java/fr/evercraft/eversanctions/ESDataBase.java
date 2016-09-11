@@ -57,7 +57,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		String manual_profile = "CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
-							"`duration` DOUBLE DEFAULT NULL," +
+							"`expiration` DOUBLE DEFAULT NULL," +
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(255) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
@@ -72,7 +72,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		String manual_ip = 	"CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
-							"`duration` DOUBLE DEFAULT NULL," +
+							"`expiration` DOUBLE DEFAULT NULL," +
 							"`reason` VARCHAR(255) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
 							"`pardon_date` DOUBLE DEFAULT NULL," +
@@ -85,7 +85,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		String auto = 	"CREATE TABLE IF NOT EXISTS <table> (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
-							"`duration` DOUBLE DEFAULT NULL," +
+							"`expiration` DOUBLE DEFAULT NULL," +
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(36) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
@@ -132,17 +132,17 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		Set<Ban.Profile> bans = new HashSet<Ban.Profile>();
 		PreparedStatement preparedStatement = null;
 		try {
-			String query = "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
 					+ "		FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 					+ "		WHERE `type` = ? "
 					+ "			AND `pardon_date` IS NULL "
-					+ "			AND (`duration` IS NULL OR (`duration` + `creation`) > ?))"
+					+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`) > ?))"
 					+ "UNION"
-					+ "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+					+ "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
 					+ "		FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 					+ "		WHERE (`type` = ? OR `type` = ?) "
 					+ "			AND `pardon_date` IS NULL "
-					+ "			AND (`duration` IS NULL OR (`duration` + `creation`)  > ?));";
+					+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`)  > ?));";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_PROFILE.name());
 			preparedStatement.setLong(2, System.currentTimeMillis());
@@ -163,9 +163,9 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 								.reason(EChat.of(list.getString("reason")))
 								.source(Text.of(list.getString("source")));
 						
-						long duration = list.getLong("duration");
+						long expiration = list.getLong("expiration");
 						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
+							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
 						bans.add((Ban.Profile) build.build());
@@ -195,19 +195,19 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
 		PreparedStatement preparedStatement = null;
 		try {
-			String query = "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
 						+ "		FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 						+ "		WHERE `type` = ? "
 						+ "			AND `pardon_date` IS NULL "
 						+ "			AND `option` IS NOT NULL "
-						+ "			AND (`duration` IS NULL OR (`duration` + `creation`) > ?))"
+						+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`) > ?))"
 						+ "UNION"
-						+ "(SELECT `identifier`, `creation`, `duration`, `reason`, `source` "
+						+ "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
 						+ "		FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 						+ "		WHERE (`type` = ? OR `type` = ?) "
 						+ "			AND `pardon_date` IS NULL "
 						+ "			AND `option` IS NOT NULL "
-						+ "			AND (`duration` IS NULL OR (`duration` + `creation`)  > ?));";
+						+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`)  > ?));";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
 			preparedStatement.setLong(2, System.currentTimeMillis());
@@ -228,9 +228,9 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 								.reason(EChat.of(list.getString("reason")))
 								.source(Text.of(list.getString("source")));
 						
-						long duration = list.getLong("duration");
+						long expiration = list.getLong("expiration");
 						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
+							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
 						bans.put((Ban.Ip) build.build(), Optional.of(UUID.fromString(list.getString("identifier"))));
@@ -251,11 +251,10 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		try {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
-						+ "WHERE (`type` = ? OR `type` = ?) "
-						+ "	AND `pardon_date` IS NULL "
-						+ " AND (`duration` IS NULL OR DATEADD(millisecond,`duration`,`creation`)  > NOW());";
+						+ "WHERE `pardon_date` IS NULL "
+						+ " AND (`expiration` IS NULL OR (`expiration` + `creation`)  > ?);";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setLong(3, System.currentTimeMillis());
+			preparedStatement.setLong(1, System.currentTimeMillis());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
 				try {
@@ -270,9 +269,9 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 								.reason(EChat.of(list.getString("reason")))
 								.source(Text.of(list.getString("source")));
 						
-						long duration = list.getLong("duration");
+						long expiration = list.getLong("expiration");
 						if(!list.wasNull()) {
-							build = build.expirationDate(Instant.ofEpochMilli(creation + duration));
+							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
 						bans.put((Ban.Ip) build.build(), Optional.empty());

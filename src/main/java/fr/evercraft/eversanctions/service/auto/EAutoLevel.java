@@ -21,17 +21,18 @@ import java.util.Optional;
 
 import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
+import fr.evercraft.everapi.sponge.UtilsDate;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 
 public class EAutoLevel implements SanctionAuto.Level {
 	
 	private final SanctionAuto.Type type;
-	private final Optional<Long> duration;
+	private final Optional<String> duration;
 	private final String reason;
 	private final Optional<Jail> jail;
 	private final Optional<InetAddress> address;
 	
-	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, String reason) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
@@ -39,7 +40,7 @@ public class EAutoLevel implements SanctionAuto.Level {
 		this.address = Optional.empty();
 	}
 	
-	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason, Jail jail) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, String reason, Jail jail) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
@@ -47,7 +48,7 @@ public class EAutoLevel implements SanctionAuto.Level {
 		this.address = Optional.empty();
 	}
 	
-	public EAutoLevel(final SanctionAuto.Type type, final Optional<Long> duration, String reason, InetAddress address) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, String reason, InetAddress address) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
@@ -61,8 +62,16 @@ public class EAutoLevel implements SanctionAuto.Level {
 	}
 
 	@Override
-	public Optional<Long> getDuration() {
+	public Optional<String> getDuration() {
 		return this.duration;
+	}
+	
+	@Override
+	public Optional<Long> getExpirationDate(long creation) {
+		if(this.duration.isPresent()) {
+			return UtilsDate.parseDateDiff(creation, this.duration.get(), true);
+		}
+		return Optional.empty();
 	}
 
 	@Override

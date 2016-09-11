@@ -44,10 +44,14 @@ public class ESListener {
 						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))));
 			} else {
-				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_UNLIMITED.get()
+				long time = ban.get().getExpirationDate().get().toEpochMilli();
+				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_TEMP.get()
 						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))
-						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(ban.get().getExpirationDate().get().toEpochMilli()))));
+						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(time))
+						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(time))
+						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(time))
+						.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(time))));
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
