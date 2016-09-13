@@ -20,6 +20,7 @@ import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.ban.BanService;
 
+import fr.evercraft.everapi.EverAPI;
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.sanction.JailService;
@@ -30,14 +31,14 @@ import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
 
-@Plugin(id = "fr.evercraft.eversanctions", 
+@Plugin(id = "eversanctions", 
 		name = "EverSanctions", 
-		version = "1.2", 
+		version = EverAPI.VERSION, 
 		description = "Manage Sanctions",
 		url = "http://evercraft.fr/",
 		authors = {"rexbut"},
 		dependencies = {
-		    @Dependency(id = "fr.evercraft.everapi", version = "1.2")
+		    @Dependency(id = "everapi", version = EverAPI.VERSION)
 		})
 public class EverSanctions extends EPlugin {
 	private ESConfig configs;
