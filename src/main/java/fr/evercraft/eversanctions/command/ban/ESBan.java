@@ -34,6 +34,7 @@ import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsDate;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -124,27 +125,47 @@ public class ESBan extends ECommand<EverSanctions> {
 	}
 	
 	private boolean commandBan(final CommandSource staff, EUser user, final String time_string, final String reason) {
+		// Le staff et le joueur sont identique
+		if (staff.getIdentifier().equals(user.getIdentifier())) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_EQUALS.get()
+				.replaceAll("<player>", user.getName())));
+			return false;
+		}
+		
+		// Le joueur à déjà un ban en cours
+		if (user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_NOEMPTY.get()
+				.replaceAll("<player>", user.getName())));
+			return false;
+		}
+		
+		// Aucune raison
 		if (reason.isEmpty()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_REASON.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
-		
+			
+		// Ban définitif
 		if (time_string.equalsIgnoreCase(SanctionService.UNLIMITED)) {
 			return this.commandUnlimitedBan(staff, user, reason);
 		}
 		
 		long creation = System.currentTimeMillis();
 		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
+		
+		// Temps incorrect
 		if (!time.isPresent()) {
 			staff.sendMessage(this.help(staff));
 			return false;
 		}
 		
+		// Ban tempotaire
 		return this.commandTempBan(staff, user, creation, time.get(), reason);
 	}
 	
 	private boolean commandUnlimitedBan(final CommandSource staff, final EUser user, final String reason) {
+		// Ban annulé
 		if (!user.ban(Optional.empty(), EChat.of(reason), staff.getIdentifier())) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));

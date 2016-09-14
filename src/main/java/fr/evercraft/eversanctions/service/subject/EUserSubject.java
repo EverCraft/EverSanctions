@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
@@ -38,7 +39,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
@@ -46,7 +46,6 @@ import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionUserSubject;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
-import fr.evercraft.everapi.services.sanction.manual.SanctionManual;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -81,11 +80,15 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	public void reload() {
+		
+	}
+	
+	public void reload(Connection connection) {
 		this.manual.clear();
 		this.auto.clear();
 		
-		this.manual.addAll(this.selectManual());
-		this.auto.addAll(this.selectAuto());
+		this.manual.addAll(this.requeteSelectManual(connection));
+		this.auto.addAll(this.requeteSelectAuto(connection));
 	}
 	
 	public void update() {
@@ -117,7 +120,7 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	public Optional<EManualProfile> get(final SanctionManualProfile.Type type) {
-		return this.manual.stream().filter(manual -> manual.getType().equals(type) && !manual.isExpire()).findFirst();
+		return this.manual.stream().filter(manual -> manual.getType().equals(type)).findFirst();
 	}
 	
 	public Stream<EManualProfile> getManual() {
@@ -154,6 +157,24 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	/*
+	 * DataBase
+	 */
+	
+	private void requeteRemove() {
+		Connection connection = null;
+		try {
+			connection = this.plugin.getDataBase().getConnection();
+			
+			this.requeteRemoveManual(connection);
+			this.requeteRemoveAuto(connection);
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {if (connection != null) connection.close();} catch (SQLException e) {}
+	    }
+	}
+	
+	/*
 	 * Manual
 	 */
 	
@@ -180,7 +201,7 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		this.plugin.getSanctionService().add(ban);
 		this.manual.add(manual);
-		this.plugin.getThreadAsync().execute(() -> this.addManual(manual));
+		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(manual));
 		return true;
 	}
 	
@@ -196,7 +217,7 @@ public class EUserSubject implements SanctionUserSubject {
 			Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
 			if(user.isPresent() && !Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(address)))) {
 				this.manual.add(ban);
-				this.plugin.getThreadAsync().execute(() -> this.addManual(ban));
+				this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
 				return true;
 			}
 		}
@@ -212,7 +233,7 @@ public class EUserSubject implements SanctionUserSubject {
 		if(!this.get(SanctionManualProfile.Type.MUTE).isPresent()) {
 			final EManualProfileMute ban = new EManualProfileMute(creation, expiration, reason, source);
 			this.manual.add(ban);
-			this.plugin.getThreadAsync().execute(() -> this.addManual(ban));
+			this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
 			return true;
 		}
 		return false;
@@ -228,27 +249,29 @@ public class EUserSubject implements SanctionUserSubject {
 		if(!this.get(SanctionManualProfile.Type.JAIL).isPresent()) {
 			final EManualProfileJail ban = new EManualProfileJail(jail.getName(), creation, expiration, reason, source);
 			this.manual.add(ban);
-			this.plugin.getThreadAsync().execute(() -> this.addManual(ban));
+			this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
 			return true;
 		}
 		return false;
 	}
 	
 	@Override
-	public boolean pardon(SanctionManualProfile.Type type, long date, Text reason, String source) {
+	public Optional<SanctionManualProfile> pardon(SanctionManualProfile.Type type, long date, Text reason, String source) {
 		Preconditions.checkNotNull(type, "type");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		Optional<EManualProfile> manual = this.get(type);
+		this.plugin.getEServer().broadcast("size : " + this.manual.size());
+		this.plugin.getEServer().broadcast("manual : " + manual);
 		// Aucun manual
 		if(!manual.isPresent()) {
-			return false;
+			return Optional.empty();
 		}
 		
 		manual.get().pardon(date, reason, source);
-		this.plugin.getThreadAsync().execute(() -> this.pardonManual(manual.get()));
-		return true;
+		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		return Optional.of(manual.get());
 	}
 	
 	/*
@@ -266,7 +289,8 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		this.plugin.getThreadAsync().execute(() -> this.pardonAuto(auto.get()));
+		auto.get().pardon(date, reason, source);
+		this.plugin.getThreadAsync().execute(() -> this.requetePardonAuto(auto.get()));
 		return true;
 	}
 	
@@ -312,7 +336,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.auto.add(auto);
-		this.plugin.getThreadAsync().execute(() -> this.addAuto(auto));
+		this.plugin.getThreadAsync().execute(() -> this.requeteAddAuto(auto));
 		return true;
 	}
 	
@@ -321,15 +345,41 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 
 	@Override
-	public Collection<SanctionManual> getManualBans() {
-		return ImmutableList.copyOf(this.manual);
+	public Optional<SanctionManualProfile> getManual(SanctionManualProfile.Type type) {
+		return Optional.ofNullable(this.get(type).orElse(null));
 	}
 
 	@Override
-	public Collection<SanctionAuto> getAutoBans() {
-		return ImmutableList.copyOf(this.auto);
+	public Collection<SanctionAuto> getAuto(SanctionAuto.Type type) {
+		return this.auto.stream().filter(auto -> auto.getType().equals(type) && !auto.isExpire()).collect(Collectors.toList());
 	}
 
+	@Override
+	public boolean removeManual(SanctionManualProfile profile) {
+		if (this.manual.remove(profile)) {
+			this.plugin.getThreadAsync().execute(() -> this.requeteRemoveManual(profile));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean removeAuto(SanctionAuto profile) {
+		if (this.auto.remove(profile)) {
+			this.plugin.getThreadAsync().execute(() -> this.requeteRemoveAuto(profile));
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean clear() {
+		if (this.auto.isEmpty() || this.manual.isEmpty()) {
+			this.plugin.getThreadAsync().execute(() -> this.requeteRemove());
+			return true;
+		}
+		return false;
+	}
+	
 	public String getIdentifier() {
 		return this.uuid.toString();
 	}
@@ -342,12 +392,10 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Manual
 	 */
 	
-	private Collection<EManualProfile> selectManual() {
+	private Collection<EManualProfile> requeteSelectManual(final Connection connection) {
 		Collection<EManualProfile> profiles = new ArrayList<EManualProfile>();
-		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		try {
-			connection = this.plugin.getDataBase().getConnection();
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 						+ "WHERE `identifier` = ? ;";
@@ -388,18 +436,13 @@ public class EUserSubject implements SanctionUserSubject {
 			}
 		} catch (SQLException e) {
 	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (uuid='" + this.getIdentifier() + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
 		} finally {
-			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
-			} catch (SQLException e) {}
+			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
 		return profiles;
 	}
 	
-	private void addManual(final EManualProfile ban) {
+	private void requeteAddManual(final EManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -459,7 +502,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void pardonManual(final EManualProfile ban) {
+	private void requetePardonManual(final EManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -501,7 +544,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void removeManual(final EManualProfile ban) {
+	private void requeteRemoveManual(final SanctionManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
     	try {
@@ -535,11 +578,9 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void clearManual() {
-		Connection connection = null;
+	private void requeteRemoveManual(final Connection connection) {
 		PreparedStatement preparedStatement = null;
     	try {
-    		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 		    				+ "WHERE `uuid` = ? ;";
@@ -550,13 +591,8 @@ public class EUserSubject implements SanctionUserSubject {
 			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
 		} finally {
-			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
-			} catch (SQLException e) {}
+			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
 	}
 		
@@ -564,12 +600,10 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Auto
 	 */
 	
-	private Collection<EAuto> selectAuto() {
+	private Collection<EAuto> requeteSelectAuto(final Connection connection) {
 		Collection<EAuto> profiles = new ArrayList<EAuto>();
-		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		try {
-			connection = this.plugin.getDataBase().getConnection();
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 						+ "WHERE `identifier` = ? ;";
@@ -606,18 +640,13 @@ public class EUserSubject implements SanctionUserSubject {
 			}
 		} catch (SQLException e) {
 	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (uuid='" + this.getIdentifier() + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
 		} finally {
-			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
-			} catch (SQLException e) {}
+			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
 		return profiles;
 	}
 	
-	private void addAuto(final EAuto ban) {
+	private void requeteAddAuto(final EAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -670,7 +699,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void pardonAuto(final EAuto ban) {
+	private void requetePardonAuto(final EAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -712,7 +741,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void removeAuto(final EAuto ban) {
+	private void requeteRemoveAuto(final SanctionAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
     	try {
@@ -746,11 +775,9 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void removeAuto() {
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
+	private void requeteRemoveAuto(final Connection connection) {
+    	PreparedStatement preparedStatement = null;
     	try {
-    		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 		    				+ "WHERE `uuid` = ? ;";
@@ -760,15 +787,9 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
+        	this.plugin.getLogger().warn("Error during a change of auto : " + e.getMessage());
 		} finally {
-			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
-			} catch (SQLException e) {}
+			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
 	}
-	
 }

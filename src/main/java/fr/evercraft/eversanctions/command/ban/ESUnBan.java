@@ -111,7 +111,15 @@ public class ESUnBan extends ECommand<EverSanctions> {
 			return false;
 		}
 		
-		if (!user.pardon(SanctionManualProfile.Type.BAN_PROFILE, reason, staff.getIdentifier())) {
+		// Le joueur à déjà un ban en cours
+		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_NOEMPTY.get()
+				.replaceAll("<player>", user.getName())));
+			return false;
+		}
+		
+		Optional<SanctionManualProfile> pardon = user.pardon(SanctionManualProfile.Type.BAN_PROFILE, reason, staff.getIdentifier());
+		if (!pardon.isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;

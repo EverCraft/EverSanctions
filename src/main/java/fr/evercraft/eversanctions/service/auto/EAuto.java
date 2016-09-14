@@ -39,9 +39,9 @@ public class EAuto implements SanctionAuto {
 	private final String source;
 	private final Optional<String> option;
 	
-	private final Optional<Long> pardon_date;
-	private final Optional<Text> pardon_reason;
-	private final Optional<String> pardon_source;
+	private Optional<Long> pardon_date;
+	private Optional<Text> pardon_reason;
+	private Optional<String> pardon_source;
 	
 	public EAuto(final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source) {
 		this(date_start, duration, reason, type, level, source, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
@@ -165,5 +165,11 @@ public class EAuto implements SanctionAuto {
 			return Optional.of((Ban.Ip) builder.build());
 		}
 		return Optional.empty();
+	}
+
+	public void pardon(long date, Text reason, String source) {
+		this.pardon_date = Optional.ofNullable(date);
+		this.pardon_reason = Optional.ofNullable(reason);
+		this.pardon_source = Optional.ofNullable(source);
 	}
 }

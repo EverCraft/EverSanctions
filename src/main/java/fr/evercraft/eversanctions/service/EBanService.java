@@ -35,6 +35,7 @@ import org.spongepowered.api.util.ban.BanTypes;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.java.UtilsMap;
+import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.subject.EIpSubject;
@@ -141,7 +142,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(GameProfile profile) {
 		Optional<EUserSubject> subject = this.getSubject(profile.getUniqueId());
 		if(subject.isPresent()) {
-			return subject.get().pardonBan(Text.EMPTY, EBanService.UNKNOWN);
+			return subject.get().pardon(SanctionManualProfile.Type.BAN_PROFILE, Text.EMPTY, EBanService.UNKNOWN).isPresent();
 		} else {
         	throw new IllegalArgumentException(String.format("UserSubject not found : %s", profile.getUniqueId()));
         }
