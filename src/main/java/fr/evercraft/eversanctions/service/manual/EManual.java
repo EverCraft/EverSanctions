@@ -80,7 +80,7 @@ public abstract class EManual implements SanctionManual {
 		return this.pardon_source;
 	}
 	
-	public void pardon(long date, Text reason, String source) {
+	public void pardon(Long date, Text reason, String source) {
 		this.pardon_date = Optional.ofNullable(date);
 		this.pardon_reason = Optional.ofNullable(reason);
 		this.pardon_source = Optional.ofNullable(source);

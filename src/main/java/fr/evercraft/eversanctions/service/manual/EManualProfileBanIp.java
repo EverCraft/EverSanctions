@@ -49,12 +49,12 @@ public class EManualProfileBanIp extends EManualProfile implements SanctionManua
 	}
 	
 	@Override
-	public Ip getBan(InetAddress address) {
+	public Ip getBan() {
 		Builder builder =  org.spongepowered.api.util.ban.Ban.builder()
 				.type(BanTypes.IP)
 				.reason(this.getReason())
 				.startDate(Instant.ofEpochMilli(this.getCreationDate()))
-				.address(address)
+				.address(this.address)
 				.source(EChat.of(this.getSource()));
 		
 		if(this.getExpirationDate().isPresent()) {

@@ -132,7 +132,7 @@ public class ESBan extends ECommand<EverSanctions> {
 			return false;
 		}
 		
-		// Le joueur à déjà un ban en cours
+		// Le joueur a déjà un ban en cours
 		if (user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_NOEMPTY.get()
 				.replaceAll("<player>", user.getName())));
@@ -145,13 +145,14 @@ public class ESBan extends ECommand<EverSanctions> {
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
+		
+		long creation = System.currentTimeMillis();
 			
 		// Ban définitif
 		if (time_string.equalsIgnoreCase(SanctionService.UNLIMITED)) {
-			return this.commandUnlimitedBan(staff, user, reason);
+			return this.commandUnlimitedBan(staff, user, creation, reason);
 		}
 		
-		long creation = System.currentTimeMillis();
 		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
 		
 		// Temps incorrect
@@ -164,9 +165,9 @@ public class ESBan extends ECommand<EverSanctions> {
 		return this.commandTempBan(staff, user, creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedBan(final CommandSource staff, final EUser user, final String reason) {
+	private boolean commandUnlimitedBan(final CommandSource staff, final EUser user, final long creation, final String reason) {
 		// Ban annulé
-		if (!user.ban(Optional.empty(), EChat.of(reason), staff.getIdentifier())) {
+		if (!user.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
@@ -186,7 +187,7 @@ public class ESBan extends ECommand<EverSanctions> {
 	}
 	
 	private boolean commandTempBan(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
-		if (!user.ban(creation, Optional.of(expiration), EChat.of(reason), staff.getIdentifier())) {
+		if (!user.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;

@@ -104,21 +104,29 @@ public class ESUnBan extends ECommand<EverSanctions> {
 	}
 	
 	private boolean commandPardonBan(final CommandSource staff, EUser user, String reason_string) {
-		Text reason = EChat.of(reason_string);
-		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_REASON_EMPTY.get()
-						.replaceAll("<player>", user.getName())));
-			return false;
-		}
-		
-		// Le joueur à déjà un ban en cours
-		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_NOEMPTY.get()
+		// Le staff et le joueur sont identique
+		if (staff.getIdentifier().equals(user.getIdentifier())) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EQUALS.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		Optional<SanctionManualProfile> pardon = user.pardon(SanctionManualProfile.Type.BAN_PROFILE, reason, staff.getIdentifier());
+		Text reason = EChat.of(reason_string);
+		if (reason.isEmpty()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_REASON.get()
+						.replaceAll("<player>", user.getName())));
+			return false;
+		}
+		
+		// Le joueur n'a pas de ban en cours
+		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EMPTY.get()
+				.replaceAll("<player>", user.getName())));
+			return false;
+		}
+		
+		// Si l'event a été cancel
+		Optional<SanctionManualProfile.Ban> pardon = user.pardonBan(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_CANCEL.get()
 						.replaceAll("<player>", user.getName())));

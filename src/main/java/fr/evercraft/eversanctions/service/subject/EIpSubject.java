@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
@@ -87,24 +88,15 @@ public class EIpSubject implements SanctionIpSubject {
 	public boolean isBan() {
 		return this.manual.isPresent();
 	}
-	
+
 	@Override
-	public boolean add(final long creation, final Text reason, final String source) {
-		return this.add(creation, Optional.empty(), reason, source);
-	}
-	
-	@Override
-	public boolean add(final long creation, final long expiration, final Text reason, final String source) {
-		return this.add(creation, Optional.of(expiration), reason, source);
-	}
-	
-	public boolean add(final Long creation, final Optional<Long> expiration, final Text reason, final String source) {
-		Preconditions.checkNotNull(creation, "creation");
+	public boolean add(final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
+		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		if(!this.isBan()) {
-			final EManualIP ban = new EManualIP(creation, expiration, reason, source);
+			final EManualIP ban = new EManualIP(creation, expiration, reason, source.getIdentifier());
 			if(!Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.address)))) {
 				this.manual = Optional.of(ban);
 				this.plugin.getThreadAsync().execute(() -> this.addSQL(ban));
@@ -115,14 +107,13 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public boolean pardon(final Long date, final Text reason, final String source) {
-		Preconditions.checkNotNull(date, "date");
+	public boolean pardon(final long date, final Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		if(this.manual.isPresent()) {
 			final EManualIP ban = this.manual.get();
-			ban.pardon(date, reason, source);
+			ban.pardon(date, reason, source.getIdentifier());
 			this.plugin.getThreadAsync().execute(() -> this.pardonSQL(ban));
 			
 		}

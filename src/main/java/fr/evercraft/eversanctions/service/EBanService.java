@@ -25,7 +25,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
@@ -35,7 +38,6 @@ import org.spongepowered.api.util.ban.BanTypes;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.java.UtilsMap;
-import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.subject.EIpSubject;
@@ -98,18 +100,16 @@ public class EBanService extends ESanctionService {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<Profile> getProfileBans() {
 		this.removeExpired();
-		return (Collection<Profile>) this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE));
+		return (Collection<Profile>) this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE)).collect(Collectors.toList());
 	}
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<Ban.Ip> getIpBans() {
 		this.removeExpired();
-		return (Collection<Ban.Ip>) this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP));
+		return (Collection<Ban.Ip>) this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(GameProfile profile) {
 		Optional<EUserSubject> subject = this.getSubject(profile.getUniqueId());
 		if(subject.isPresent()) {
-			return subject.get().pardon(SanctionManualProfile.Type.BAN_PROFILE, Text.EMPTY, EBanService.UNKNOWN).isPresent();
+			return subject.get().pardonBan(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole()).isPresent();
 		} else {
         	throw new IllegalArgumentException(String.format("UserSubject not found : %s", profile.getUniqueId()));
         }
@@ -153,7 +153,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(InetAddress address) {
 		Optional<EIpSubject> subject = this.getSubject(address);
 		if(subject.isPresent()) {
-			return subject.get().pardon(System.currentTimeMillis(), Text.EMPTY, EBanService.UNKNOWN);
+			return subject.get().pardon(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole());
 		} else {
         	throw new IllegalArgumentException(String.format("IPSubject not found : %s", address.toString()));
         }
@@ -182,7 +182,12 @@ public class EBanService extends ESanctionService {
 		Optional<? extends Ban> before;
 		long time = ban.getCreationDate().toEpochMilli();
     	Text reason = ban.getReason().orElse(Text.EMPTY);
-    	String source = ban.getBanSource().orElse(Text.of(EBanService.UNKNOWN)).toPlain();
+    	
+    	Optional<CommandSource> source = ban.getBanCommandSource();
+    	if (ban.getBanSource().isPresent()) {
+    		source = Optional.ofNullable(this.plugin.getEServer().getEPlayer(ban.getBanSource().get().toPlain()).orElse(null));
+    	}
+    	
     	Optional<Long> duration = Optional.empty();
     	if(ban.getExpirationDate().isPresent()) {
     		duration = Optional.of(ban.getCreationDate().toEpochMilli() - ban.getExpirationDate().get().toEpochMilli());
@@ -194,7 +199,7 @@ public class EBanService extends ESanctionService {
 
             Optional<EUserSubject> subject = this.getSubject(profile.getProfile().getUniqueId());
             if(subject.isPresent()) {
-            	subject.get().ban(time, duration, reason, source);
+            	subject.get().ban(time, duration, reason, source.orElse(this.plugin.getEServer().getConsole()));
             } else {
             	throw new IllegalArgumentException(String.format("User not found : %s", profile.getProfile().getUniqueId()));
             }
@@ -204,7 +209,7 @@ public class EBanService extends ESanctionService {
         	
         	Optional<EIpSubject> subject = this.getSubject(ip.getAddress());
     		if(subject.isPresent()) {
-    			subject.get().add(time, duration, reason, source);
+    			subject.get().add(time, duration, reason, source.orElse(this.plugin.getEServer().getConsole()));
     		} else {
             	throw new IllegalArgumentException(String.format("IPSubject not found : %s", UtilsNetwork.getHostString(ip.getAddress())));
             }
@@ -228,5 +233,54 @@ public class EBanService extends ESanctionService {
 
 	public void add(Ban.Profile ban) {
 		this.bans_profile.add(ban);
+	}
+
+	public void remove(Ban.Profile profile) {
+		this.bans_profile.removeIf(ban -> {
+			if(!ban.getProfile().equals(profile.getProfile())) {
+				return false;
+			}
+			if(ban.getCreationDate().toEpochMilli() != profile.getCreationDate().toEpochMilli()) {
+				return false;
+			}
+			if(ban.getExpirationDate().isPresent() && profile.getExpirationDate().isPresent() && 
+				ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+				return false;
+			}
+			if(ban.getReason().isPresent() && profile.getReason().isPresent() && 
+				ban.getReason().get().toPlain() != profile.getReason().get().toPlain()) {
+				return false;
+			}
+			if(ban.getBanSource().isPresent() && profile.getBanSource().isPresent() && 
+				ban.getBanSource().get().toPlain() != profile.getBanSource().get().toPlain()) {
+				return false;
+			}
+			return true;
+		});
+	}
+	
+	public void remove(Ban.Ip profile) {
+		BiPredicate<Ban.Ip, Optional<UUID>> predicate = (ban, uuid) -> {
+			if(!ban.getAddress().equals(profile.getAddress())) {
+				return false;
+			}
+			if(ban.getCreationDate().toEpochMilli() != profile.getCreationDate().toEpochMilli()) {
+				return false;
+			}
+			if(ban.getExpirationDate().isPresent() && profile.getExpirationDate().isPresent() && 
+				ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+				return false;
+			}
+			if(ban.getReason().isPresent() && profile.getReason().isPresent() && 
+				ban.getReason().get().toPlain() != profile.getReason().get().toPlain()) {
+				return false;
+			}
+			if(ban.getBanSource().isPresent() && profile.getBanSource().isPresent() && 
+				ban.getBanSource().get().toPlain() != profile.getBanSource().get().toPlain()) {
+				return false;
+			}
+			return true;
+		};
+		UtilsMap.removeIf(this.bans_ip, predicate);
 	}
 }

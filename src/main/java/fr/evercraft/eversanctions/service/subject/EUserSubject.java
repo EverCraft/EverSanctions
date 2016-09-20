@@ -33,19 +33,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
+import fr.evercraft.everapi.event.ESpongeEventFactory;
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionUserSubject;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto.Reason;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -80,7 +85,16 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	public void reload() {
-		
+		Connection connection = null;
+		try {
+			connection = this.plugin.getDataBase().getConnection();
+			
+			this.reload(connection);
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {if (connection != null) connection.close();} catch (SQLException e) {}
+	    }
 	}
 	
 	public void reload(Connection connection) {
@@ -120,11 +134,68 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	public Optional<EManualProfile> get(final SanctionManualProfile.Type type) {
-		return this.manual.stream().filter(manual -> manual.getType().equals(type)).findFirst();
+		this.plugin.getLogger().warn("size : " + this.manual.size());
+		this.plugin.getLogger().warn("size type : " + this.manual.stream().filter(manual -> manual.getType().equals(type)).count());
+		this.plugin.getLogger().warn("size unexpire: " + this.manual.stream().filter(manual -> manual.getType().equals(type) && !manual.isExpire()).count());
+		return this.manual.stream().filter(manual -> manual.getType().equals(type) && !manual.isExpire()).findFirst();
 	}
 	
-	public Stream<EManualProfile> getManual() {
-		return this.manual.stream().filter(manual -> !manual.isExpire());
+	/**
+	 * Retourne le ban manuel
+	 * @return
+	 */
+	public Optional<EManualProfileBan> getManualBan() {
+		Optional<EManualProfile> ban = this.manual.stream()
+													.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.BAN_PROFILE) && !manual.isExpire() && !manual.isPardon())
+													.findFirst();
+		if (ban.isPresent() && ban.get() instanceof EManualProfileBan) {
+			return Optional.of((EManualProfileBan) ban.get()); 
+		}
+		return Optional.empty();
+	}
+	
+	/**
+	 * Retourne les ban-ip manuel
+	 * @return
+	 */
+	public Collection<EManualProfileBanIp> getManualBanIp() {
+		Builder<EManualProfileBanIp> bans = ImmutableList.builder();
+		for(EManualProfile manual : this.manual) {
+			if(manual.getType().equals(SanctionManualProfile.Type.BAN_IP)) {
+				if(!manual.isExpire()) {
+					bans.add((EManualProfileBanIp) manual);
+				}
+			}
+		}
+		return bans.build();
+	}
+	
+	/**
+	 * Retourne le mute manuel
+	 * @return
+	 */
+	public Optional<EManualProfileMute> getManualMute() {
+		Optional<EManualProfile> ban = this.manual.stream()
+													.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.MUTE) && !manual.isExpire())
+													.findFirst();
+		if (ban.isPresent() && ban.get() instanceof EManualProfileBan) {
+			return Optional.of((EManualProfileMute) ban.get()); 
+		}
+		return Optional.empty();
+	}
+	
+	/**
+	 * Retourne le jail manuel
+	 * @return
+	 */
+	public Optional<EManualProfileJail> getManualJail() {
+		Optional<EManualProfile> ban = this.manual.stream()
+													.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.JAIL) && !manual.isExpire())
+													.findFirst();
+		if (ban.isPresent() && ban.get() instanceof EManualProfileBan) {
+			return Optional.of((EManualProfileJail) ban.get()); 
+		}
+		return Optional.empty();
 	}
 	
 	public Optional<EAuto> get(final SanctionAuto.Reason reason) {
@@ -179,22 +250,26 @@ public class EUserSubject implements SanctionUserSubject {
 	 */
 	
 	@Override
-	public boolean ban(long creation, Optional<Long> expiration, Text reason, final String source) {
+	public boolean ban(long creation, Optional<Long> expiration, Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		if (this.get(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+		// Le joueur a déjà une saction
+		if (this.getManualBan().isPresent()) {
 			return false;
 		}
 		
-		final Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		// Joueur introuvable
 		if (!user.isPresent()) {
 			return false;
 		}
 		
-		final EManualProfileBan manual = new EManualProfileBan(creation, expiration, reason, source);
+		final EManualProfileBan manual = new EManualProfileBan(creation, expiration, reason, source.getIdentifier());
 		final Ban.Profile ban = manual.getBan(user.get().getProfile());
+		
+		// Event cancel
 		if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), ban, user.get()))) {
 			return false;
 		}
@@ -206,70 +281,189 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	@Override
-	public boolean banIp(InetAddress address, long creation, Optional<Long> expiration, Text reason, final String source) {
+	public boolean banIp(InetAddress address, long creation, Optional<Long> expiration, Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(address, "address");
 		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		if(!this.get(SanctionManualProfile.Type.BAN_IP).isPresent()) {
-			final EManualProfileBanIp ban = new EManualProfileBanIp(address, creation, expiration, reason, source);
-			Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
-			if(user.isPresent() && !Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(address)))) {
-				this.manual.add(ban);
-				this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
-				return true;
-			}
+		// Le joueur a déjà une saction
+		if (!this.getManualBanIp().isEmpty()) {
+			return false;
 		}
-		return false;
+		
+		// User inconnu
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return false;
+		}
+		
+		final EManualProfileBanIp ban = new EManualProfileBanIp(address, creation, expiration, reason, source.getIdentifier());
+		
+		// Event cancel
+		if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))) {
+			return false;
+		}
+		
+		this.manual.add(ban);
+		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
+		return true;
 	}
 	
 	@Override
-	public boolean mute(long creation, Optional<Long> expiration, Text reason, final String source) {
+	public boolean mute(long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		if(!this.get(SanctionManualProfile.Type.MUTE).isPresent()) {
-			final EManualProfileMute ban = new EManualProfileMute(creation, expiration, reason, source);
-			this.manual.add(ban);
-			this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
-			return true;
+		// Le joueur a déjà une saction
+		if (this.getManualMute().isPresent()) {
+			return false;
 		}
+		
+		// User inconnu
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return false;
+		}
+		
+		final EManualProfileMute mute = new EManualProfileMute(creation, expiration, reason, source.getIdentifier());
+		
+		// Event cancel
+		if(Sponge.getEventManager().post(ESpongeEventFactory.createMuteEventEnable(user.get(), reason, creation, expiration, source, Cause.source(this).build()))) {
+			return false;
+		}
+		
+		this.manual.add(mute);
+		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(mute));
 		return false;
 	}
 	
 	@Override
-	public boolean jail(Jail jail, long creation, Optional<Long> expiration, Text reason, final String source) {
+	public boolean jail(Jail jail, long creation, Optional<Long> expiration, Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(jail, "jail");
 		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		if(!this.get(SanctionManualProfile.Type.JAIL).isPresent()) {
-			final EManualProfileJail ban = new EManualProfileJail(jail.getName(), creation, expiration, reason, source);
-			this.manual.add(ban);
-			this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
-			return true;
+		// Le joueur a déjà une saction
+		if (this.getManualJail().isPresent()) {
+			return false;
 		}
+		
+		// User inconnu
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return false;
+		}
+		
+		final EManualProfileMute mute = new EManualProfileMute(creation, expiration, reason, source.getIdentifier());
+		
+		// Event cancel
+		if(Sponge.getEventManager().post(ESpongeEventFactory.createJailEventEnable(user.get(), jail, reason, creation, expiration, source, Cause.source(this).build()))) {
+			return false;
+		}
+		
+		this.manual.add(mute);
+		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(mute));
 		return false;
 	}
 	
 	@Override
-	public Optional<SanctionManualProfile> pardon(SanctionManualProfile.Type type, long date, Text reason, String source) {
-		Preconditions.checkNotNull(type, "type");
+	public Optional<SanctionManualProfile.Ban> pardonBan(long date, Text reason, CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		Optional<EManualProfile> manual = this.get(type);
-		this.plugin.getEServer().broadcast("size : " + this.manual.size());
-		this.plugin.getEServer().broadcast("manual : " + manual);
+		Optional<EManualProfileBan> manual = this.getManualBan();
+		
 		// Aucun manual
 		if(!manual.isPresent()) {
 			return Optional.empty();
 		}
 		
-		manual.get().pardon(date, reason, source);
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return Optional.empty();
+		}
+		
+		manual.get().pardon(date, reason, source.getIdentifier());
+		final Ban.Profile ban = manual.get().getBan(user.get().getProfile());
+		
+		this.plugin.getLogger().warn("pardon");
+		
+		this.plugin.getSanctionService().remove(ban);
+		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		this.plugin.getLogger().warn("return");
+		return Optional.of(manual.get());
+	}
+	
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Collection<SanctionManualProfile.BanIp> pardonBanIp(long date, Text reason, CommandSource source) {
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		Collection<EManualProfileBanIp> manuals = this.getManualBanIp();
+		if(manuals.isEmpty()) {
+			return ImmutableList.of();
+		}
+		
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return ImmutableList.of();
+		}
+		
+		
+		for (EManualProfileBanIp manual : manuals) {
+			manual.pardon(date, reason, source.getIdentifier());
+			final Ban.Ip ban = manual.getBan();
+			
+			this.plugin.getSanctionService().remove(ban);
+			this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual));
+		}
+		return (Collection) manuals;
+	}
+	
+	@Override
+	public Optional<SanctionManualProfile.Mute> pardonMute(long date, Text reason, CommandSource source) {
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		Optional<EManualProfileMute> manual = this.getManualMute();
+		
+		// Aucun manual
+		if(!manual.isPresent()) {
+			return Optional.empty();
+		}
+		
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return Optional.empty();
+		}
+		
+		manual.get().pardon(date, reason, source.getIdentifier());
+		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		return Optional.of(manual.get());
+	}
+	
+	@Override
+	public Optional<SanctionManualProfile.Jail> pardonJail(long date, Text reason, CommandSource source) {
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		Optional<EManualProfileJail> manual = this.getManualJail();
+		
+		// Aucun manual
+		if(!manual.isPresent()) {
+			return Optional.empty();
+		}
+		
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return Optional.empty();
+		}
+		
+		manual.get().pardon(date, reason, source.getIdentifier());
 		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
@@ -278,7 +472,7 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Auto
 	 */
 	
-	public boolean pardon(SanctionAuto.Reason type, long date, Text reason, String source) {
+	public boolean pardon(SanctionAuto.Reason type, long date, Text reason, CommandSource source) {
 		Preconditions.checkNotNull(type, "type");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
@@ -289,13 +483,13 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		auto.get().pardon(date, reason, source);
+		auto.get().pardon(date, reason, source.getIdentifier());
 		this.plugin.getThreadAsync().execute(() -> this.requetePardonAuto(auto.get()));
 		return true;
 	}
 	
 	@Override
-	public boolean addSanction(SanctionAuto.Reason reason, long creation, String source) {
+	public boolean addSanction(SanctionAuto.Reason reason, long creation, CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
@@ -320,7 +514,7 @@ public class EUserSubject implements SanctionUserSubject {
 			option = level.get().getOption();
 		}
 		
-		EAuto auto = new EAuto(creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source, option);
+		EAuto auto = new EAuto(creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source.getIdentifier(), option);
 		
 		if(auto.isBan()) {
 			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile()).get(), user.get()))) {
@@ -338,6 +532,12 @@ public class EUserSubject implements SanctionUserSubject {
 		this.auto.add(auto);
 		this.plugin.getThreadAsync().execute(() -> this.requeteAddAuto(auto));
 		return true;
+	}
+	
+	@Override
+	public boolean pardonSanction(Reason reason, long creation, CommandSource source) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	public int getLevel(final SanctionAuto.Reason reason) {
@@ -406,9 +606,12 @@ public class EUserSubject implements SanctionUserSubject {
 				Long creation = list.getLong("creation");
 				Text reason = EChat.of(list.getString("reason"));
 				String source = list.getString("source");
-				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
 				Optional<String> pardon_source = Optional.ofNullable(list.getString("pardon_source"));
 				
+				Optional<Text> pardon_reason = Optional.empty();
+				if(list.getString("pardon_reason") != null) {
+					pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
+				}
 				Optional<Long> expiration = Optional.of(list.getLong("expiration"));
 				if(list.wasNull()) {
 					expiration = Optional.empty();
@@ -435,7 +638,7 @@ public class EUserSubject implements SanctionUserSubject {
 				}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (uuid='" + this.getIdentifier() + "'): " + e.getMessage());
+	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
@@ -509,10 +712,10 @@ public class EUserSubject implements SanctionUserSubject {
     	try {    		
     		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "UPDATE `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-    						+ "SET pardon_date = ? ,"
-    							+ "pardon_reason = ? ,"
-    							+ "pardon_source = ? "
-    						+ "WHERE uuid = ? AND creation = ? ;";
+    						+ "SET `pardon_date` = ? ,"
+    							+ " `pardon_reason` = ? ,"
+    							+ " `pardon_source` = ? "
+    						+ "WHERE `identifier` = ? AND creation = ? ;";
     		preparedStatement = connection.prepareStatement(query);
 
 			if(ban.isPardon()) {
@@ -527,7 +730,7 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(4, this.getIdentifier());
 			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getLogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
@@ -551,13 +754,13 @@ public class EUserSubject implements SanctionUserSubject {
     		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-		    				+ "WHERE `uuid` = ? AND `creation` = ? ;";
+		    				+ "WHERE `identifier` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "type='" + ban.getType().name() + "';"
@@ -583,12 +786,12 @@ public class EUserSubject implements SanctionUserSubject {
     	try {
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
-		    				+ "WHERE `uuid` = ? ;";
+		    				+ "WHERE `identifier` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';");
+			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
 		} finally {
@@ -639,7 +842,7 @@ public class EUserSubject implements SanctionUserSubject {
 				}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (uuid='" + this.getIdentifier() + "'): " + e.getMessage());
+	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
@@ -677,7 +880,7 @@ public class EUserSubject implements SanctionUserSubject {
 				preparedStatement.setString(10, null);
 			}
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "type='" + ban.getType().name() + "';"
@@ -706,10 +909,10 @@ public class EUserSubject implements SanctionUserSubject {
     	try {    		
     		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "UPDATE `" + this.plugin.getDataBase().getTableAuto() + "` "
-    						+ "SET pardon_date = ? ,"
-    							+ "pardon_reason = ? ,"
-    							+ "pardon_source = ? "
-    						+ "WHERE uuid = ? AND creation = ? ;";
+    						+ "SET `pardon_date` = ? ,"
+    							+ "`pardon_reason` = ? ,"
+    							+ "`pardon_source` = ? "
+    						+ "WHERE `identifier` = ? AND `creation` = ? ;";
     		preparedStatement = connection.prepareStatement(query);
 
 			if(ban.isPardon()) {
@@ -724,7 +927,7 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(4, this.getIdentifier());
 			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getLogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
@@ -748,13 +951,13 @@ public class EUserSubject implements SanctionUserSubject {
     		connection = this.plugin.getDataBase().getConnection();
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
-		    				+ "WHERE `uuid` = ? AND `creation` = ? ;";
+		    				+ "WHERE `identifier` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
 																  + "creation='" + ban.getCreationDate() + "';"
 																  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 																  + "type='" + ban.getType().name() + "';"
@@ -780,12 +983,12 @@ public class EUserSubject implements SanctionUserSubject {
     	try {
     		String query = 	  "DELETE " 
 		    				+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
-		    				+ "WHERE `uuid` = ? ;";
+		    				+ "WHERE `identifier` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (uuid ='" + this.getIdentifier() + "';");
+			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of auto : " + e.getMessage());
 		} finally {

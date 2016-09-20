@@ -59,7 +59,9 @@ public class ESMessage extends EMessage {
 		
 		UNBAN_DESCRIPTION("unban.description", "Débanni le joueur du serveur"),
 		UNBAN_STAFF("unban.staff", "&7Vous avez débanni &6<player>&7."),
-		UNBAN_REASON_EMPTY("unban.reasonEmpty", "&cErreur : La raison est obligatoire."),
+		UNBAN_ERROR_REASON("unban.errorReason", "&cErreur : La raison est obligatoire."),
+		UNBAN_ERROR_EQUALS("unban.errorEquals", "&cErreur : Impossible de vous débannir vous-même."),
+		UNBAN_ERROR_EMPTY("unban.errorEmpty", "&cErreur : &6<player> &cn'est pas banni."),
 		UNBAN_CANCEL("unban.cancel", "&cErreur : Impossible de débannir <player> pour le moment."),
 		
 		// Banip
