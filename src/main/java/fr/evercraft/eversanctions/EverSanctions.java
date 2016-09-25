@@ -38,7 +38,8 @@ import fr.evercraft.eversanctions.service.EJailService;
 		url = "http://evercraft.fr/",
 		authors = {"rexbut"},
 		dependencies = {
-		    @Dependency(id = "everapi", version = EverAPI.VERSION)
+		    @Dependency(id = "everapi", version = EverAPI.VERSION),
+		    @Dependency(id = "spongeapi", version = EverAPI.SPONGEAPI_VERSION)
 		})
 public class EverSanctions extends EPlugin {
 	private ESConfig configs;

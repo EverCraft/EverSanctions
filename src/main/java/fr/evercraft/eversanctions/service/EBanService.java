@@ -237,22 +237,22 @@ public class EBanService extends ESanctionService {
 
 	public void remove(Ban.Profile profile) {
 		this.bans_profile.removeIf(ban -> {
-			if(!ban.getProfile().equals(profile.getProfile())) {
+			if (!ban.getProfile().getUniqueId().equals(profile.getProfile().getUniqueId())) {
 				return false;
 			}
-			if(ban.getCreationDate().toEpochMilli() != profile.getCreationDate().toEpochMilli()) {
+			if (ban.getCreationDate().toEpochMilli() != profile.getCreationDate().toEpochMilli()) {
 				return false;
 			}
-			if(ban.getExpirationDate().isPresent() && profile.getExpirationDate().isPresent() && 
-				ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+			if(ban.getExpirationDate().isPresent() || profile.getExpirationDate().isPresent()) { 
+				if (!ban.getExpirationDate().isPresent() || !profile.getExpirationDate().isPresent() ||
+						ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+					return false;
+				}
+			}
+			if(!ban.getReason().orElse(Text.EMPTY).toPlain().equals(profile.getReason().orElse(Text.EMPTY).toPlain())) {
 				return false;
 			}
-			if(ban.getReason().isPresent() && profile.getReason().isPresent() && 
-				ban.getReason().get().toPlain() != profile.getReason().get().toPlain()) {
-				return false;
-			}
-			if(ban.getBanSource().isPresent() && profile.getBanSource().isPresent() && 
-				ban.getBanSource().get().toPlain() != profile.getBanSource().get().toPlain()) {
+			if(!ban.getBanSource().orElse(Text.EMPTY).toPlain().equals(profile.getBanSource().orElse(Text.EMPTY).toPlain())) {
 				return false;
 			}
 			return true;
@@ -267,16 +267,16 @@ public class EBanService extends ESanctionService {
 			if(ban.getCreationDate().toEpochMilli() != profile.getCreationDate().toEpochMilli()) {
 				return false;
 			}
-			if(ban.getExpirationDate().isPresent() && profile.getExpirationDate().isPresent() && 
-				ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+			if(ban.getExpirationDate().isPresent() || profile.getExpirationDate().isPresent()) { 
+				if (!ban.getExpirationDate().isPresent() || !profile.getExpirationDate().isPresent() ||
+						ban.getExpirationDate().get().toEpochMilli() != profile.getExpirationDate().get().toEpochMilli()) {
+					return false;
+				}
+			}
+			if(!ban.getReason().orElse(Text.EMPTY).toPlain().equals(profile.getReason().orElse(Text.EMPTY).toPlain())) {
 				return false;
 			}
-			if(ban.getReason().isPresent() && profile.getReason().isPresent() && 
-				ban.getReason().get().toPlain() != profile.getReason().get().toPlain()) {
-				return false;
-			}
-			if(ban.getBanSource().isPresent() && profile.getBanSource().isPresent() && 
-				ban.getBanSource().get().toPlain() != profile.getBanSource().get().toPlain()) {
+			if(!ban.getBanSource().orElse(Text.EMPTY).toPlain().equals(profile.getBanSource().orElse(Text.EMPTY).toPlain())) {
 				return false;
 			}
 			return true;
