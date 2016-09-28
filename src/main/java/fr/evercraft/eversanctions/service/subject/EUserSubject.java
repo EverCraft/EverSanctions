@@ -303,14 +303,21 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
+		// SubjectIP inconnu
+		final Optional<EIpSubject> subject_ip = this.plugin.getSanctionService().getSubject(address);
+		if (!subject_ip.isPresent()) {
+			return false;
+		}
+		
 		final EManualProfileBanIp ban = new EManualProfileBanIp(this.getUniqueId(), address, creation, expiration, reason, source.getIdentifier());
 		
 		// Event cancel
-		if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))) {
+		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))) {
 			return false;
 		}
 		
 		this.manual.add(ban);
+		subject_ip.get().add(ban);
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(ban));
 		return true;
 	}
@@ -528,10 +535,22 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		if(auto.isBanIP()) {
-			if(!user.get().getLastIP().isPresent() || 
-				Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile(), user.get().getLastIP().get()).get()))) {
+			// IP inconnu
+			if(!user.get().getLastIP().isPresent()) {
 				return false;
 			}
+			
+			// SubjectIP inconnu
+			final Optional<EIpSubject> subject_ip = this.plugin.getSanctionService().getSubject(user.get().getLastIP().get());
+			if (!subject_ip.isPresent()) {
+				return false;
+			}
+			
+			if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile(), user.get().getLastIP().get()).get()))) {
+				return false;
+			}
+			
+			subject_ip.get().add(auto);
 		}
 		
 		this.auto.add(auto);
