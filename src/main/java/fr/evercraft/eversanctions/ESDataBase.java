@@ -23,10 +23,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import org.spongepowered.api.profile.GameProfile;
@@ -128,8 +126,8 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		return this.getPrefix() + this.table_jails;
 	}	
 
-	public Set<Ban.Profile> getBansProfile(Connection connection) {
-		Set<Ban.Profile> bans = new HashSet<Ban.Profile>();
+	public Map<Ban.Profile, UUID> getBansProfile(Connection connection) {
+		Map<Ban.Profile, UUID> bans = new HashMap<Ban.Profile, UUID>();
 		PreparedStatement preparedStatement = null;
 		try {
 			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
@@ -152,7 +150,8 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
 				try {
-					Optional<GameProfile> profile = this.plugin.getEServer().getGameProfile(UUID.fromString(list.getString("identifier")));
+					UUID uuid = UUID.fromString(list.getString("identifier"));
+					Optional<GameProfile> profile = this.plugin.getEServer().getGameProfile(uuid);
 					if(profile.isPresent()) {					
 						long creation = list.getLong("creation");
 						
@@ -168,7 +167,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
-						bans.add((Ban.Profile) build.build());
+						bans.put((Ban.Profile) build.build(), uuid);
 					}
 				} catch (IllegalArgumentException e) {}
 			}
@@ -184,15 +183,15 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 	 * Ip
 	 */
 	
-	public Map<Ban.Ip, Optional<UUID>> getBansIp(Connection connection) {
-		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
+	public Map<Ban.Ip, String> getBansIp(Connection connection) {
+		Map<Ban.Ip, String> bans = new HashMap<Ban.Ip, String>();
 		bans.putAll(this.getBanIpProfile(connection));
 		bans.putAll(this.getBanIp(connection));
 		return bans;
 	}
 	
-	public Map<Ban.Ip, Optional<UUID>> getBanIpProfile(Connection connection) {
-		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
+	public Map<Ban.Ip, String> getBanIpProfile(Connection connection) {
+		Map<Ban.Ip, String> bans = new HashMap<Ban.Ip, String>();
 		PreparedStatement preparedStatement = null;
 		try {
 			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
@@ -233,7 +232,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
-						bans.put((Ban.Ip) build.build(), Optional.of(UUID.fromString(list.getString("identifier"))));
+						bans.put((Ban.Ip) build.build(), list.getString("option"));
 					}
 				} catch (IllegalArgumentException e) {}
 			}
@@ -245,8 +244,8 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		return bans;
 	}
 	
-	public Map<Ban.Ip, Optional<UUID>> getBanIp(Connection connection) {
-		Map<Ban.Ip, Optional<UUID>> bans = new HashMap<Ban.Ip, Optional<UUID>>();
+	public Map<Ban.Ip, String> getBanIp(Connection connection) {
+		Map<Ban.Ip, String> bans = new HashMap<Ban.Ip, String>();
 		PreparedStatement preparedStatement = null;
 		try {
 			String query = "SELECT * "
@@ -274,7 +273,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
 						
-						bans.put((Ban.Ip) build.build(), Optional.empty());
+						bans.put((Ban.Ip) build.build(), list.getString("identifier"));
 					}
 				} catch (IllegalArgumentException e) {}
 			}

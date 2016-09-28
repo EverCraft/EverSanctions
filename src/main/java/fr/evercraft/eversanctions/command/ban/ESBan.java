@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -101,20 +100,13 @@ public class ESBan extends ECommand<EverSanctions> {
 		// Nombre d'argument correct
 		if (args.size() == 3) {
 			
-			Optional<EUser> user = this.plugin.getEServer().getEUser(args.get(0));
+			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
 				resultat = this.commandBan(source, user.get(), args.get(1), args.get(2));
 			// Le joueur est introuvable
 			} else {
-				Optional<GameProfile> gameprofile = this.plugin.getEServer().getGameProfile(args.get(0));
-				// Le joueur existe
-				if (gameprofile.isPresent()){
-					resultat = this.commandBan(source, this.plugin.getEServer().getOrCreateEUser(gameprofile.get()), args.get(1), args.get(2));
-				// Le joueur est introuvable
-				} else {
-					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
-				}
+				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
 			}
 			
 		// Nombre d'argument incorrect

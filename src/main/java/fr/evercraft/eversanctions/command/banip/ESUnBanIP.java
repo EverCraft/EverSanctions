@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.evercraft.eversanctions.command.ban;
+package fr.evercraft.eversanctions.command.banip;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +36,12 @@ import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 
-public class ESUnBan extends ECommand<EverSanctions> {
+public class ESUnBanIP extends ECommand<EverSanctions> {
 	
-	public ESUnBan(final EverSanctions plugin) {
-        super(plugin, "unban", "pardon");
+	public ESUnBanIP(final EverSanctions plugin) {
+        super(plugin, "unbanip", "pardon-ip");
         
-     // TODO Remove command : pardon
+        // TODO Remove command : pardon-ip
     }
 	
 	@Override

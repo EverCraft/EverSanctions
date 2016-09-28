@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.service.subject;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,6 +40,7 @@ import com.google.common.collect.ImmutableList.Builder;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
@@ -48,14 +50,16 @@ import fr.evercraft.eversanctions.service.manual.EManualIP;
 public class EIpSubject implements SanctionIpSubject {
 	
 	private final EverSanctions plugin;
-	private final InetAddress address;
+	private final InetSocketAddress socket;
+	private final String identifier;
 	
 	private final ConcurrentSkipListSet<EManualIP> manual_expiry;
 	private Optional<EManualIP> manual;
 
 	public EIpSubject(final EverSanctions plugin, final InetAddress address) {
 		this.plugin = plugin;
-		this.address = address;
+		this.socket = UtilsNetwork.getSocketAddress(address);
+		this.identifier = UtilsNetwork.getHostString(address);
 		
 		this.manual_expiry = new ConcurrentSkipListSet<EManualIP>((EManualIP o1, EManualIP o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 		this.manual = Optional.empty();
@@ -90,14 +94,14 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 
 	@Override
-	public boolean add(final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
+	public boolean ban(final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		if(!this.isBan()) {
 			final EManualIP ban = new EManualIP(creation, expiration, reason, source.getIdentifier());
-			if(!Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.address)))) {
+			if(!Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.getAddress())))) {
 				this.manual = Optional.of(ban);
 				this.plugin.getThreadAsync().execute(() -> this.addSQL(ban));
 				return true;
@@ -107,7 +111,25 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public boolean pardon(final long date, final Text reason, final CommandSource source) {
+	public boolean ban(final EUser user, final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
+		Preconditions.checkNotNull(user, "user");
+		Preconditions.checkNotNull(expiration, "expiration");
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		if(!this.isBan()) {
+			final EManualIP ban = new EManualIP(creation, expiration, reason, source.getIdentifier());
+			if(!Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.getAddress())))) {
+				this.manual = Optional.of(ban);
+				this.plugin.getThreadAsync().execute(() -> this.addSQL(ban));
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean pardonBan(final long date, final Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
@@ -154,11 +176,15 @@ public class EIpSubject implements SanctionIpSubject {
 	 */
 	
 	public InetAddress getAddress() {
-		return this.address;
+		return this.socket.getAddress();
 	}
 	
-	public String getAddressString() {
-		return UtilsNetwork.getHostString(this.address);
+	public InetSocketAddress getSocketAddress() {
+		return this.socket;
+	}
+	
+	public String getIdentifier() {
+		return this.identifier;
 	}
 	
 	/*
@@ -175,7 +201,7 @@ public class EIpSubject implements SanctionIpSubject {
 						+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
 						+ "WHERE `identifier` = ? ;";
 			preparedStatement = this.plugin.getDataBase().getConnection().prepareStatement(query);
-			preparedStatement.setString(1, this.getAddressString());
+			preparedStatement.setString(1, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
 				Long creation = list.getLong("creation");
@@ -196,7 +222,7 @@ public class EIpSubject implements SanctionIpSubject {
 				ips.add(new EManualIP(creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getAddressString() + "'): " + e.getMessage());
+	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -217,7 +243,7 @@ public class EIpSubject implements SanctionIpSubject {
     		String query = 	  "INSERT INTO `" + this.plugin.getDataBase().getTableManualProfile() + "` "
     						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.getAddressString());
+			preparedStatement.setString(1, this.getIdentifier());
 			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
 			preparedStatement.setLong(3, ban.getExpirationDate().orElse(null));
 			preparedStatement.setString(4, EChat.serialize(ban.getReason()));
@@ -233,7 +259,7 @@ public class EIpSubject implements SanctionIpSubject {
 				preparedStatement.setString(8, null);
 			}
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getAddressString() + "';"
+			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
@@ -275,10 +301,10 @@ public class EIpSubject implements SanctionIpSubject {
 				preparedStatement.setString(2, null);
 				preparedStatement.setString(3, null);
 			}
-			preparedStatement.setString(4, this.getAddressString());
+			preparedStatement.setString(4, this.getIdentifier());
 			preparedStatement.setTimestamp(5, new Timestamp(ban.getCreationDate()));
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (identifier='" + this.getAddressString() + "';"
+			this.plugin.getLogger().debug("Updating to the database : (identifier='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
@@ -304,11 +330,11 @@ public class EIpSubject implements SanctionIpSubject {
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
 		    				+ "WHERE `identifier` = ? AND `creation` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.getAddressString());
+			preparedStatement.setString(1, this.getIdentifier());
 			preparedStatement.setTimestamp(2, new Timestamp(ban.getCreationDate()));
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getAddressString() + "';"
+			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
@@ -337,10 +363,10 @@ public class EIpSubject implements SanctionIpSubject {
 		    				+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 		    				+ "WHERE `identifier` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, this.getAddressString());
+			preparedStatement.setString(1, this.getIdentifier());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getAddressString() + "';");
+			this.plugin.getLogger().debug("Remove from database : (identifier='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {

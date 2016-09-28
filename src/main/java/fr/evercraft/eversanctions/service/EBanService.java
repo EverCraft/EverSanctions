@@ -21,20 +21,21 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.Ban.Ip;
-import org.spongepowered.api.util.ban.Ban.Profile;
 import org.spongepowered.api.util.ban.BanTypes;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.java.UtilsMap;
@@ -62,14 +63,14 @@ public class EBanService extends ESanctionService {
 			};
 	
 	// Ordre décroissant
-	private final ConcurrentSkipListSet<Ban.Profile> bans_profile;
-	private final ConcurrentSkipListMap<Ban.Ip, Optional<UUID>> bans_ip;
+	private final ConcurrentSkipListMap<Ban.Profile, UUID> bans_profile;
+	private final ConcurrentSkipListMap<Ban.Ip, String> bans_ip;
 	
 	public EBanService(final EverSanctions plugin) {
 		super(plugin);
 		
-		this.bans_profile = new ConcurrentSkipListSet<Ban.Profile>(EBanService.COMPARATOR_BAN);
-		this.bans_ip = new ConcurrentSkipListMap<Ban.Ip, Optional<UUID>>(EBanService.COMPARATOR_BAN);
+		this.bans_profile = new ConcurrentSkipListMap<Ban.Profile, UUID>(EBanService.COMPARATOR_BAN);
+		this.bans_ip = new ConcurrentSkipListMap<Ban.Ip, String>(EBanService.COMPARATOR_BAN);
 		
 		this.reload();
 	}
@@ -82,7 +83,7 @@ public class EBanService extends ESanctionService {
 		try {
 			connection = this.plugin.getDataBase().getConnection();
 			
-			this.bans_profile.addAll(this.plugin.getDataBase().getBansProfile(connection));
+			this.bans_profile.putAll(this.plugin.getDataBase().getBansProfile(connection));
 			this.bans_ip.putAll(this.plugin.getDataBase().getBansIp(connection));
 		} catch (ServerDisableException e) {
 			e.execute();
@@ -94,47 +95,69 @@ public class EBanService extends ESanctionService {
 	}
 	
 	@Override
-	public Collection<? extends Ban> getBans() {
-		return null;
+	public Collection<Ban> getBans() {
+		Builder<Ban> builder = ImmutableSet.builder();
+		builder.addAll(this.bans_profile.keySet());
+		builder.addAll(this.bans_ip.keySet());
+		return builder.build();
 	}
 
 
 	@Override
-	public Collection<Profile> getProfileBans() {
-		this.removeExpired();
-		return (Collection<Profile>) this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE)).collect(Collectors.toList());
+	public Collection<Ban.Profile> getProfileBans() {
+		Builder<Ban.Profile> builder = ImmutableSet.builder();
+		builder.addAll(this.bans_profile.keySet());
+		return builder.build();
 	}
 
 
 	@Override
 	public Collection<Ban.Ip> getIpBans() {
-		this.removeExpired();
-		return (Collection<Ban.Ip>) this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP)).collect(Collectors.toList());
+		Builder<Ban.Ip> builder = ImmutableSet.builder();
+		builder.addAll(this.bans_ip.keySet());
+		return builder.build();
 	}
 
 	@Override
 	public Optional<Ban.Profile> getBanFor(GameProfile profile) {
-		this.removeExpired();
-		return this.bans_profile.stream().filter(ban -> ban.getType().equals(BanTypes.PROFILE) && ((Ban.Profile)ban).getProfile().equals(profile)).findFirst();
+		Optional<Ban.Profile> ban = Optional.empty();
+		Iterator<Entry<Ban.Profile, UUID>> iterator = this.bans_profile.entrySet().iterator();
+		
+		while(!ban.isPresent() && iterator.hasNext()) {
+			Entry<Ban.Profile, UUID> element = iterator.next();
+			if(element.getValue().equals(profile.getUniqueId())) {
+				ban = Optional.of(element.getKey());
+			}
+		}
+		return ban;
 	}
 
 
 	@Override
 	public Optional<Ban.Ip> getBanFor(InetAddress address) {
-		this.removeExpired();
-		return this.bans_ip.keySet().stream().filter(ban -> ban.getType().equals(BanTypes.IP) && ((Ip)ban).getAddress().equals(address)).findFirst();
+		String address_string = UtilsNetwork.getHostString(address);
+		Optional<Ban.Ip> ban = Optional.empty();
+		Iterator<Entry<Ban.Ip, String>> iterator = this.bans_ip.entrySet().iterator();
+		
+		while(!ban.isPresent() && iterator.hasNext()) {
+			Entry<Ban.Ip, String> element = iterator.next();
+			if(element.getValue().equalsIgnoreCase(address_string)) {
+				ban = Optional.of(element.getKey());
+			}
+		}
+		return ban;
 	}
 
 
 	@Override
 	public boolean isBanned(GameProfile profile) {
-		return this.getBanFor(profile).isPresent();
+		return this.bans_profile.containsValue(profile.getUniqueId());
 	}
 
 
 	@Override
 	public boolean isBanned(InetAddress address) {
-		return this.getBanFor(address).isPresent();
+		return this.bans_ip.containsValue(UtilsNetwork.getHostString(address));
 	}
 
 
@@ -153,7 +176,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(InetAddress address) {
 		Optional<EIpSubject> subject = this.getSubject(address);
 		if(subject.isPresent()) {
-			return subject.get().pardon(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole());
+			return subject.get().pardonBan(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole());
 		} else {
         	throw new IllegalArgumentException(String.format("IPSubject not found : %s", address.toString()));
         }
@@ -163,7 +186,7 @@ public class EBanService extends ESanctionService {
 	@Override
 	public boolean removeBan(Ban ban) {
 		if (ban.getType().equals(BanTypes.PROFILE)) {
-			if(this.bans_profile.contains(ban)) {
+			if(this.bans_profile.containsKey(ban)) {
 				return this.pardon(((Ban.Profile) ban).getProfile());
 			}
         } else if (ban.getType().equals(BanTypes.IP)) {
@@ -209,7 +232,7 @@ public class EBanService extends ESanctionService {
         	
         	Optional<EIpSubject> subject = this.getSubject(ip.getAddress());
     		if(subject.isPresent()) {
-    			subject.get().add(time, duration, reason, source.orElse(this.plugin.getEServer().getConsole()));
+    			subject.get().ban(time, duration, reason, source.orElse(this.plugin.getEServer().getConsole()));
     		} else {
             	throw new IllegalArgumentException(String.format("IPSubject not found : %s", UtilsNetwork.getHostString(ip.getAddress())));
             }
@@ -219,24 +242,27 @@ public class EBanService extends ESanctionService {
         return before;
 	}
 
-
 	@Override
 	public boolean hasBan(Ban ban) {
-		return this.bans_profile.contains(ban) || this.bans_ip.containsKey(ban);
+		return this.bans_profile.containsKey(ban) || this.bans_ip.containsKey(ban);
 	}
 	
 	public void removeExpired() {
 		long time = System.currentTimeMillis();
-		this.bans_profile.removeIf(ban -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 		UtilsMap.removeIf(this.bans_ip, (ban,  uuid) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
+		UtilsMap.removeIf(this.bans_ip, (ban,  address) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 	}
 
 	public void add(Ban.Profile ban) {
-		this.bans_profile.add(ban);
+		this.bans_profile.put(ban, ban.getProfile().getUniqueId());
+	}
+	
+	public void add(Ban.Ip ban) {
+		this.bans_ip.put(ban, UtilsNetwork.getHostString(ban.getAddress()));
 	}
 
 	public void remove(Ban.Profile profile) {
-		this.bans_profile.removeIf(ban -> {
+		BiPredicate<Ban.Profile, UUID> predicate = (ban, uuid) -> {
 			if (!ban.getProfile().getUniqueId().equals(profile.getProfile().getUniqueId())) {
 				return false;
 			}
@@ -256,11 +282,12 @@ public class EBanService extends ESanctionService {
 				return false;
 			}
 			return true;
-		});
+		};
+		UtilsMap.removeIf(this.bans_profile, predicate);
 	}
 	
 	public void remove(Ban.Ip profile) {
-		BiPredicate<Ban.Ip, Optional<UUID>> predicate = (ban, uuid) -> {
+		BiPredicate<Ban.Ip, String> predicate = (ban, address) -> {
 			if(!ban.getAddress().equals(profile.getAddress())) {
 				return false;
 			}

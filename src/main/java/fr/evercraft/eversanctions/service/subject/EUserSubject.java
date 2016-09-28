@@ -70,7 +70,6 @@ public class EUserSubject implements SanctionUserSubject {
 	private final ConcurrentSkipListSet<EAuto> auto;
 	
 	private boolean ban;
-	private boolean ip;
 	private boolean mute;
 	private boolean jail;
 
@@ -107,7 +106,6 @@ public class EUserSubject implements SanctionUserSubject {
 	
 	public void update() {
 		this.ban = false;
-		this.ip = false;
 		this.mute = false;
 		this.jail = false;
 		
@@ -115,8 +113,6 @@ public class EUserSubject implements SanctionUserSubject {
 			.forEach(manual -> {
 				if(manual.getType().equals(SanctionManualProfile.Type.BAN_PROFILE)) {
 					this.ban = true;
-				} else if(manual.getType().equals(SanctionManualProfile.Type.BAN_IP)) {
-					this.ip = true;
 				} else if(manual.getType().equals(SanctionManualProfile.Type.MUTE)) {
 					this.mute = true;
 				} else if(manual.getType().equals(SanctionManualProfile.Type.JAIL)) {
@@ -127,7 +123,6 @@ public class EUserSubject implements SanctionUserSubject {
 		this.auto.stream().filter(auto -> !auto.isExpire())
 			.forEach(auto -> {
 				this.ban = this.ban || auto.isBan();
-				this.ip = this.ip || auto.isBanIP();
 				this.mute = this.mute || auto.isMute();
 				this.jail = this.jail || auto.isJail();
 			});
@@ -212,8 +207,18 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	@Override
-	public boolean isBanIp() {
-		return this.ip;
+	public boolean isBanIp(InetAddress address) {
+		Optional<EManualProfile> ban_manual = this.manual.stream()
+			.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.BAN_IP) && UtilsNetwork.equals(((SanctionManualProfile.BanIp) manual).getAddress(), address))
+			.findFirst();
+		if(ban_manual.isPresent()) {
+			return true;
+		}
+		
+		Optional<EAuto> ban_auto = this.auto.stream()
+				.filter(auto -> auto.getAddress().isPresent() && UtilsNetwork.equals(auto.getAddress().get(), address))
+				.findFirst();
+		return ban_auto.isPresent();
 	}
 
 
@@ -508,8 +513,8 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		
 		Optional<String> option = Optional.empty();
-		if(level.get().getType().isBanIP() && user.get().getLastIp().isPresent()) {
-			option = Optional.ofNullable(UtilsNetwork.getHostString(user.get().getLastIp().get()));
+		if(level.get().getType().isBanIP() && user.get().getLastIP().isPresent()) {
+			option = Optional.ofNullable(UtilsNetwork.getHostString(user.get().getLastIP().get()));
 		} else if(level.get().getType().isMute()) {
 			option = level.get().getOption();
 		}
@@ -523,8 +528,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		if(auto.isBanIP()) {
-			if(!user.get().getLastIp().isPresent() || 
-				Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile(), user.get().getLastIp().get()).get()))) {
+			if(!user.get().getLastIP().isPresent() || 
+				Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile(), user.get().getLastIP().get()).get()))) {
 				return false;
 			}
 		}
