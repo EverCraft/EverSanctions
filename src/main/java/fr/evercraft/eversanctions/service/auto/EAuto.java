@@ -19,6 +19,7 @@ package fr.evercraft.eversanctions.service.auto;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
@@ -32,6 +33,8 @@ import fr.evercraft.everapi.sponge.UtilsNetwork;
 
 public class EAuto implements SanctionAuto {
 
+	private final UUID uuid;
+	
 	private final Long creation;
 	private Optional<Long> expiration;
 	private final SanctionAuto.Reason reason;
@@ -46,17 +49,19 @@ public class EAuto implements SanctionAuto {
 	private Optional<Text> pardon_reason;
 	private Optional<String> pardon_source;
 	
-	public EAuto(final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source) {
-		this(date_start, duration, reason, type, level, source, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+	public EAuto(final UUID uuid, final long date_start, final Optional<Long> duration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, 
+			final String source) {
+		this(uuid, date_start, duration, reason, type, level, source, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long date_start, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
-			final Optional<String> option) {
-		this(date_start, expiration, reason, type, level, source, option, Optional.empty(), Optional.empty(), Optional.empty());
+	public EAuto(final UUID uuid, final long date_start, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, 
+			final String source, final Optional<String> option) {
+		this(uuid, date_start, expiration, reason, type, level, source, option, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EAuto(final long creation, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, final String source, 
-			final Optional<String> option, final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
+	public EAuto(final UUID uuid, final long creation, final Optional<Long> expiration, final SanctionAuto.Reason reason, final SanctionAuto.Type type, final int level, 
+			final String source, final Optional<String> option, final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
+		this.uuid = uuid;
 		this.creation = creation;
 		this.reason = reason;
 		this.type = type;
@@ -74,6 +79,11 @@ public class EAuto implements SanctionAuto {
 		} else {
 			this.address = Optional.empty();
 		}
+	}
+	
+	@Override
+	public UUID getProfile() {
+		return this.uuid;
 	}
 
 	@Override

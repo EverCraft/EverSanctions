@@ -19,6 +19,7 @@ package fr.evercraft.eversanctions.service.manual;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.BanTypes;
@@ -32,13 +33,13 @@ public class EManualProfileBanIp extends EManualProfile implements SanctionManua
 	
 	private InetAddress address;
 	
-	public EManualProfileBanIp(final InetAddress address, final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
-		this(address, date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	public EManualProfileBanIp(final UUID uuid, final InetAddress address, final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
+		this(uuid, address, date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfileBanIp(final InetAddress address, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
+	public EManualProfileBanIp(final UUID uuid, final InetAddress address, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
-		super(date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
+		super(uuid, date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
 		
 		this.address = address;
 	}

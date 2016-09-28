@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.service.manual;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.text.Text;
 
@@ -24,12 +25,12 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public class EManualProfileMute extends EManualProfile implements SanctionManualProfile.Mute {
 	
-	public EManualProfileMute(final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
-		this(date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	public EManualProfileMute(final UUID uuid, final long date_start, final Optional<Long> expiration, final Text reason, final String source) {
+		this(uuid, date_start, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfileMute(final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
+	public EManualProfileMute(final UUID uuid, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
-		super(date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
+		super(uuid, date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 }

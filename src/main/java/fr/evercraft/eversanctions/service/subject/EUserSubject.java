@@ -100,8 +100,8 @@ public class EUserSubject implements SanctionUserSubject {
 		this.manual.clear();
 		this.auto.clear();
 		
-		this.manual.addAll(this.requeteSelectManual(connection));
-		this.auto.addAll(this.requeteSelectAuto(connection));
+		this.manual.addAll(this.sqlSelectManual(connection));
+		this.auto.addAll(this.sqlSelectAuto(connection));
 	}
 	
 	public void update() {
@@ -241,8 +241,8 @@ public class EUserSubject implements SanctionUserSubject {
 		try {
 			connection = this.plugin.getDataBase().getConnection();
 			
-			this.requeteRemoveManual(connection);
-			this.requeteRemoveAuto(connection);
+			this.sqlRemoveManual(connection);
+			this.sqlRemoveAuto(connection);
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -271,7 +271,7 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		final EManualProfileBan manual = new EManualProfileBan(creation, expiration, reason, source.getIdentifier());
+		final EManualProfileBan manual = new EManualProfileBan(this.getUniqueId(), creation, expiration, reason, source.getIdentifier());
 		final Ban.Profile ban = manual.getBan(user.get().getProfile());
 		
 		// Event cancel
@@ -281,7 +281,7 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		this.plugin.getSanctionService().add(ban);
 		this.manual.add(manual);
-		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(manual));
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(manual));
 		return true;
 	}
 	
@@ -303,7 +303,7 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		final EManualProfileBanIp ban = new EManualProfileBanIp(address, creation, expiration, reason, source.getIdentifier());
+		final EManualProfileBanIp ban = new EManualProfileBanIp(this.getUniqueId(), address, creation, expiration, reason, source.getIdentifier());
 		
 		// Event cancel
 		if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))) {
@@ -311,7 +311,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.manual.add(ban);
-		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(ban));
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(ban));
 		return true;
 	}
 	
@@ -332,7 +332,7 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		final EManualProfileMute mute = new EManualProfileMute(creation, expiration, reason, source.getIdentifier());
+		final EManualProfileMute mute = new EManualProfileMute(this.getUniqueId(), creation, expiration, reason, source.getIdentifier());
 		
 		// Event cancel
 		if(Sponge.getEventManager().post(ESpongeEventFactory.createMuteEventEnable(user.get(), reason, creation, expiration, source, Cause.source(this).build()))) {
@@ -340,7 +340,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.manual.add(mute);
-		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(mute));
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(mute));
 		return false;
 	}
 	
@@ -362,7 +362,7 @@ public class EUserSubject implements SanctionUserSubject {
 			return false;
 		}
 		
-		final EManualProfileMute mute = new EManualProfileMute(creation, expiration, reason, source.getIdentifier());
+		final EManualProfileMute mute = new EManualProfileMute(this.getUniqueId(), creation, expiration, reason, source.getIdentifier());
 		
 		// Event cancel
 		if(Sponge.getEventManager().post(ESpongeEventFactory.createJailEventEnable(user.get(), jail, reason, creation, expiration, source, Cause.source(this).build()))) {
@@ -370,7 +370,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.manual.add(mute);
-		this.plugin.getThreadAsync().execute(() -> this.requeteAddManual(mute));
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(mute));
 		return false;
 	}
 	
@@ -397,7 +397,7 @@ public class EUserSubject implements SanctionUserSubject {
 		this.plugin.getLogger().warn("pardon");
 		
 		this.plugin.getSanctionService().remove(ban);
-		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		this.plugin.getLogger().warn("return");
 		return Optional.of(manual.get());
 	}
@@ -424,7 +424,7 @@ public class EUserSubject implements SanctionUserSubject {
 			final Ban.Ip ban = manual.getBan();
 			
 			this.plugin.getSanctionService().remove(ban);
-			this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual));
+			this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual));
 		}
 		return (Collection) manuals;
 	}
@@ -447,7 +447,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		manual.get().pardon(date, reason, source.getIdentifier());
-		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
 	
@@ -469,7 +469,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		manual.get().pardon(date, reason, source.getIdentifier());
-		this.plugin.getThreadAsync().execute(() -> this.requetePardonManual(manual.get()));
+		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
 	
@@ -489,7 +489,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		auto.get().pardon(date, reason, source.getIdentifier());
-		this.plugin.getThreadAsync().execute(() -> this.requetePardonAuto(auto.get()));
+		this.plugin.getThreadAsync().execute(() -> this.sqlPardonAuto(auto.get()));
 		return true;
 	}
 	
@@ -519,7 +519,7 @@ public class EUserSubject implements SanctionUserSubject {
 			option = level.get().getOption();
 		}
 		
-		EAuto auto = new EAuto(creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source.getIdentifier(), option);
+		EAuto auto = new EAuto(this.getUniqueId(), creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source.getIdentifier(), option);
 		
 		if(auto.isBan()) {
 			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile()).get(), user.get()))) {
@@ -535,7 +535,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.auto.add(auto);
-		this.plugin.getThreadAsync().execute(() -> this.requeteAddAuto(auto));
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddAuto(auto));
 		return true;
 	}
 	
@@ -562,7 +562,7 @@ public class EUserSubject implements SanctionUserSubject {
 	@Override
 	public boolean removeManual(SanctionManualProfile profile) {
 		if (this.manual.remove(profile)) {
-			this.plugin.getThreadAsync().execute(() -> this.requeteRemoveManual(profile));
+			this.plugin.getThreadAsync().execute(() -> this.sqlRemoveManual(profile));
 			return true;
 		}
 		return false;
@@ -571,7 +571,7 @@ public class EUserSubject implements SanctionUserSubject {
 	@Override
 	public boolean removeAuto(SanctionAuto profile) {
 		if (this.auto.remove(profile)) {
-			this.plugin.getThreadAsync().execute(() -> this.requeteRemoveAuto(profile));
+			this.plugin.getThreadAsync().execute(() -> this.sqlRemoveAuto(profile));
 			return true;
 		}
 		return false;
@@ -597,7 +597,7 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Manual
 	 */
 	
-	private Collection<EManualProfile> requeteSelectManual(final Connection connection) {
+	private Collection<EManualProfile> sqlSelectManual(final Connection connection) {
 		Collection<EManualProfile> profiles = new ArrayList<EManualProfile>();
 		PreparedStatement preparedStatement = null;
 		try {
@@ -629,16 +629,19 @@ public class EUserSubject implements SanctionUserSubject {
 				Optional<SanctionManualProfile.Type> type = SanctionManualProfile.Type.get(list.getString("type"));
 				if (type.isPresent()) {
 					if(type.get().equals(SanctionManualProfile.Type.BAN_PROFILE)) {
-						profiles.add(new EManualProfileBan(creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+						profiles.add(new EManualProfileBan(this.getUniqueId(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 					} else if (type.get().equals(SanctionManualProfile.Type.BAN_IP)) {
 						Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("option"));
 						if (address.isPresent()) {
-							profiles.add(new EManualProfileBanIp(address.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+							profiles.add(new EManualProfileBanIp(this.getUniqueId(), address.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 						}
 					} else if (type.get().equals(SanctionManualProfile.Type.MUTE)) {
-						profiles.add(new EManualProfileMute(creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+						profiles.add(new EManualProfileMute(this.getUniqueId(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 					} else if (type.get().equals(SanctionManualProfile.Type.JAIL)) {
-						profiles.add(new EManualProfileJail(list.getString("option"), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+						Optional<String> jail = Optional.ofNullable(list.getString("option"));
+						if (jail.isPresent()) {
+							profiles.add(new EManualProfileJail(this.getUniqueId(), jail.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+						}
 					}
 				}
 			}
@@ -650,7 +653,7 @@ public class EUserSubject implements SanctionUserSubject {
 		return profiles;
 	}
 	
-	private void requeteAddManual(final EManualProfile ban) {
+	private void sqlAddManual(final EManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -710,7 +713,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requetePardonManual(final EManualProfile ban) {
+	private void sqlPardonManual(final EManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -752,7 +755,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requeteRemoveManual(final SanctionManualProfile ban) {
+	private void sqlRemoveManual(final SanctionManualProfile ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
     	try {
@@ -786,7 +789,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requeteRemoveManual(final Connection connection) {
+	private void sqlRemoveManual(final Connection connection) {
 		PreparedStatement preparedStatement = null;
     	try {
     		String query = 	  "DELETE " 
@@ -808,13 +811,14 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Auto
 	 */
 	
-	private Collection<EAuto> requeteSelectAuto(final Connection connection) {
+	private Collection<EAuto> sqlSelectAuto(final Connection connection) {
 		Collection<EAuto> profiles = new ArrayList<EAuto>();
 		PreparedStatement preparedStatement = null;
 		try {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
-						+ "WHERE `identifier` = ? ;";
+						+ "WHERE `identifier` = ? "
+						+ "ORDER BY `creation` ASC;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
@@ -843,7 +847,7 @@ public class EUserSubject implements SanctionUserSubject {
 					if(pardon_date != null) {
 						levels.put(type.get(), level_type);
 					}
-					profiles.add(new EAuto(creation, expiration, reason.get(), type.get(), level_type, source, option, pardon_date, pardon_reason, pardon_source));
+					profiles.add(new EAuto(this.getUniqueId(), creation, expiration, reason.get(), type.get(), level_type, source, option, pardon_date, pardon_reason, pardon_source));
 				}
 			}
 		} catch (SQLException e) {
@@ -854,7 +858,7 @@ public class EUserSubject implements SanctionUserSubject {
 		return profiles;
 	}
 	
-	private void requeteAddAuto(final EAuto ban) {
+	private void sqlAddAuto(final EAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -907,7 +911,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requetePardonAuto(final EAuto ban) {
+	private void sqlPardonAuto(final EAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
@@ -949,7 +953,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requeteRemoveAuto(final SanctionAuto ban) {
+	private void sqlRemoveAuto(final SanctionAuto ban) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
     	try {
@@ -983,7 +987,7 @@ public class EUserSubject implements SanctionUserSubject {
 	    }
 	}
 	
-	private void requeteRemoveAuto(final Connection connection) {
+	private void sqlRemoveAuto(final Connection connection) {
     	PreparedStatement preparedStatement = null;
     	try {
     		String query = 	  "DELETE " 

@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.service.manual;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.text.Text;
 
@@ -24,13 +25,13 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 
 public class EManualProfileJail extends EManualProfile implements SanctionManualProfile.Jail {
 	
-	public EManualProfileJail(final String jail, final long creation, final Optional<Long> expiration, final Text reason, final String source) {
-		this(jail, creation, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	public EManualProfileJail(final UUID uuid, final String jail, final long creation, final Optional<Long> expiration, final Text reason, final String source) {
+		this(uuid, jail, creation, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfileJail(final String jail, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
+	public EManualProfileJail(final UUID uuid, final String jail, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
-		super(date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
+		super(uuid, date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
 	}
 
 	@Override
