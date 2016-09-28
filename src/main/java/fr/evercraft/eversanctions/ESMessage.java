@@ -86,7 +86,7 @@ public class ESMessage extends EMessage {
 		BANIP_PLAYER_ERROR_CANCEL("banip.player.errorCancel", 		"&cErreur : Impossible de bannir l'adresse de &6<player>&c pour le moment."),
 		BANIP_PLAYER_ERROR_EQUALS("banip.player.errorEquals", 		"&cErreur : Impossible de bannir votre propre adresse IP."),
 		BANIP_PLAYER_ERROR_NOEMPTY("banip.player.errorNoEmpty", 	"&cErreur : L'adresse IP de &6<player> &cest déjà banni."),
-		BANIP_PLAYER_ERROR_IP("banip.player.errorIP", 	"&cErreur : L'adresse IP de &6<player> &cest déjà banni."),
+		BANIP_PLAYER_ERROR_IP("banip.player.errorIP", 				"&cErreur : Aucune adresse IP connu de &6<player>&c."),
 		
 		UNBANIP_DESCRIPTION("unbanip.description", "Débanni l'adresse IP du serveur"),
 		UNBANIP_STAFF("unbanip.staff", "&7Vous avez débanni &6<player>&7."),
