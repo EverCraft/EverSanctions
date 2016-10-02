@@ -57,12 +57,13 @@ public class ESMessage extends EMessage {
 		BAN_ERROR_EQUALS("ban.errorEquals", 						"&cErreur : Impossible de vous bannir vous-même."),
 		BAN_ERROR_NOEMPTY("ban.errorNoEmpty", 						"&cErreur : &6<player> &cest déjà banni."),
 		
+		// UnBan
 		UNBAN_DESCRIPTION("unban.description", 						"Débanni le joueur du serveur"),
 		UNBAN_STAFF("unban.staff", 									"&7Vous avez débanni &6<player>&7."),
 		UNBAN_ERROR_REASON("unban.errorReason", 					"&cErreur : La raison est obligatoire."),
 		UNBAN_ERROR_EQUALS("unban.errorEquals", 					"&cErreur : Impossible de vous débannir vous-même."),
 		UNBAN_ERROR_EMPTY("unban.errorEmpty", 						"&cErreur : &6<player> &cn'est pas banni."),
-		UNBAN_CANCEL("unban.cancel", 								"&cErreur : Impossible de débannir &6<player> pour le moment."),
+		UNBAN_CANCEL("unban.cancel", 								"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
 		
 		// Banip
 		BANIP_DESCRIPTION("banip.description", 						"Banni l'adresse IP du joueur"),
@@ -88,12 +89,20 @@ public class ESMessage extends EMessage {
 		BANIP_PLAYER_ERROR_NOEMPTY("banip.player.errorNoEmpty", 	"&cErreur : L'adresse IP de &6<player> &cest déjà banni."),
 		BANIP_PLAYER_ERROR_IP("banip.player.errorIP", 				"&cErreur : Aucune adresse IP connu de &6<player>&c."),
 		
+		// UnBanIp
 		UNBANIP_DESCRIPTION("unbanip.description", "Débanni l'adresse IP du serveur"),
-		UNBANIP_STAFF("unbanip.staff", "&7Vous avez débanni &6<player>&7."),
-		UNBANIP_ERROR_REASON("unbanip.errorReason", "&cErreur : La raison est obligatoire."),
-		UNBANIP_ERROR_EQUALS("unbanip.errorEquals", "&cErreur : Impossible de vous débannir vous-même."),
-		UNBANIP_ERROR_EMPTY("unbanip.errorEmpty", "&cErreur : &6<player> &cn'est pas banni."),
-		UNBANIP_CANCEL("unbanip.cancel", "&cErreur : Impossible de débannir <player> pour le moment."),
+		
+		UNBANIP_IP_STAFF("unbanip.ip.staff", "&7Vous avez débanni l'adresse IP &6<address>&7."),
+		UNBANIP_IP_ERROR_REASON("unbanip.ip.errorReason", "&cErreur : La raison est obligatoire."),
+		UNBANIP_IP_ERROR_EQUALS("unbanip.ip.errorEquals", "&cErreur : Impossible de débannir votre propre adresse IP."),
+		UNBANIP_IP_ERROR_EMPTY("unbanip.ip.errorEmpty", "&cErreur : L'adresse IP  &6<address> &cn'est pas banni."),
+		UNBANIP_IP_CANCEL("unbanip.ip.cancel", "&cErreur : Impossible de débannir l'adresse IP &6<address> &cpour le moment."),
+		
+		UNBANIP_PLAYER_STAFF("unbanip.player.staff", "&7Vous avez débanni l'adresse IP de &6<player>&7."),
+		UNBANIP_PLAYER_ERROR_REASON("unbanip.player.errorReason", "&cErreur : La raison est obligatoire."),
+		UNBANIP_PLAYER_ERROR_EQUALS("unbanip.player.errorEquals", "&cErreur : Impossible de débannir votre propre adresse IP."),
+		UNBANIP_PLAYER_ERROR_EMPTY("unbanip.player.errorEmpty", "&cErreur : L'adresse IP de &6<player> &cn'est pas banni."),
+		UNBANIP_PLAYER_CANCEL("unbanip.player.cancel", "&cErreur : Impossible de débannir l'adresse IP de &6<player> &cpour le moment."),
 		
 		
 		MUTE_DESCRIPTION("mute.description", "Mute le joueur"),

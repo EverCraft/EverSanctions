@@ -176,7 +176,7 @@ public class EBanService extends ESanctionService {
 	public boolean pardon(InetAddress address) {
 		Optional<EIpSubject> subject = this.getSubject(address);
 		if(subject.isPresent()) {
-			return subject.get().pardonBan(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole());
+			return !subject.get().pardonBan(System.currentTimeMillis(), Text.EMPTY, this.plugin.getEServer().getConsole()).isEmpty();
 		} else {
         	throw new IllegalArgumentException(String.format("IPSubject not found : %s", address.toString()));
         }

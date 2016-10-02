@@ -141,7 +141,7 @@ public class EUserSubject implements SanctionUserSubject {
 	 */
 	public Optional<EManualProfileBan> getManualBan() {
 		Optional<EManualProfile> ban = this.manual.stream()
-													.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.BAN_PROFILE) && !manual.isExpire() && !manual.isPardon())
+													.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.BAN_PROFILE) && !manual.isExpire())
 													.findFirst();
 		if (ban.isPresent() && ban.get() instanceof EManualProfileBan) {
 			return Optional.of((EManualProfileBan) ban.get()); 
@@ -153,6 +153,17 @@ public class EUserSubject implements SanctionUserSubject {
 	 * Retourne les ban-ip manuel
 	 * @return
 	 */
+	public Optional<EManualProfileBanIp> getManualBanIp(InetAddress address) {
+		Optional<EManualProfile> ban = this.manual.stream().filter(manual ->
+			manual.getType().equals(SanctionManualProfile.Type.BAN_IP) && UtilsNetwork.equals(((EManualProfileBanIp) manual).getAddress(), address) && !manual.isExpire()
+		).findFirst();
+		
+		if (ban.isPresent()) {
+			return Optional.of((EManualProfileBanIp) ban.get());
+		}
+		return Optional.empty();
+	}
+	
 	public Collection<EManualProfileBanIp> getManualBanIp() {
 		Builder<EManualProfileBanIp> bans = ImmutableList.builder();
 		for(EManualProfile manual : this.manual) {
@@ -204,6 +215,14 @@ public class EUserSubject implements SanctionUserSubject {
 	@Override
 	public boolean isBan() {
 		return this.ban;
+	}
+	
+	@Override
+	public boolean isBanIp() {
+		return this.manual.stream()
+				.filter(manual -> manual.getType().equals(SanctionManualProfile.Type.BAN_IP) && !manual.isExpire())
+				.findFirst()
+				.isPresent();
 	}
 	
 	@Override
@@ -293,7 +312,7 @@ public class EUserSubject implements SanctionUserSubject {
 		Preconditions.checkNotNull(source, "source");
 		
 		// Le joueur a déjà une saction
-		if (!this.getManualBanIp().isEmpty()) {
+		if (!this.getManualBanIp(address).isPresent()) {
 			return false;
 		}
 		
@@ -410,6 +429,33 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	@Override
+	public Optional<SanctionManualProfile.BanIp> pardonBanIp(InetAddress address, long date, Text reason, CommandSource source) {
+		Preconditions.checkNotNull(address, "address");
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		Optional<EManualProfileBanIp> optManual = this.getManualBanIp(address);
+		if(optManual.isPresent()) {
+			return Optional.empty();
+		}
+		EManualProfileBanIp manual = optManual.get();
+		
+		
+		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
+		if (!user.isPresent()) {
+			return Optional.empty();
+		}
+		
+		
+		manual.pardon(date, reason, source.getIdentifier());
+		final Ban.Ip ban = manual.getBan();
+		
+		this.plugin.getSanctionService().remove(ban);
+		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual));
+		return Optional.of(manual);
+	}
+	
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Collection<SanctionManualProfile.BanIp> pardonBanIp(long date, Text reason, CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
@@ -435,6 +481,7 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		return (Collection) manuals;
 	}
+	
 	
 	@Override
 	public Optional<SanctionManualProfile.Mute> pardonMute(long date, Text reason, CommandSource source) {

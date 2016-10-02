@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.banip;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -220,6 +221,7 @@ public class ESBanIP extends ECommand<EverSanctions> {
 			.forEach(player ->
 				player.kick(EChat.of(ESMessages.BANIP_IP_TEMP_PLAYER.get()
 						.replaceAll("<staff>", staff.getIdentifier())
+						.replaceAll("<address>", subject.getIdentifier())
 						.replaceAll("<reason>", reason)
 						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
 						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
@@ -250,7 +252,7 @@ public class ESBanIP extends ECommand<EverSanctions> {
 		}
 		
 		// Le staff et le joueur sont identique
-		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), subject.get().getSocketAddress())) {
+		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(last.get()))) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BANIP_PLAYER_ERROR_EQUALS.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
@@ -273,7 +275,7 @@ public class ESBanIP extends ECommand<EverSanctions> {
 		long creation = System.currentTimeMillis();
 		// Ban définitif
 		if (time_string.equalsIgnoreCase(SanctionService.UNLIMITED)) {
-			return this.commandUnlimitedPlayerBanIP(staff, user, subject.get(), creation, reason);
+			return this.commandUnlimitedPlayerBanIP(staff, user, last.get(), creation, reason);
 		}
 		
 		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
@@ -285,55 +287,67 @@ public class ESBanIP extends ECommand<EverSanctions> {
 		}
 		
 		// Ban tempotaire
-		return this.commandTempPlayerBanIP(staff, user, subject.get(), creation, time.get(), reason);
+		return this.commandTempPlayerBanIP(staff, user, last.get(), creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedPlayerBanIP(final CommandSource staff, final EUser user, final SanctionIpSubject subject, final long creation, final String reason) {
+	private boolean commandUnlimitedPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final String reason) {
 		// Ban annulé
-		if (!subject.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
+		if (!user.banIp(address, creation, Optional.empty(), EChat.of(reason), staff)) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BANIP_PLAYER_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+					.replaceAll("<player>", user.getName())
+					.replaceAll("<address>", UtilsNetwork.getHostString(address))));
 			return false;
 		}
 		
 		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BANIP_PLAYER_UNLIMITED_STAFF.get()
-			 .replaceAll("<reason>", reason)
-			 .replaceAll("<player>", user.getName())));
-		
-		if(user instanceof EPlayer) {
-			EPlayer player = (EPlayer) user;
+				.replaceAll("<reason>", reason)
+				.replaceAll("<player>", user.getName())
+				.replaceAll("<address>", UtilsNetwork.getHostString(address))));
+
+		InetSocketAddress socket = UtilsNetwork.getSocketAddress(address);
+		this.plugin.getEServer().getOnlineEPlayers().stream()
+		.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
+		.forEach(player ->
 			player.kick(EChat.of(ESMessages.BANIP_PLAYER_UNLIMITED_PLAYER.get()
 					.replaceAll("<staff>", staff.getIdentifier())
-					.replaceAll("<reason>", reason)));
-		}
+					.replaceAll("<reason>", reason)
+					.replaceAll("<address>", UtilsNetwork.getHostString(address))))
+		);
+		
 		return true;
 	}
 	
-	private boolean commandTempPlayerBanIP(final CommandSource staff, final EUser user, final SanctionIpSubject subject, final long creation, final long expiration, final String reason) {
-		if (!user.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
+	private boolean commandTempPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final long expiration, final String reason) {
+		if (!user.banIp(address, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BANIP_PLAYER_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+						.replaceAll("<player>", user.getName())
+						.replaceAll("<address>", UtilsNetwork.getHostString(address))));
 			return false;
 		}
 		
 		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BANIP_PLAYER_TEMP_STAFF.get()
 			 .replaceAll("<player>", user.getName())
+			 .replaceAll("<address>", UtilsNetwork.getHostString(address))
 			 .replaceAll("<reason>", reason)
 			 .replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
 			 .replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
 			 .replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
 			 .replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
 		
-		if(user instanceof EPlayer) {
-			EPlayer player = (EPlayer) user;
+
+		InetSocketAddress socket = UtilsNetwork.getSocketAddress(address);
+		this.plugin.getEServer().getOnlineEPlayers().stream()
+		.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
+		.forEach(player ->
 			player.kick(EChat.of(ESMessages.BANIP_PLAYER_TEMP_PLAYER.get()
 					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<address>", UtilsNetwork.getHostString(address))
 					.replaceAll("<reason>", reason)
 					.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
 					.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
 					.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-					.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
-		}
+					.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))))
+		);
 		return true;
 	}
 }

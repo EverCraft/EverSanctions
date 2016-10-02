@@ -26,12 +26,17 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 
 import com.google.common.base.Preconditions;
@@ -113,13 +118,22 @@ public class EIpSubject implements SanctionIpSubject {
 		return builder.build();
 	}
 
+	public boolean isBanIpManual() {
+		return this.ip_manual.stream().filter(manual -> !manual.isExpire()).findFirst().isPresent();
+	}
+	
+	public boolean isBanProfileManual() {
+		return this.profile_manual.stream().filter(manual -> !manual.isExpire()).findFirst().isPresent();
+	}
+	
 	@Override
-	public boolean ban(final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
-		Preconditions.checkNotNull(expiration, "expiration");
-		Preconditions.checkNotNull(reason, "reason");
-		Preconditions.checkNotNull(source, "source");
-
-		return false;
+	public boolean isBanManual() {
+		return this.isBanIpManual() || this.isBanProfileManual();
+	}
+	
+	@Override
+	public boolean isBanAuto() {		
+		return this.profile_auto.stream().filter(manual -> !manual.isExpire()).findFirst().isPresent();
 	}
 	
 	public boolean add(final EManualProfileBanIp manual) {
@@ -139,19 +153,72 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public boolean pardonBan(final long date, final Text reason, final CommandSource source) {
+	public boolean ban(final long creation, final Optional<Long> expiration, final Text reason, final CommandSource source) {
+		Preconditions.checkNotNull(expiration, "expiration");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 
-		return false;
+		// L'ip est déjà banni
+		if (this.isBanIpManual()) {
+			return false;
+		}
+		
+		final EManualIP ban = new EManualIP(creation, expiration, reason, source.getIdentifier());
+		
+		// Event cancel
+		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.getAddress())))) {
+			return false;
+		}
+		
+		this.ip_manual.add(ban);
+		this.plugin.getThreadAsync().execute(() -> this.sqlAdd(ban));
+		return true;
+	}
+	
+	@Override
+	public Collection<SanctionManual> pardonBan(final long date, final Text reason, final CommandSource source) {
+		Preconditions.checkNotNull(reason, "reason");
+		Preconditions.checkNotNull(source, "source");
+		
+		ImmutableList.Builder<SanctionManual> pardons = ImmutableList.builder();
+		
+		Optional<EManualIP> ip = this.ip_manual.stream().filter(ban -> !ban.isExpire()).findFirst();
+		List<EManualProfileBanIp> profiles = this.profile_manual.stream().filter(manual -> !manual.isExpire()).collect(Collectors.toList());
+		
+		if (ip.isPresent()) {
+			ip.get().pardon(date, reason, source.getIdentifier());
+			this.plugin.getSanctionService().remove(ip.get().getBan(this.getAddress()));
+			this.plugin.getThreadAsync().execute(() -> this.sqlUpdate(ip.get()));
+		}
+		
+		profiles.forEach(ban -> {
+			Optional<EUserSubject> subject = this.plugin.getSanctionService().getSubject(ban.getProfile());
+			if (subject.isPresent()) {
+				Optional<SanctionManualProfile.BanIp> pardon = subject.get().pardonBanIp(this.getAddress(), date, reason, source);
+				if(pardon.isPresent()) {
+					pardons.add(pardon.get());
+				}
+			}
+		});
+		
+		return pardons.build();
 	}
 	
 	public boolean remove(final SanctionManualIP ban) {
 		Preconditions.checkNotNull(ban, "ban");
+		
+		if (this.ip_manual.remove(ban)) {
+			this.plugin.getThreadAsync().execute(() -> this.sqlRemove(ban));
+			return true;
+		}
 		return false;
 	}
 	
 	public boolean clear() {
+		if (!this.ip_manual.isEmpty()) {
+			this.plugin.getThreadAsync().execute(() -> this.sqlClear());
+			return true;
+		}
 		return false;
 	}
 	
