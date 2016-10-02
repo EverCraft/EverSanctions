@@ -41,9 +41,9 @@ import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 
-public class ESUnBanIP extends ECommand<EverSanctions> {
+public class ESUnBanIp extends ECommand<EverSanctions> {
 	
-	public ESUnBanIP(final EverSanctions plugin) {
+	public ESUnBanIp(final EverSanctions plugin) {
         super(plugin, "unbanip", "pardon-ip");
         
         // TODO Remove command : pardon-ip

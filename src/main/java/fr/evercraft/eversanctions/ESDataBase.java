@@ -30,6 +30,7 @@ import java.util.UUID;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.Ban.Ip;
 import org.spongepowered.api.util.ban.BanTypes;
 
 import fr.evercraft.everapi.exception.PluginDisableException;
@@ -59,7 +60,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(255) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
-							"`option` VARCHAR(36) DEFAULT NULL," +
+							"`context` VARCHAR(36) DEFAULT NULL," +
 							"`pardon_date` DOUBLE DEFAULT NULL," +
 							"`pardon_reason` VARCHAR(255) DEFAULT NULL," +
 							"`pardon_source` VARCHAR(36) DEFAULT NULL," +
@@ -87,7 +88,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 							"`type` VARCHAR(36) NOT NULL," +
 							"`reason` VARCHAR(36) NOT NULL," +
 							"`source` VARCHAR(36) NOT NULL," +
-							"`option` VARCHAR(36) DEFAULT NULL," +
+							"`context` VARCHAR(36) DEFAULT NULL," +
 							"`pardon_date` DOUBLE DEFAULT NULL," +
 							"`pardon_reason` VARCHAR(255) DEFAULT NULL," +
 							"`pardon_source` VARCHAR(36) DEFAULT NULL," +
@@ -172,7 +173,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
+	    	this.plugin.getLogger().warn("getBansProfile : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }
@@ -194,18 +195,18 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		Map<Ban.Ip, String> bans = new HashMap<Ban.Ip, String>();
 		PreparedStatement preparedStatement = null;
 		try {
-			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
+			String query = "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source`, `context` "
 						+ "		FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 						+ "		WHERE `type` = ? "
 						+ "			AND `pardon_date` IS NULL "
-						+ "			AND `option` IS NOT NULL "
+						+ "			AND `context` IS NOT NULL "
 						+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`) > ?))"
 						+ "UNION"
-						+ "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source` "
+						+ "(SELECT `identifier`, `creation`, `expiration`, `reason`, `source`, `context` "
 						+ "		FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 						+ "		WHERE (`type` = ? OR `type` = ?) "
 						+ "			AND `pardon_date` IS NULL "
-						+ "			AND `option` IS NOT NULL "
+						+ "			AND `context` IS NOT NULL "
 						+ "			AND (`expiration` IS NULL OR (`expiration` + `creation`)  > ?));";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
@@ -216,8 +217,10 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
 				try {
-					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("option"));
-					if(address.isPresent()) {					
+					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("context"));
+					this.plugin.getLogger().warn("getBanIpProfile");
+					if(address.isPresent()) {
+						this.plugin.getLogger().warn("getBanIpProfile : address");
 						long creation = list.getLong("creation");
 						
 						Ban.Builder build = Ban.builder()
@@ -231,13 +234,15 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 						if(!list.wasNull()) {
 							build = build.expirationDate(Instant.ofEpochMilli(creation + expiration));
 						}
-						
-						bans.put((Ban.Ip) build.build(), list.getString("option"));
+						Ip ip = (Ban.Ip) build.build();
+						this.plugin.getLogger().warn("source : " + ip.getBanSource());
+						this.plugin.getLogger().warn("reason : " + ip.getReason());
+						bans.put((Ban.Ip) build.build(), list.getString("context"));
 					}
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
+	    	this.plugin.getLogger().warn("getBanIpProfile : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }
@@ -278,7 +283,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn(" : " + e.getMessage());
+	    	this.plugin.getLogger().warn("getBanIp : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }

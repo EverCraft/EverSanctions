@@ -22,10 +22,11 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.ban.Ban.Profile;
+import org.spongepowered.api.util.ban.Ban;
 
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 
 public class ESListener {
@@ -37,17 +38,41 @@ public class ESListener {
 	
 	@Listener(order=Order.FIRST)
 	public void onPlayerJoin(final ClientConnectionEvent.Auth event) {
-		Optional<Profile> ban = this.plugin.getSanctionService().getBanFor(event.getProfile());
-		if (ban.isPresent()) {
-			if(ban.get().isIndefinite()) {
+		Optional<Ban.Profile> profile = this.plugin.getSanctionService().getBanFor(event.getProfile());
+		if (profile.isPresent()) {
+			if(profile.get().isIndefinite()) {
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_UNLIMITED.get()
-						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
-						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))));
+						.replaceAll("<staff>", EChat.serialize(profile.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<player>", profile.get().getProfile().getName().orElse(profile.get().getProfile().getUniqueId().toString()))
+						.replaceAll("<reason>", EChat.serialize(profile.get().getReason().orElse(Text.EMPTY)))));
 			} else {
-				long time = ban.get().getExpirationDate().get().toEpochMilli();
+				long time = profile.get().getExpirationDate().get().toEpochMilli();
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_TEMP.get()
-						.replaceAll("<staff>", EChat.serialize(ban.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
-						.replaceAll("<reason>", EChat.serialize(ban.get().getReason().orElse(Text.EMPTY)))
+						.replaceAll("<staff>", EChat.serialize(profile.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<player>", profile.get().getProfile().getName().orElse(profile.get().getProfile().getUniqueId().toString()))
+						.replaceAll("<reason>", EChat.serialize(profile.get().getReason().orElse(Text.EMPTY)))
+						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(time))
+						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(time))
+						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(time))
+						.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(time))));
+			}
+			event.setMessageCancelled(false);
+			event.setCancelled(true);
+		}
+		
+		Optional<Ban.Ip> ip = this.plugin.getSanctionService().getBanFor(event.getConnection().getAddress().getAddress());
+		if (ip.isPresent()) {
+			if(ip.get().isIndefinite()) {
+				event.setMessage(EChat.of(ESMessages.CONNECTION_BANIP_UNLIMITED.get()
+						.replaceAll("<staff>", EChat.serialize(ip.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<address>", UtilsNetwork.getHostString(event.getConnection().getAddress().getAddress()))
+						.replaceAll("<reason>", EChat.serialize(ip.get().getReason().orElse(Text.EMPTY)))));
+			} else {
+				long time = ip.get().getExpirationDate().get().toEpochMilli();
+				event.setMessage(EChat.of(ESMessages.CONNECTION_BANIP_TEMP.get()
+						.replaceAll("<staff>", EChat.serialize(ip.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
+						.replaceAll("<address>", UtilsNetwork.getHostString(event.getConnection().getAddress().getAddress()))
+						.replaceAll("<reason>", EChat.serialize(ip.get().getReason().orElse(Text.EMPTY)))
 						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(time))
 						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(time))
 						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(time))

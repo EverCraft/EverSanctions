@@ -71,8 +71,6 @@ public class EBanService extends ESanctionService {
 		
 		this.bans_profile = new ConcurrentSkipListMap<Ban.Profile, UUID>(EBanService.COMPARATOR_BAN);
 		this.bans_ip = new ConcurrentSkipListMap<Ban.Ip, String>(EBanService.COMPARATOR_BAN);
-		
-		this.reload();
 	}
 	
 	public void reload() {
@@ -139,10 +137,13 @@ public class EBanService extends ESanctionService {
 		Optional<Ban.Ip> ban = Optional.empty();
 		Iterator<Entry<Ban.Ip, String>> iterator = this.bans_ip.entrySet().iterator();
 		
+		this.plugin.getLogger().warn("size : " + this.bans_ip.size());
 		while(!ban.isPresent() && iterator.hasNext()) {
 			Entry<Ban.Ip, String> element = iterator.next();
+			this.plugin.getLogger().warn(address_string + " : " + element.getValue());
 			if(element.getValue().equalsIgnoreCase(address_string)) {
 				ban = Optional.of(element.getKey());
+				this.plugin.getLogger().warn("true");
 			}
 		}
 		return ban;

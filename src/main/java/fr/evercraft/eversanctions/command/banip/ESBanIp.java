@@ -44,9 +44,9 @@ import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 
-public class ESBanIP extends ECommand<EverSanctions> {
+public class ESBanIp extends ECommand<EverSanctions> {
 	
-	public ESBanIP(final EverSanctions plugin) {
+	public ESBanIp(final EverSanctions plugin) {
         super(plugin, "banip", "ban-ip");
         
      // TODO Remove command : ban-ip

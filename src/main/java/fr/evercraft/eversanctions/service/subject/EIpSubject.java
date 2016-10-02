@@ -248,7 +248,8 @@ public class EIpSubject implements SanctionIpSubject {
 		try {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableManualIp() + "` "
-						+ "WHERE `identifier` = ? ;";
+						+ "WHERE `identifier` = ? "
+						+ "ORDER BY `creation` ASC;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
@@ -285,7 +286,8 @@ public class EIpSubject implements SanctionIpSubject {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableManualProfile() + "` "
 						+ "WHERE `type` = ? "
-						+ " AND `option` = ? ;";
+						+ " AND `context` = ? "
+						+ "ORDER BY `creation` ASC;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
 			preparedStatement.setString(2, this.getIdentifier());
@@ -329,7 +331,7 @@ public class EIpSubject implements SanctionIpSubject {
 			String query = "SELECT * "
 						+ "FROM `" + this.plugin.getDataBase().getTableAuto() + "` "
 						+ "WHERE (`type` = ? OR `type` = ?)"
-						+ " AND `option` = ? "
+						+ " AND `context` = ? "
 						+ "ORDER BY `creation` ASC;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionAuto.Type.BAN_IP.name());
@@ -354,7 +356,7 @@ public class EIpSubject implements SanctionIpSubject {
 					if(list.wasNull()) {
 						pardon_date = Optional.empty();
 					}
-					Optional<String> option = Optional.ofNullable(list.getString("option"));
+					Optional<String> context = Optional.ofNullable(list.getString("context"));
 					
 					Optional<SanctionAuto.Type> type = SanctionAuto.Type.get(list.getString("type"));
 					Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(list.getString("reason"));
@@ -363,7 +365,7 @@ public class EIpSubject implements SanctionIpSubject {
 						if(pardon_date != null) {
 							levels.put(type.get(), level_type);
 						}
-						profiles.add(new EAuto(uuid, creation, expiration, reason.get(), type.get(), level_type, source, option, pardon_date, pardon_reason, pardon_source));
+						profiles.add(new EAuto(uuid, creation, expiration, reason.get(), type.get(), level_type, source, context, pardon_date, pardon_reason, pardon_source));
 					}
 				} catch (IllegalArgumentException e) {}
 			}

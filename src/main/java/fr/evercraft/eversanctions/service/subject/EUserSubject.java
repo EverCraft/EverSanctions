@@ -129,9 +129,6 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 	
 	public Optional<EManualProfile> get(final SanctionManualProfile.Type type) {
-		this.plugin.getLogger().warn("size : " + this.manual.size());
-		this.plugin.getLogger().warn("size type : " + this.manual.stream().filter(manual -> manual.getType().equals(type)).count());
-		this.plugin.getLogger().warn("size unexpire: " + this.manual.stream().filter(manual -> manual.getType().equals(type) && !manual.isExpire()).count());
 		return this.manual.stream().filter(manual -> manual.getType().equals(type) && !manual.isExpire()).findFirst();
 	}
 	
@@ -312,32 +309,38 @@ public class EUserSubject implements SanctionUserSubject {
 		Preconditions.checkNotNull(source, "source");
 		
 		// Le joueur a déjà une saction
-		if (!this.getManualBanIp(address).isPresent()) {
+		if (this.getManualBanIp(address).isPresent()) {
+			this.plugin.getLogger().warn("!this.getManualBanIp(address).isPresent()");
 			return false;
 		}
 		
 		// User inconnu
 		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
 		if (!user.isPresent()) {
+			this.plugin.getLogger().warn("!user.isPresent()");
 			return false;
 		}
 		
 		// SubjectIP inconnu
 		final Optional<EIpSubject> subject_ip = this.plugin.getSanctionService().getSubject(address);
 		if (!subject_ip.isPresent()) {
+			this.plugin.getLogger().warn("!subject_ip.isPresent()");
 			return false;
 		}
 		
-		final EManualProfileBanIp ban = new EManualProfileBanIp(this.getUniqueId(), address, creation, expiration, reason, source.getIdentifier());
+		final EManualProfileBanIp manual = new EManualProfileBanIp(this.getUniqueId(), address, creation, expiration, reason, source.getIdentifier());
+		final Ban.Ip ban = manual.getBan();
 		
 		// Event cancel
-		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))) {
+		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban))) {
+			this.plugin.getLogger().warn("Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan()))");
 			return false;
 		}
 		
-		this.manual.add(ban);
-		subject_ip.get().add(ban);
-		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(ban));
+		this.manual.add(manual);
+		subject_ip.get().add(manual);
+		this.plugin.getSanctionService().add(ban);
+		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(manual));
 		return true;
 	}
 	
@@ -420,11 +423,8 @@ public class EUserSubject implements SanctionUserSubject {
 		manual.get().pardon(date, reason, source.getIdentifier());
 		final Ban.Profile ban = manual.get().getBan(user.get().getProfile());
 		
-		this.plugin.getLogger().warn("pardon");
-		
 		this.plugin.getSanctionService().remove(ban);
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
-		this.plugin.getLogger().warn("return");
 		return Optional.of(manual.get());
 	}
 	
@@ -435,17 +435,15 @@ public class EUserSubject implements SanctionUserSubject {
 		Preconditions.checkNotNull(source, "source");
 		
 		Optional<EManualProfileBanIp> optManual = this.getManualBanIp(address);
-		if(optManual.isPresent()) {
+		if(!optManual.isPresent()) {
 			return Optional.empty();
 		}
 		EManualProfileBanIp manual = optManual.get();
-		
 		
 		final Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(this.getUniqueId());
 		if (!user.isPresent()) {
 			return Optional.empty();
 		}
-		
 		
 		manual.pardon(date, reason, source.getIdentifier());
 		final Ban.Ip ban = manual.getBan();
@@ -566,14 +564,14 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		
-		Optional<String> option = Optional.empty();
+		Optional<String> context = Optional.empty();
 		if(level.get().getType().isBanIP() && user.get().getLastIP().isPresent()) {
-			option = Optional.ofNullable(UtilsNetwork.getHostString(user.get().getLastIP().get()));
+			context = Optional.ofNullable(UtilsNetwork.getHostString(user.get().getLastIP().get()));
 		} else if(level.get().getType().isMute()) {
-			option = level.get().getOption();
+			context = level.get().getOption();
 		}
 		
-		EAuto auto = new EAuto(this.getUniqueId(), creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source.getIdentifier(), option);
+		EAuto auto = new EAuto(this.getUniqueId(), creation, level.get().getExpirationDate(creation), reason, level.get().getType(), level_int, source.getIdentifier(), context);
 		
 		if(auto.isBan()) {
 			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile()).get(), user.get()))) {
@@ -697,14 +695,14 @@ public class EUserSubject implements SanctionUserSubject {
 					if(type.get().equals(SanctionManualProfile.Type.BAN_PROFILE)) {
 						profiles.add(new EManualProfileBan(this.getUniqueId(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 					} else if (type.get().equals(SanctionManualProfile.Type.BAN_IP)) {
-						Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("option"));
+						Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("context"));
 						if (address.isPresent()) {
 							profiles.add(new EManualProfileBanIp(this.getUniqueId(), address.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 						}
 					} else if (type.get().equals(SanctionManualProfile.Type.MUTE)) {
 						profiles.add(new EManualProfileMute(this.getUniqueId(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 					} else if (type.get().equals(SanctionManualProfile.Type.JAIL)) {
-						Optional<String> jail = Optional.ofNullable(list.getString("option"));
+						Optional<String> jail = Optional.ofNullable(list.getString("context"));
 						if (jail.isPresent()) {
 							profiles.add(new EManualProfileJail(this.getUniqueId(), jail.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 						}
@@ -723,11 +721,11 @@ public class EUserSubject implements SanctionUserSubject {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		
-		Optional<String> option = Optional.empty();
+		Optional<String> context = Optional.empty();
 		if(ban.getType().equals(SanctionManualProfile.Type.JAIL)) {
-			option = Optional.of(((EManualProfileJail) ban).getJailName());
+			context = Optional.of(((EManualProfileJail) ban).getJailName());
 		} else if(ban.getType().equals(SanctionManualProfile.Type.BAN_IP)) {
-			option = Optional.of(((EManualProfileBanIp) ban).getAddress().getHostAddress());
+			context = Optional.of(((EManualProfileBanIp) ban).getAddress().getHostAddress());
 		}
 		
     	try {    		
@@ -745,7 +743,7 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(4, ban.getType().name());
 			preparedStatement.setString(5, EChat.serialize(ban.getReason()));
 			preparedStatement.setString(6, ban.getSource());
-			preparedStatement.setString(7, option.orElse(null));
+			preparedStatement.setString(7, context.orElse(null));
 			
 			if(ban.isPardon()) {
 				preparedStatement.setDouble(8, ban.getPardonDate().get());
@@ -763,7 +761,7 @@ public class EUserSubject implements SanctionUserSubject {
 					 											  + "type='" + ban.getType().name() + "';"
 					 											  + "reason='" + EChat.serialize(ban.getReason()) + "';"
 					 											  + "source='" + ban.getCreationDate() + "';"
-					 											  + "option='" + option.orElse("null") + "';"
+					 											  + "context='" + context.orElse("null") + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("null") + "')");
@@ -904,7 +902,7 @@ public class EUserSubject implements SanctionUserSubject {
 				if(list.wasNull()) {
 					pardon_date = Optional.empty();
 				}
-				Optional<String> option = Optional.ofNullable(list.getString("option"));
+				Optional<String> context = Optional.ofNullable(list.getString("context"));
 				
 				Optional<SanctionAuto.Type> type = SanctionAuto.Type.get(list.getString("type"));
 				Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(list.getString("reason"));
@@ -913,7 +911,7 @@ public class EUserSubject implements SanctionUserSubject {
 					if(pardon_date != null) {
 						levels.put(type.get(), level_type);
 					}
-					profiles.add(new EAuto(this.getUniqueId(), creation, expiration, reason.get(), type.get(), level_type, source, option, pardon_date, pardon_reason, pardon_source));
+					profiles.add(new EAuto(this.getUniqueId(), creation, expiration, reason.get(), type.get(), level_type, source, context, pardon_date, pardon_reason, pardon_source));
 				}
 			}
 		} catch (SQLException e) {
@@ -961,7 +959,7 @@ public class EUserSubject implements SanctionUserSubject {
 					 											  + "type='" + ban.getType().name() + "';"
 					 											  + "reason='" + ban.getReason().getName() + "';"
 					 											  + "source='" + ban.getCreationDate() + "';"
-					 											  + "option='" + ban.getOption().orElse("null") + "';"
+					 											  + "context='" + ban.getOption().orElse("null") + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("null") + "')");

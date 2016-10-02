@@ -47,7 +47,7 @@ public class EJailService implements JailService {
 		
 		this.jails = new ConcurrentHashMap<String, EJail>();
 		
-		reload();
+		this.reload();
 	}
 	
 	public void reload() {

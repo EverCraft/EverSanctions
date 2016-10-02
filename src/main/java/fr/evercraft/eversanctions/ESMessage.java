@@ -79,9 +79,9 @@ public class ESMessage extends EMessage {
 		BANIP_IP_ERROR_NOEMPTY("banip.ip.errorNoEmpty", 			"&cErreur : L'addresse IP &6<player> &cest déjà banni."),
 		
 		BANIP_PLAYER_UNLIMITED_STAFF("banip.player.unlimitedStaff", "&7Vous avez banni définitivement l'adresse IP de &6<player> &7du serveur pour la raison : &6<reason>&7."),
-		BANIP_PLAYER_UNLIMITED_PLAYER("banip.player.unlimitedPlayer", "&c&lL'adresse IP de <player> a été banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		BANIP_PLAYER_UNLIMITED_PLAYER("banip.player.unlimitedPlayer", "&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
 		BANIP_PLAYER_TEMP_STAFF("banip.player.tempStaff", 			"&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>&7."),
-		BANIP_PLAYER_TEMP_PLAYER("banip.player.tempPlayer", 		"&c&lL'adresse IP de <player> a été banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		BANIP_PLAYER_TEMP_PLAYER("banip.player.tempPlayer", 		"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
 		BANIP_PLAYER_ERROR_TIME("banip.player.errorTime", 			"&cErreur : &6'<time>' n'est pas une durée."),
 		BANIP_PLAYER_ERROR_REASON("banip.player.errorReason", 		"&cErreur : La raison est obligatoire."),
 		BANIP_PLAYER_ERROR_CANCEL("banip.player.errorCancel", 		"&cErreur : Impossible de bannir l'adresse de &6<player>&c pour le moment."),

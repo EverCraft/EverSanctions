@@ -27,6 +27,8 @@ import fr.evercraft.everapi.services.sanction.JailService;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.eversanctions.command.ban.ESBan;
 import fr.evercraft.eversanctions.command.ban.ESUnBan;
+import fr.evercraft.eversanctions.command.banip.ESBanIp;
+import fr.evercraft.eversanctions.command.banip.ESUnBanIp;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
@@ -71,18 +73,27 @@ public class EverSanctions extends EPlugin {
 	}
 	
 	@Override
-	protected void onCompleteEnable() {
+	protected void onCompleteEnable() {		
 		ESCommand command = new ESCommand(this);
 		command.add(new ESReload(this, command));
 		
 		new ESBan(this);
 		new ESUnBan(this);
+		new ESBanIp(this);
+		new ESUnBanIp(this);
+	}
+	
+	@Override
+	protected void onStartServer() {
+		this.ban_service.reload();
 	}
 
 	protected void onReload() throws PluginDisableException {
 		this.reloadConfigurations();
 		
 		this.database.reload();
+		this.ban_service.reload();
+		this.jail_service.reload();
 	}
 	
 	protected void onDisable() {
