@@ -43,5 +43,11 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.enable", false);
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "eversanctions_");
+		
+		addDefault("jail.radius", 20);
+	}
+
+	public int getJailRadius() {
+		return this.get("jail.radius").getInt(20);
 	}
 }

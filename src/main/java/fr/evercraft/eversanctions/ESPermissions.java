@@ -31,6 +31,12 @@ public enum ESPermissions implements EnumPermission {
 	BAN("ban.command"),
 	BANIP("banip.command"),
 	MUTE("mute.command"),
+	
+	JAILS("jails.command"),
+	JAILS_ADD("jails.add"),
+	JAILS_DELETE("jails.delete"),
+	JAILS_LIST("jails.list"),
+	JAILS_TELEPORT("jails.teleport"),
 	JAIL("jail.command"),
 	
 	TEMP_BAN("tempban.command"),

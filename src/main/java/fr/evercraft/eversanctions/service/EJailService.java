@@ -31,6 +31,8 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.server.location.LocationSQL;
 import fr.evercraft.everapi.services.sanction.Jail;
@@ -57,9 +59,15 @@ public class EJailService implements JailService {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Collection<Jail> getAll() {
-		return (Collection) this.jails.values();
+		ImmutableList.Builder<Jail> builder = ImmutableList.builder();
+		this.jails.values().stream().filter(jail -> jail.getTransform() != null)
+									.forEach(jail -> builder.add(jail));
+		return builder.build();
+	}
+	
+	public Collection<EJail> getAllEJail() {
+		return ImmutableList.copyOf(this.jails.values());
 	}
 
 	@Override
@@ -71,36 +79,29 @@ public class EJailService implements JailService {
 
 	@Override
 	public Optional<Jail> get(String identifier) {
+		Optional<EJail> jail = this.getEJail(identifier);
+		if(jail.isPresent() && jail.get().getTransform() != null) {
+			return Optional.of(jail.get());
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<EJail> getEJail(String identifier) {
 		Preconditions.checkNotNull(identifier, "identifier");
 		
 		return Optional.ofNullable(this.jails.get(identifier));
 	}
 
 	@Override
-	public boolean add(String identifier, int radius, Transform<World> location) {
+	public boolean add(String identifier, Transform<World> location, Optional<Integer> radius) {
 		Preconditions.checkNotNull(identifier, "identifier");
-		Preconditions.checkNotNull(radius, "radius");
 		Preconditions.checkNotNull(location, "location");
+		Preconditions.checkNotNull(radius, "radius");
 		
 		if (!this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
+			final EJail jail = new EJail(this.plugin, identifier, radius, new LocationSQL(this.plugin, location));
 			this.jails.put(identifier, jail);
 			this.plugin.getThreadAsync().execute(() -> this.addAsync(jail));
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean update(String identifier, int radius, Transform<World> location) {
-		Preconditions.checkNotNull(identifier, "identifier");
-		Preconditions.checkNotNull(radius, "radius");
-		Preconditions.checkNotNull(location, "location");
-		
-		if (this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(identifier, radius, new LocationSQL(this.plugin, location));
-			this.jails.put(identifier, jail);
-			this.plugin.getThreadAsync().execute(() -> this.updateAsync(jail));
 			return true;
 		}
 		return false;
@@ -143,14 +144,19 @@ public class EJailService implements JailService {
 			preparedStatement = connection.prepareStatement(query);
 			ResultSet list = preparedStatement.executeQuery();
 			while (list.next()) {
+				Optional<Integer> radius = Optional.of(list.getInt("radius"));
+				if (list.wasNull()) {
+					radius = Optional.empty();
+				}
+				
 				LocationSQL location = new LocationSQL(this.plugin,	list.getString("world"), 
 														list.getDouble("x"),
 														list.getDouble("y"),
 														list.getDouble("z"),
 														list.getDouble("yaw"),
 														list.getDouble("pitch"));
-				jails.put(list.getString("identifier"), new EJail(list.getString("identifier"), list.getInt("radius"), location));
-				this.plugin.getLogger().debug("Loading : (jail='" + list.getString("identifier") + "';radius='" + list.getInt("radius") + "';location='" + location + "')");
+				jails.put(list.getString("identifier"), new EJail(this.plugin, list.getString("identifier"), radius, location));
+				this.plugin.getLogger().debug("Loading : (jail='" + list.getString("identifier") + "';radius='" + radius + "';location='" + location + "')");
 			}
     	} catch (SQLException e) {
     		this.plugin.getLogger().warn("Jails error when loading : " + e.getMessage());
@@ -184,44 +190,6 @@ public class EJailService implements JailService {
 			
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Adding to the database : (jail='" + jail.getName() + "';radius='" + jail.getRadius() + "';location='" + jail.getName() + "')");
-    	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
-			} catch (SQLException e) {}
-	    }
-	}
-	
-	public void updateAsync(final EJail jail) {
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-    	try {
-    		connection = this.plugin.getDataBase().getConnection();
-    		String query = 	  "UPDATE `" + this.plugin.getDataBase().getTableJails() + "` "
-    						+ "SET `radius` = ?,"
-    							+ "`world` = ?, "
-	    						+ "`x` = ?, "
-	    						+ "`y` = ?, "
-	    						+ "`z` = ?, "
-	    						+ "`yaw` = ?, "
-	    						+ "`pitch` = ? "
-    						+ "WHERE `identifier` = ? ;";
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setInt(1, jail.getRadius());
-			preparedStatement.setString(2, jail.getLocationSQL().getWorldUUID());
-			preparedStatement.setDouble(3, jail.getLocationSQL().getX());
-			preparedStatement.setDouble(4, jail.getLocationSQL().getY());
-			preparedStatement.setDouble(5, jail.getLocationSQL().getZ());
-			preparedStatement.setDouble(6, jail.getLocationSQL().getYaw());
-			preparedStatement.setDouble(7, jail.getLocationSQL().getPitch());
-			preparedStatement.setString(8, jail.getName());
-			
-			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating the database : (jail='" + jail.getName() + "';radius='" + jail.getRadius() + "';location='" + jail.getName() + "')");
     	} catch (SQLException e) {
         	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
 		} catch (ServerDisableException e) {

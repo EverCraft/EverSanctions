@@ -16,21 +16,29 @@
  */
 package fr.evercraft.eversanctions.service;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 
+import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.server.location.LocationSQL;
 import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.eversanctions.EverSanctions;
 
 public class EJail implements Jail {
 	
-	private final String name;
-	private final int radius;
-	private final LocationSQL location;
+	private final EverSanctions plugin;
 	
-	public EJail(final String name, final int radius, final LocationSQL location) {
+	private final String name;
+	private Optional<Integer> radius;
+	private LocationSQL location;
+	
+	public EJail(final EverSanctions plugin, final String name, final Optional<Integer> radius, final LocationSQL location) {
+		this.plugin = plugin;
 		this.name = name;
 		this.radius = radius;
 		this.location = location;
@@ -43,15 +51,72 @@ public class EJail implements Jail {
 	
 	@Override
 	public int getRadius() {
-		return this.radius;
+		return this.radius.orElse(this.plugin.getConfigs().getJailRadius());
 	}
 	
 	@Override
-	public Optional<Transform<World>> getTransform() {
-		return this.location.getTransform();
+	public Transform<World> getTransform() {
+		return this.location.getTransform().orElse(null);
 	}
 
 	public LocationSQL getLocationSQL() {
 		return this.location;
+	}
+
+	public boolean update(final Transform<World> transform) {
+		this.location = new LocationSQL(this.plugin, transform);
+		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
+		return false;
+	}
+	
+	public boolean update(final Optional<Integer> radius) {
+		this.radius = radius;
+		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
+		return false;
+	}
+	
+	public boolean update(final Transform<World> transform, final Optional<Integer> radius) {
+		this.location = new LocationSQL(this.plugin, transform);
+		this.radius = radius;
+		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
+		return false;
+	}
+	
+	public void updateAsync() {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+    	try {
+    		connection = this.plugin.getDataBase().getConnection();
+    		String query = 	  "UPDATE `" + this.plugin.getDataBase().getTableJails() + "` "
+    						+ "SET `radius` = ?,"
+    							+ "`world` = ?, "
+	    						+ "`x` = ?, "
+	    						+ "`y` = ?, "
+	    						+ "`z` = ?, "
+	    						+ "`yaw` = ?, "
+	    						+ "`pitch` = ? "
+    						+ "WHERE `identifier` = ? ;";
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setInt(1, this.getRadius());
+			preparedStatement.setString(2, this.getLocationSQL().getWorldUUID());
+			preparedStatement.setDouble(3, this.getLocationSQL().getX());
+			preparedStatement.setDouble(4, this.getLocationSQL().getY());
+			preparedStatement.setDouble(5, this.getLocationSQL().getZ());
+			preparedStatement.setDouble(6, this.getLocationSQL().getYaw());
+			preparedStatement.setDouble(7, this.getLocationSQL().getPitch());
+			preparedStatement.setString(8, this.getName());
+			
+			preparedStatement.execute();
+			this.plugin.getLogger().debug("Updating the database : (jail='" + this.getName() + "';radius='" + this.getRadius() + "';location='" + this.getName() + "')");
+    	} catch (SQLException e) {
+        	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) preparedStatement.close();
+				if (connection != null) connection.close();
+			} catch (SQLException e) {}
+	    }
 	}
 }

@@ -107,7 +107,46 @@ public class ESMessage extends EMessage {
 		
 		MUTE_DESCRIPTION("mute.description", "Mute le joueur"),
 		
-		JAIL_DESCRIPTION("jail.description", "Emprisonne le joueur");
+		JAIL_DESCRIPTION("jail.description", "Emprisonne le joueur"),
+		
+		// WARP
+		JAIL_NAME("jail.name", 														"&6&l<name>"),
+		JAIL_NAME_HOVER("jail.nameHover", 											"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
+		JAIL_INCONNU("jail.inconnu", 												"&cIl n'y a pas de prison qui s'appelle &6<jail>&c."),
+		
+		JAILS_DESCRIPTION("jails.description", 										"Gestion des prisons"),
+		
+		JAILS_LIST_DESCRIPTION("jails.list.description", 							"Affiche la liste des prisons"),
+		JAILS_LIST_EMPTY("jails.list.empty", 										"&7Aucun prison"),
+		JAILS_LIST_TITLE("jails.list.title", 										"&aListe des prisons"),
+		JAILS_LIST_LINE_DELETE("jails.list.lineDelete", 							"    &6&l➤  &6<jail> &7: <teleport> <delete>"),
+		JAILS_LIST_LINE_DELETE_ERROR_WORLD("jails.list.lineDeleteErrorWorld", 		"    &6&l➤  &6<jail> &7: <delete>"),
+		JAILS_LIST_LINE("jails.list.line", 											"    &6&l➤  &6<jail> &7: <teleport>"),
+		JAILS_LIST_TELEPORT("jails.list.teleport", 									"&a&nTéléporter"),
+		JAILS_LIST_TELEPORT_HOVER("jails.list.teleportHover", 						"&cCliquez ici pour vous téléporter à la prison &6<jail>&c."),
+		JAILS_LIST_DELETE("jails.list.delete", 										"&c&nSupprimer"),
+		JAILS_LIST_DELETE_HOVER("jails.list.deleteHover", 							"&cCliquez ici pour supprimer la prison &6<jail>&c."),
+		
+		JAILS_TELEPORT_DESCRIPTION("jails.teleport.description", 					"Téléporte à une prison"),
+		JAILS_TELEPORT_PLAYER("jails.teleport.player", 								"&7Vous avez été téléporté à la prison &6<jail>&7."),
+		JAILS_TELEPORT_PLAYER_ERROR("jails.teleport.playerError", 					"&cImpossible de vous téléporter à la prison &6<jail>&c."),
+		JAILS_TELEPORT_UNKNOWN("jails.teleport.unknown", 							"&cIl n'y a pas de prison qui s'appelle &6<jail>&c."),
+		
+		JAILS_DELETE_DESCRIPTION("jails.delete.description", 						"Supprime une prison"),
+		JAILS_DELETE_INCONNU("jails.delete.inconnu", 								"&cIl n'y pas de prison qui s'appelle &6<jail>&c."),
+		JAILS_DELETE_CONFIRMATION("jails.delete.confirmation", 						"&7Souhaitez-vous vraiment supprimer la prison &6<jail> &7: <confirmation>"),
+		JAILS_DELETE_CONFIRMATION_VALID("jails.delete.confirmationValid", 			"&2&nConfirmer"),
+		JAILS_DELETE_CONFIRMATION_VALID_HOVER("jails.delete.confirmationValidHover","&cCliquez ici pour supprimer la prison &6<jail>&c."),
+		JAILS_DELETE_DELETE("jails.delete.delete", 									"&7Vous avez supprimé la prison &6<jail>&7."),
+		JAILS_DELETE_CANCEL("jails.delete.cancel", 									"&cImpossible de supprimé la &6<jail> &cpour le moment."),
+		
+		JAILS_ADD_DESCRIPTION("jails.set.description", 								"Crée une prison"),
+		JAILS_ADD_NAME("jails.set.name", 											"&6&l<name>"),
+		JAILS_ADD_NAME_HOVER("jails.set.nameHover", 								"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
+		JAILS_ADD_REPLACE("jails.set.replace", 										"&7Vous avez redéfini la prison &6<jail>&7."),
+		JAILS_ADD_REPLACE_CANCEL("jails.set.replaceCancel", 						"&cImpossible de redéfinir la prison &6<jail> &4pour le moment."),
+		JAILS_ADD_NEW("jails.set.new", 												"&7Vous avez défini la prison &6<jail>&7."),
+		JAILS_ADD_NEW_CANCEL("jails.set.newCancel", 								"&cImpossible de définir la prison &6<jail> &4pour le moment.");
 		
 		private final String path;
 	    private final Object french;
