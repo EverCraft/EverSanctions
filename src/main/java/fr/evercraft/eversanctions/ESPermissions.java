@@ -37,6 +37,7 @@ public enum ESPermissions implements EnumPermission {
 	JAILS_DELETE("jails.delete"),
 	JAILS_LIST("jails.list"),
 	JAILS_TELEPORT("jails.teleport"),
+	JAILS_SETRADIUS("jails.setradius"),
 	JAIL("jail.command"),
 	
 	TEMP_BAN("tempban.command"),

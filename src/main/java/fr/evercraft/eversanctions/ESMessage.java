@@ -140,13 +140,20 @@ public class ESMessage extends EMessage {
 		JAILS_DELETE_DELETE("jails.delete.delete", 									"&7Vous avez supprimé la prison &6<jail>&7."),
 		JAILS_DELETE_CANCEL("jails.delete.cancel", 									"&cImpossible de supprimé la &6<jail> &cpour le moment."),
 		
-		JAILS_ADD_DESCRIPTION("jails.set.description", 								"Crée une prison"),
-		JAILS_ADD_NAME("jails.set.name", 											"&6&l<name>"),
-		JAILS_ADD_NAME_HOVER("jails.set.nameHover", 								"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
-		JAILS_ADD_REPLACE("jails.set.replace", 										"&7Vous avez redéfini la prison &6<jail>&7."),
-		JAILS_ADD_REPLACE_CANCEL("jails.set.replaceCancel", 						"&cImpossible de redéfinir la prison &6<jail> &4pour le moment."),
-		JAILS_ADD_NEW("jails.set.new", 												"&7Vous avez défini la prison &6<jail>&7."),
-		JAILS_ADD_NEW_CANCEL("jails.set.newCancel", 								"&cImpossible de définir la prison &6<jail> &4pour le moment.");
+		JAILS_ADD_DESCRIPTION("jails.add.description", 								"Crée une prison"),
+		JAILS_ADD_NAME("jails.add.name", 											"&6&l<name>"),
+		JAILS_ADD_NAME_HOVER("jails.add.nameHover", 								"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
+		JAILS_ADD_REPLACE("jails.add.replace", 										"&7Vous avez redéfini la prison &6<jail>&7."),
+		JAILS_ADD_REPLACE_CANCEL("jails.add.replaceCancel", 						"&cImpossible de redéfinir la prison &6<jail> &4pour le moment."),
+		JAILS_ADD_NEW("jails.add.new", 												"&7Vous avez défini la prison &6<jail>&7."),
+		JAILS_ADD_NEW_CANCEL("jails.add.newCancel", 								"&cImpossible de définir la prison &6<jail> &4pour le moment."),
+		
+		JAILS_SETRADIUS_DESCRIPTION("jails.setradius.description", 					"Modifie le rayon d'une prison"),
+		JAILS_SETRADIUS_DEFAULT("jails.setradius.default", 							""),
+		JAILS_SETRADIUS_VALUE("jails.setradius.value", 								""),
+		JAILS_SETRADIUS_DEFAULT_CANCEL("jails.setradius.defaultCancel", 			""),
+		JAILS_SETRADIUS_VALUE_CANCEL("jails.setradius.valueCancel", 				""),
+		JAILS_SETRADIUS_UNKNOWN("jails.setradius.unknown", 							"");
 		
 		private final String path;
 	    private final Object french;
