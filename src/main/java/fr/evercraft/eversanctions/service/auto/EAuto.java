@@ -28,6 +28,7 @@ import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.api.util.ban.Ban.Builder;
 
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 
@@ -99,6 +100,12 @@ public class EAuto implements SanctionAuto {
 	@Override
 	public String getSource() {
 		return this.source;
+	}
+	
+	@Override
+	public Optional<Jail> getJail() {
+		// TODO
+		return Optional.empty();
 	}
 	
 	@Override

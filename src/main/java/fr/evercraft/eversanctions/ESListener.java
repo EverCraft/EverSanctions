@@ -18,13 +18,19 @@ package fr.evercraft.eversanctions;
 
 import java.util.Optional;
 
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.server.player.EPlayer;
+import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
@@ -80,6 +86,32 @@ public class ESListener {
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
+		}
+	}
+	
+	@Listener
+	public void onPlayerMove(MoveEntityEvent event) {
+		if (event.getTargetEntity() instanceof Player) {
+			if (!event.getFromTransform().getExtent().equals(event.getToTransform().getExtent()) ||
+					Math.ceil(event.getFromTransform().getPosition().getX()) != Math.ceil(event.getToTransform().getPosition().getX()) ||
+					Math.ceil(event.getFromTransform().getPosition().getY()) != Math.ceil(event.getToTransform().getPosition().getY()) ||
+					Math.ceil(event.getFromTransform().getPosition().getZ()) != Math.ceil(event.getToTransform().getPosition().getZ())) {
+			
+				Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer((Player) event.getTargetEntity());
+				if (optPlayer.isPresent()) {
+					EPlayer player = optPlayer.get();
+					
+					// Jail
+					if(player.isJail()) {
+						Jail jail = player.getJail().get();
+						Transform<World> transform = jail.getTransform();
+						if (event.getToTransform().getExtent().equals(transform.getExtent()) ||
+							event.getToTransform().getPosition().distance(transform.getPosition()) >= jail.getRadius()) {
+							player.setTransform(transform);
+						}
+					}
+				}
+			}	
 		}
 	}
 }

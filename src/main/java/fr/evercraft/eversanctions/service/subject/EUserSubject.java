@@ -71,7 +71,7 @@ public class EUserSubject implements SanctionUserSubject {
 	
 	private boolean ban;
 	private boolean mute;
-	private boolean jail;
+	private Optional<Jail> jail;
 
 	public EUserSubject(final EverSanctions plugin, final UUID uuid) {
 		this.plugin = plugin;
@@ -79,6 +79,7 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		this.manual = new ConcurrentSkipListSet<EManualProfile>((EManualProfile o1, EManualProfile o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 		this.auto = new ConcurrentSkipListSet<EAuto>((EAuto o1, EAuto o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
+		this.jail = Optional.empty();
 		
 		this.reload();
 	}
@@ -107,7 +108,7 @@ public class EUserSubject implements SanctionUserSubject {
 	public void update() {
 		this.ban = false;
 		this.mute = false;
-		this.jail = false;
+		this.jail = Optional.empty();
 		
 		this.manual.stream().filter(manual -> !manual.isExpire())
 			.forEach(manual -> {
@@ -115,8 +116,8 @@ public class EUserSubject implements SanctionUserSubject {
 					this.ban = true;
 				} else if(manual.getType().equals(SanctionManualProfile.Type.MUTE)) {
 					this.mute = true;
-				} else if(manual.getType().equals(SanctionManualProfile.Type.JAIL)) {
-					this.jail = true;
+				} else if(!this.jail.isPresent() && manual.getType().equals(SanctionManualProfile.Type.JAIL)) {
+					((SanctionManualProfile.Jail) manual).getJail().ifPresent(jail -> this.jail = Optional.of(jail));
 				}
 			});
 		
@@ -124,7 +125,10 @@ public class EUserSubject implements SanctionUserSubject {
 			.forEach(auto -> {
 				this.ban = this.ban || auto.isBan();
 				this.mute = this.mute || auto.isMute();
-				this.jail = this.jail || auto.isJail();
+				
+				if(!this.jail.isPresent() && auto.isJail()) {
+					auto.getJail().ifPresent(jail -> this.jail = Optional.of(jail));
+				}
 			});
 	}
 	
@@ -245,6 +249,11 @@ public class EUserSubject implements SanctionUserSubject {
 
 	@Override
 	public boolean isJail() {
+		return this.jail.isPresent();
+	}
+	
+	@Override
+	public Optional<Jail> getJail() {
 		return this.jail;
 	}
 	
@@ -704,7 +713,7 @@ public class EUserSubject implements SanctionUserSubject {
 					} else if (type.get().equals(SanctionManualProfile.Type.JAIL)) {
 						Optional<String> jail = Optional.ofNullable(list.getString("context"));
 						if (jail.isPresent()) {
-							profiles.add(new EManualProfileJail(this.getUniqueId(), jail.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
+							profiles.add(new EManualProfileJail(this.plugin, this.getUniqueId(), jail.get(), creation, expiration, reason, source, pardon_date, pardon_reason, pardon_source));
 						}
 					}
 				}

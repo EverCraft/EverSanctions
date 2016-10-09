@@ -22,25 +22,32 @@ import java.util.UUID;
 import org.spongepowered.api.text.Text;
 
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
+import fr.evercraft.eversanctions.EverSanctions;
 
 public class EManualProfileJail extends EManualProfile implements SanctionManualProfile.Jail {
 	
-	public EManualProfileJail(final UUID uuid, final String jail, final long creation, final Optional<Long> expiration, final Text reason, final String source) {
-		this(uuid, jail, creation, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
+	private final EverSanctions plugin;
+	private final String jail;
+	
+	public EManualProfileJail(final EverSanctions plugin, final UUID uuid, final String jail, final long creation, final Optional<Long> expiration, final Text reason, final String source) {
+		this(plugin, uuid, jail, creation, expiration, reason, source, Optional.empty(), Optional.empty(), Optional.empty());
 	}
 	
-	public EManualProfileJail(final UUID uuid, final String jail, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
+	public EManualProfileJail(final EverSanctions plugin, final UUID uuid, final String jail, final long date_start, final Optional<Long> expiration, final Text reason, final String source, 
 			final Optional<Long> pardon_date, final Optional<Text> pardon_reason, final Optional<String> pardon_source) {
 		super(uuid, date_start, expiration, reason, source, pardon_date, pardon_reason, pardon_source);
+		
+		this.plugin = plugin;
+		this.jail = jail;
 	}
 
 	@Override
 	public String getJailName() {
-		return null;
+		return this.jail;
 	}
 
 	@Override
-	public Optional<Jail> getJail() {
-		return null;
+	public Optional<fr.evercraft.everapi.services.sanction.Jail> getJail() {
+		return this.plugin.getJailService().get(this.jail);
 	}
 }

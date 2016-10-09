@@ -29,6 +29,8 @@ import fr.evercraft.eversanctions.command.ban.ESBan;
 import fr.evercraft.eversanctions.command.ban.ESUnBan;
 import fr.evercraft.eversanctions.command.banip.ESBanIp;
 import fr.evercraft.eversanctions.command.banip.ESUnBanIp;
+import fr.evercraft.eversanctions.command.jail.ESJail;
+import fr.evercraft.eversanctions.command.jail.ESUnJail;
 import fr.evercraft.eversanctions.command.jails.ESJails;
 import fr.evercraft.eversanctions.command.jails.ESJailsAdd;
 import fr.evercraft.eversanctions.command.jails.ESJailsDelete;
@@ -85,8 +87,12 @@ public class EverSanctions extends EPlugin {
 		
 		new ESBan(this);
 		new ESUnBan(this);
+		
 		new ESBanIp(this);
 		new ESUnBanIp(this);
+		
+		new ESJail(this);
+		new ESUnJail(this);
 		
 		ESJails jail = new ESJails(this);
 		jail.add(new ESJailsAdd(this, jail));
