@@ -1,4 +1,4 @@
-package fr.evercraft.eversanctions.command.jail;
+package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +9,17 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.player.EPlayer;
+import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
+import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.service.EJail;
 
 public class ESJailsAdd extends ESubCommand<EverSanctions> {
@@ -50,7 +50,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 	public List<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1) {
-			suggests.add("...");
+			suggests.add("jail...");
 		} else if (args.size() == 2) {
 			suggests.add(String.valueOf(this.plugin.getConfigs().getJailRadius()));
 		}
@@ -99,21 +99,22 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			if (jail.get().update(player.getTransform())) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_ADD_REPLACE.get())
-						.replace("<jail>", this.getButtonJail(name, player.getLocation()))
+						.replace("<jail>", ESJail.getButtonJail(jail.get()))
 						.build());
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_REPLACE_CANCEL.get().replaceAll("<jail>", name));
+				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_REPLACE.get().replaceAll("<jail>", name));
 			}
 		} else {
-			if (this.plugin.getJailService().add(name, player.getTransform(), Optional.empty())) {
+			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.empty());
+			if (jail_new.isPresent()) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_ADD_NEW.get())
-						.replace("<jail>", this.getButtonJail(name, player.getLocation()))
+						.replace("<jail>", ESJail.getButtonJail(jail_new.get()))
 						.build());
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_NEW_CANCEL.get().replaceAll("<jail>", name));
+				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_NEW.get().replaceAll("<jail>", name));
 			}
 		}
 		return false;
@@ -127,34 +128,24 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			if (jail.get().update(player.getTransform(), Optional.of(radius))) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_ADD_REPLACE.get())
-						.replace("<jail>", this.getButtonJail(name, player.getLocation()))
+						.replace("<jail>", ESJail.getButtonJail(jail.get()))
 						.build());
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_REPLACE_CANCEL.get().replaceAll("<jail>", name));
+				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_REPLACE.get().replaceAll("<jail>", name));
 			}
 		} else {
-			if (this.plugin.getJailService().add(name, player.getTransform(), Optional.of(radius))) {
+			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.of(radius));
+			if (jail_new.isPresent()) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_ADD_NEW.get())
-						.replace("<jail>", this.getButtonJail(name, player.getLocation()))
+						.replace("<jail>", ESJail.getButtonJail(jail_new.get()))
 						.build());
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_NEW_CANCEL.get().replaceAll("<jail>", name));
+				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_NEW.get().replaceAll("<jail>", name));
 			}
 		}
 		return false;
-	}
-
-	private Text getButtonJail(final String name, final Location<World> location){
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", name)).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", name)
-							.replaceAll("<world>", location.getExtent().getName())
-							.replaceAll("<x>", String.valueOf(location.getBlockX()))
-							.replaceAll("<y>", String.valueOf(location.getBlockY()))
-							.replaceAll("<z>", String.valueOf(location.getBlockZ())))))
-					.build();
 	}
 }

@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -81,6 +82,19 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			suggests.add("reason...");
 		}
 		return suggests;
+	}
+	
+	@Override
+	protected List<String> getArg(final String arg) {
+		List<String> args = super.getArg(arg);
+		// Le message est transformer en un seul argument
+		if (args.size() > 2) {
+			List<String> args_send = new ArrayList<String>();
+			args_send.add(args.get(0));
+			args_send.add(Pattern.compile("^[ \"]*" + args.get(0) + "[ \"][ ]*").matcher(arg).replaceAll(""));
+			return args_send;
+		}
+		return args;
 	}
 	
 	@Override

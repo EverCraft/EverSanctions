@@ -43,7 +43,7 @@ public class ESMessage extends EMessage {
 		CONNECTION_BAN_UNLIMITED("connection.banUnlimited", 		"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
 		CONNECTION_BAN_TEMP("connection.banTemp", 					"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
 		CONNECTION_BANIP_UNLIMITED("connection.banipUnlimited", 	"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		CONNECTION_BANIP_TEMP("connection.banipTemp", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<time>"),
+		CONNECTION_BANIP_TEMP("connection.banipTemp", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
 		
 		// Ban		
 		BAN_DESCRIPTION("ban.description", 							"Banni le joueur du serveur"),
@@ -107,17 +107,38 @@ public class ESMessage extends EMessage {
 		
 		MUTE_DESCRIPTION("mute.description", "Mute le joueur"),
 		
-		JAIL_DESCRIPTION("jail.description", "Emprisonne le joueur"),
+		// Jail	
+		JAIL_DESCRIPTION("jail.description", 										"Emprisonne le joueur"),
+		JAIL_UNLIMITED_STAFF("jail.unlimitedStaff", 								"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>&7."),
+		JAIL_UNLIMITED_PLAYER("jail.unlimitedPlayer", 								"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		JAIL_TEMP_STAFF("jail.tempStaff", 											"&7Vous avez banni &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>&7."),
+		JAIL_TEMP_PLAYER("jail.tempPlayer", 										"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		JAIL_ERROR_TIME("jail.errorTime", 											"&cErreur : &6'<time>' &cn'est pas une durée."),
+		JAIL_ERROR_REASON("jail.errorReason", 										"&cErreur : La raison est obligatoire."),
+		JAIL_ERROR_CANCEL_UNLIMITED("jail.errorCancelUnlimited", 					"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
+		JAIL_ERROR_CANCEL_TEMP("jail.errorCancelTemp", 								"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
+		JAIL_ERROR_EQUALS("jail.errorEquals", 										"&cErreur : Impossible de vous bannir vous-même."),
+		JAIL_ERROR_NOEMPTY("jail.errorNoEmpty", 										"&cErreur : &6<player> &cest déjà banni."),
 		
-		// WARP
+		// UnJail
+		UNJAIL_DESCRIPTION("unjail.description", 									"Débanni le joueur du serveur"),
+		UNJAIL_STAFF("unjail.staff", 												"&7Vous avez débanni &6<player>&7."),
+		UNJAIL_PLAYER("unjail.player", 												"&7Vous avez débanni &6<player>&7."),
+		UNJAIL_ERROR_REASON("unjail.errorReason", 									"&cErreur : La raison est obligatoire."),
+		UNJAIL_ERROR_EQUALS("unjail.errorEquals", 									"&cErreur : Impossible de vous débannir vous-même."),
+		UNJAIL_ERROR_EMPTY("unjail.errorEmpty", 										"&cErreur : &6<player> &cn'est pas banni."),
+		UNJAIL_CANCEL("unjail.cancel", 												"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
+
 		JAIL_NAME("jail.name", 														"&6&l<name>"),
-		JAIL_NAME_HOVER("jail.nameHover", 											"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
-		JAIL_INCONNU("jail.inconnu", 												"&cIl n'y a pas de prison qui s'appelle &6<jail>&c."),
+		JAIL_NAME_HOVER("jail.nameHover", 											"&cRayon : &6<radius> block(s)[RT]&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
+		JAIL_UNKNOWN("jail.unknown", 												"&cErreur : Impossible trouver un prison avec le nom &6<jail>&c."),
+		JAIL_EMPTY("jail.empty",													"&cErreur : Il y a aucune prison défini sur le serveur."),
 		
+		// Jails
 		JAILS_DESCRIPTION("jails.description", 										"Gestion des prisons"),
 		
 		JAILS_LIST_DESCRIPTION("jails.list.description", 							"Affiche la liste des prisons"),
-		JAILS_LIST_EMPTY("jails.list.empty", 										"&7Aucun prison"),
+		JAILS_LIST_EMPTY("jails.list.empty", 										"&7Aucune prison"),
 		JAILS_LIST_TITLE("jails.list.title", 										"&aListe des prisons"),
 		JAILS_LIST_LINE_DELETE("jails.list.lineDelete", 							"    &6&l➤  &6<jail> &7: <teleport> <delete>"),
 		JAILS_LIST_LINE_DELETE_ERROR_WORLD("jails.list.lineDeleteErrorWorld", 		"    &6&l➤  &6<jail> &7: <delete>"),
@@ -129,31 +150,26 @@ public class ESMessage extends EMessage {
 		
 		JAILS_TELEPORT_DESCRIPTION("jails.teleport.description", 					"Téléporte à une prison"),
 		JAILS_TELEPORT_PLAYER("jails.teleport.player", 								"&7Vous avez été téléporté à la prison &6<jail>&7."),
-		JAILS_TELEPORT_PLAYER_ERROR("jails.teleport.playerError", 					"&cImpossible de vous téléporter à la prison &6<jail>&c."),
-		JAILS_TELEPORT_UNKNOWN("jails.teleport.unknown", 							"&cIl n'y a pas de prison qui s'appelle &6<jail>&c."),
+		JAILS_TELEPORT_PLAYER_ERROR("jails.teleport.playerError", 					"&cErreur : Impossible de trouver un position pour vous téléportez à la prison &6<jail>&c."),
 		
 		JAILS_DELETE_DESCRIPTION("jails.delete.description", 						"Supprime une prison"),
-		JAILS_DELETE_INCONNU("jails.delete.inconnu", 								"&cIl n'y pas de prison qui s'appelle &6<jail>&c."),
 		JAILS_DELETE_CONFIRMATION("jails.delete.confirmation", 						"&7Souhaitez-vous vraiment supprimer la prison &6<jail> &7: <confirmation>"),
 		JAILS_DELETE_CONFIRMATION_VALID("jails.delete.confirmationValid", 			"&2&nConfirmer"),
 		JAILS_DELETE_CONFIRMATION_VALID_HOVER("jails.delete.confirmationValidHover","&cCliquez ici pour supprimer la prison &6<jail>&c."),
 		JAILS_DELETE_DELETE("jails.delete.delete", 									"&7Vous avez supprimé la prison &6<jail>&7."),
-		JAILS_DELETE_CANCEL("jails.delete.cancel", 									"&cImpossible de supprimé la &6<jail> &cpour le moment."),
+		JAILS_DELETE_CANCEL("jails.delete.cancel", 									"&cErreur : Impossible de supprimé la &6<jail> &cpour le moment."),
 		
 		JAILS_ADD_DESCRIPTION("jails.add.description", 								"Crée une prison"),
-		JAILS_ADD_NAME("jails.add.name", 											"&6&l<name>"),
-		JAILS_ADD_NAME_HOVER("jails.add.nameHover", 								"&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
 		JAILS_ADD_REPLACE("jails.add.replace", 										"&7Vous avez redéfini la prison &6<jail>&7."),
-		JAILS_ADD_REPLACE_CANCEL("jails.add.replaceCancel", 						"&cImpossible de redéfinir la prison &6<jail> &4pour le moment."),
 		JAILS_ADD_NEW("jails.add.new", 												"&7Vous avez défini la prison &6<jail>&7."),
-		JAILS_ADD_NEW_CANCEL("jails.add.newCancel", 								"&cImpossible de définir la prison &6<jail> &4pour le moment."),
+		JAILS_ADD_CANCEL_REPLACE("jails.add.cancelReplace", 						"&cErreur : Impossible de redéfinir la prison &6<jail> &4pour le moment."),
+		JAILS_ADD_CANCEL_NEW("jails.add.cancelNew", 								"&cErreur : Impossible de définir la prison &6<jail> &4pour le moment."),
 		
 		JAILS_SETRADIUS_DESCRIPTION("jails.setradius.description", 					"Modifie le rayon d'une prison"),
-		JAILS_SETRADIUS_DEFAULT("jails.setradius.default", 							""),
-		JAILS_SETRADIUS_VALUE("jails.setradius.value", 								""),
-		JAILS_SETRADIUS_DEFAULT_CANCEL("jails.setradius.defaultCancel", 			""),
-		JAILS_SETRADIUS_VALUE_CANCEL("jails.setradius.valueCancel", 				""),
-		JAILS_SETRADIUS_UNKNOWN("jails.setradius.unknown", 							"");
+		JAILS_SETRADIUS_DEFAULT("jails.setradius.default", 							"&7Vous avez défini le rayon de la prison <jail> &7avec la valeur par défault (&6<radius> block(s)&7)"),
+		JAILS_SETRADIUS_VALUE("jails.setradius.value", 								"&7Vous avez défini le rayon de la prison <jail> &7à &6<radius> block(s)&7."),
+		JAILS_SETRADIUS_CANCEL_DEFAULT("jails.setradius.cancelDefault", 			"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment."),
+		JAILS_SETRADIUS_CANCEL_VALUE("jails.setradius.cancelValue", 				"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment.");
 		
 		private final String path;
 	    private final Object french;

@@ -1,4 +1,4 @@
-package fr.evercraft.eversanctions.command.jail;
+package fr.evercraft.eversanctions.command.jails;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;

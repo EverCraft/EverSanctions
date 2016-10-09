@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.evercraft.eversanctions.command.ban;
+package fr.evercraft.eversanctions.command.jail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,28 +31,27 @@ import org.spongepowered.api.text.format.TextColors;
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
+import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 
-public class ESUnBan extends ECommand<EverSanctions> {
+public class ESUnJail extends ECommand<EverSanctions> {
 	
-	public ESUnBan(final EverSanctions plugin) {
-        super(plugin, "unban", "pardon");
-        
-     // TODO Remove command : pardon
+	public ESUnJail(final EverSanctions plugin) {
+        super(plugin, "unjail");
     }
 	
 	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(ESPermissions.UNBAN.get());
+		return source.hasPermission(ESPermissions.UNJAIL.get());
 	}
 
 	@Override
 	public Text description(final CommandSource source) {
-		return ESMessages.UNBAN_DESCRIPTION.getText();
+		return ESMessages.UNJAIL_DESCRIPTION.getText();
 	}
 
 	@Override
@@ -122,21 +121,21 @@ public class ESUnBan extends ECommand<EverSanctions> {
 	private boolean commandPardonBan(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EQUALS.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_EQUALS.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_REASON.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_REASON.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
-		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EMPTY.get()
+		if (!user.getManual(SanctionManualProfile.Type.JAIL).isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_EMPTY.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
 		}
@@ -144,14 +143,21 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		// Si l'event a été cancel
 		Optional<SanctionManualProfile.Ban> pardon = user.pardonBan(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_CANCEL.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_STAFF.get()
+		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_STAFF.get()
 			.replaceAll("<reason>", reason_string)
 			.replaceAll("<player>", user.getName())));
+		
+		if(user instanceof EPlayer) {
+			EPlayer player = (EPlayer) user;
+			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.UNJAIL_PLAYER.get()
+							.replaceAll("<staff>", staff.getName())
+							.replaceAll("<reason>", reason_string));
+		}
 		return true;
 	}
 }

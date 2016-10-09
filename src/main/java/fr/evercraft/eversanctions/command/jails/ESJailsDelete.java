@@ -1,4 +1,4 @@
-package fr.evercraft.eversanctions.command.jail;
+package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,10 @@ import org.spongepowered.api.text.format.TextColors;
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
-import fr.evercraft.everapi.server.location.LocationSQL;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
+import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.EJail;
@@ -79,12 +79,12 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 		if (jail.isPresent()) {
 			player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 					.append(ESMessages.JAILS_DELETE_CONFIRMATION.get())
-					.replace("<jail>", this.getButtonJail(name, jail.get().getLocationSQL()))
+					.replace("<jail>", ESJail.getButtonJail(jail.get()))
 					.replace("<confirmation>", this.getButtonConfirmation(name))
 					.build());
 		// Le serveur n'a pas de prison qui porte ce nom
 		} else {
-			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_DELETE_INCONNU.get().replaceAll("<jail>", name));
+			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAIL_UNKNOWN.get().replaceAll("<jail>", name));
 		}
 		return false;
 	}
@@ -99,7 +99,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 			if (this.plugin.getJailService().remove(name)) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_DELETE_DELETE.get())
-						.replace("<jail>", this.getButtonJail(name, jail.get().getLocationSQL()))
+						.replace("<jail>", ESJail.getButtonJail(jail.get()))
 						.build());
 				return true;
 			// La prison n'a pas été supprimer
@@ -108,7 +108,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 			}
 		// Le serveur n'a pas de prison qui porte ce nom
 		} else {
-			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_DELETE_INCONNU.get().replaceAll("<jail>", name));
+			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAIL_UNKNOWN.get().replaceAll("<jail>", name));
 		}
 		return false;
 	}
@@ -117,18 +117,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 		return ESMessages.JAILS_DELETE_CONFIRMATION_VALID.getText().toBuilder()
 					.onHover(TextActions.showText(EChat.of(ESMessages.JAILS_DELETE_CONFIRMATION_VALID_HOVER.get()
 							.replaceAll("<jail>", name))))
-					.onClick(TextActions.runCommand("/jail delete \"" + name + "\" confirmation"))
-					.build();
-	}
-	
-	private Text getButtonJail(final String name, final LocationSQL location){
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", name)).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", name)
-							.replaceAll("<world>", location.getWorldName())
-							.replaceAll("<x>", location.getX().toString())
-							.replaceAll("<y>", location.getY().toString())
-							.replaceAll("<z>", location.getZ().toString()))))
+					.onClick(TextActions.runCommand("/jails delete \"" + name + "\" confirmation"))
 					.build();
 	}
 }

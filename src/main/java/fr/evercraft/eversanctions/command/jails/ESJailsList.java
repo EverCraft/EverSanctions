@@ -1,4 +1,4 @@
-package fr.evercraft.eversanctions.command.jail;
+package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.location.LocationSQL;
 import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
+import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.EJail;
@@ -72,16 +73,16 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		List<Text> lists = new ArrayList<Text>();
 		if (player.hasPermission(ESPermissions.JAILS_DELETE.get())) {
 			for (EJail jail : jails) {
-				if (jail.getTransform() == null) {
+				if (jail.getTransform() != null) {
 					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE_DELETE.get())
-						.replace("<jail>", this.getButtonJail(jail.getName(), jail.getRadius(), jail.getLocationSQL()))
+						.replace("<jail>", ESJail.getButtonJail(jail))
 						.replace("<radius>", String.valueOf(jail.getRadius()))
 						.replace("<teleport>", this.getButtonTeleport(jail.getName(), jail.getTransform()))
 						.replace("<delete>", this.getButtonDelete(jail.getName(), jail.getLocationSQL()))
 						.build());
 				} else {
 					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.get())
-						.replace("<jail>", this.getButtonJail(jail.getName(), jail.getRadius(), jail.getLocationSQL()))
+						.replace("<jail>", ESJail.getButtonJail(jail))
 						.replace("<radius>", String.valueOf(jail.getRadius()))
 						.replace("<delete>", this.getButtonDelete(jail.getName(), jail.getLocationSQL()))
 						.build());
@@ -89,9 +90,9 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 			}
 		} else {
 			for (EJail jail : jails) {
-				if (jail.getTransform() == null) {
+				if (jail.getTransform() != null) {
 					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE.get())
-						.replace("<jail>", this.getButtonJail(jail.getName(), jail.getRadius(), jail.getLocationSQL()))
+						.replace("<jail>", ESJail.getButtonJail(jail))
 						.replace("<radius>", String.valueOf(jail.getRadius()))
 						.replace("<teleport>", this.getButtonTeleport(jail.getName(), jail.getTransform()))
 						.build());
@@ -122,18 +123,6 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 					.onHover(TextActions.showText(EChat.of(ESMessages.JAILS_LIST_DELETE_HOVER.get()
 							.replaceAll("<jail>", name))))
 					.onClick(TextActions.runCommand("/jails delete \"" + name + "\""))
-					.build();
-	}
-	
-	private Text getButtonJail(final String name, final int radius, final LocationSQL location){
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", name)).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", name)
-							.replace("<radius>", String.valueOf(radius))
-							.replaceAll("<world>", location.getWorldName())
-							.replaceAll("<x>", location.getX().toString())
-							.replaceAll("<y>", location.getY().toString())
-							.replaceAll("<z>", location.getZ().toString()))))
 					.build();
 	}
 }

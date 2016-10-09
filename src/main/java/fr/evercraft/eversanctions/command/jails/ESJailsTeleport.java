@@ -1,4 +1,4 @@
-package fr.evercraft.eversanctions.command.jail;
+package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
@@ -19,6 +17,7 @@ import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
+import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
 
@@ -84,26 +83,15 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 			if (player.teleportSafe(jail.get().getTransform())) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_TELEPORT_PLAYER.get())
-						.replace("<jail>", this.getButtonJail(name, player.getLocation()))
+						.replace("<jail>", ESJail.getButtonJail(jail.get()))
 						.build());
 				return true;
 			} else {
 				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_TELEPORT_PLAYER_ERROR.get().replaceAll("<jail>", name));
 			}
 		} else {
-			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_TELEPORT_UNKNOWN.get().replaceAll("<jail>", name));
+			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAIL_UNKNOWN.get().replaceAll("<jail>", name));
 		}
 		return false;
-	}
-
-	private Text getButtonJail(final String name, final Location<World> location){
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", name)).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", name)
-							.replaceAll("<world>", location.getExtent().getName())
-							.replaceAll("<x>", String.valueOf(location.getBlockX()))
-							.replaceAll("<y>", String.valueOf(location.getBlockY()))
-							.replaceAll("<z>", String.valueOf(location.getBlockZ())))))
-					.build();
 	}
 }

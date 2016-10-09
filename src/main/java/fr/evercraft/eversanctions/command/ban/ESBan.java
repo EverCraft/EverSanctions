@@ -172,7 +172,7 @@ public class ESBan extends ECommand<EverSanctions> {
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.kick(EChat.of(ESMessages.BAN_UNLIMITED_PLAYER.get()
-					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<staff>", staff.getName())
 					.replaceAll("<reason>", reason)));
 		}
 		return true;
@@ -196,7 +196,7 @@ public class ESBan extends ECommand<EverSanctions> {
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.kick(EChat.of(ESMessages.BAN_TEMP_PLAYER.get()
-					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<staff>", staff.getName())
 					.replaceAll("<reason>", reason)
 					.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
 					.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))

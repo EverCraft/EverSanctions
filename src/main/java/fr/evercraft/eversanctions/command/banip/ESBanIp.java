@@ -309,7 +309,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
 		.forEach(player ->
 			player.kick(EChat.of(ESMessages.BANIP_PLAYER_UNLIMITED_PLAYER.get()
-					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<staff>", staff.getName())
 					.replaceAll("<reason>", reason)
 					.replaceAll("<address>", UtilsNetwork.getHostString(address))))
 		);
@@ -340,7 +340,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
 		.forEach(player ->
 			player.kick(EChat.of(ESMessages.BANIP_PLAYER_TEMP_PLAYER.get()
-					.replaceAll("<staff>", staff.getIdentifier())
+					.replaceAll("<staff>", staff.getName())
 					.replaceAll("<address>", UtilsNetwork.getHostString(address))
 					.replaceAll("<reason>", reason)
 					.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))

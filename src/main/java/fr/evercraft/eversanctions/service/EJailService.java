@@ -66,6 +66,13 @@ public class EJailService implements JailService {
 		return builder.build();
 	}
 	
+	@Override
+	public Collection<String> getAllNames() {
+		ImmutableList.Builder<String> builder = ImmutableList.builder();
+		this.jails.values().stream().forEach(jail -> builder.add(jail.getName()));
+		return builder.build();
+	}
+	
 	public Collection<EJail> getAllEJail() {
 		return ImmutableList.copyOf(this.jails.values());
 	}
@@ -93,7 +100,7 @@ public class EJailService implements JailService {
 	}
 
 	@Override
-	public boolean add(String identifier, Transform<World> location, Optional<Integer> radius) {
+	public Optional<Jail> add(String identifier, Transform<World> location, Optional<Integer> radius) {
 		Preconditions.checkNotNull(identifier, "identifier");
 		Preconditions.checkNotNull(location, "location");
 		Preconditions.checkNotNull(radius, "radius");
@@ -102,9 +109,9 @@ public class EJailService implements JailService {
 			final EJail jail = new EJail(this.plugin, identifier, radius, new LocationSQL(this.plugin, location));
 			this.jails.put(identifier, jail);
 			this.plugin.getThreadAsync().execute(() -> this.addAsync(jail));
-			return true;
+			return Optional.of(jail);
 		}
-		return false;
+		return Optional.empty();
 	}
 
 	@Override
