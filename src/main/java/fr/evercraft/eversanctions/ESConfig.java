@@ -16,8 +16,13 @@
  */
 package fr.evercraft.eversanctions;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
+import fr.evercraft.everapi.sponge.UtilsDate;
 
 public class ESConfig extends EConfig {
 
@@ -44,10 +49,59 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "eversanctions_");
 		
+		addDefault("ban.max-time", "5y");
+		
+		addDefault("ban-ip.max-time", "5y");
+		
 		addDefault("jail.radius", 20);
+		addDefault("jail.max-time", "5y");
+		addDefault("jail.commands-enable", Arrays.asList("profile"));
+		
+		addDefault("mute.max-time", "5y");
+		addDefault("mute.commands-disable", Arrays.asList("msg", "reply", "mail"));
 	}
-
+	
+	/*
+	 * Ban
+	 */
+	
+	public Optional<Long> getBanMaxTime() {
+		return UtilsDate.parseDateDiff(this.get("ban.max-time").getString("5y"), true);
+	}
+	
+	/*
+	 * Ban-IP
+	 */
+	
+	public Optional<Long> getBanIpMaxTime() {
+		return UtilsDate.parseDateDiff(this.get("ban-ip.max-time").getString("5y"), true);
+	}
+	
+	/*
+	 * Jail
+	 */
+	
+	public Optional<Long> getJailMaxTime() {
+		return UtilsDate.parseDateDiff(this.get("jail.max-time").getString("5y"), true);
+	}
+	
 	public int getJailRadius() {
 		return this.get("jail.radius").getInt(20);
+	}
+	
+	public List<String> getJailCommandsEnable() {
+		return this.getListString("jail.commands-enable");
+	}
+	
+	/*
+	 * Mute
+	 */
+	
+	public Optional<Long> getMuteMaxTime() {
+		return UtilsDate.parseDateDiff(this.get("mute.max-time").getString("5y"), true);
+	}
+	
+	public List<String> getMuteCommandsDisable() {
+		return this.getListString("mute.commands-disable");
 	}
 }

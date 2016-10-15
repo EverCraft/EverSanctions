@@ -171,7 +171,8 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
-			staff.sendMessage(this.help(staff));
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
+				.replaceAll("<time>", time_string)));
 			return false;
 		}
 		
@@ -282,7 +283,8 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
-			staff.sendMessage(this.help(staff));
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
+				.replaceAll("<time>", time_string)));
 			return false;
 		}
 		

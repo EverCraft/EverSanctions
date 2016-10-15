@@ -168,7 +168,8 @@ public class ESJail extends ECommand<EverSanctions> {
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
-			staff.sendMessage(this.help(staff));
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
+				.replaceAll("<time>", time_string)));
 			return false;
 		}
 		
@@ -196,6 +197,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
+			player.teleport(jail.getTransform(), true);
 			player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 					.append(ESMessages.JAIL_UNLIMITED_PLAYER.get()
 							.replaceAll("<staff>", staff.getName())
@@ -229,6 +231,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
+			player.teleport(jail.getTransform(), true);
 			player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 					.append(ESMessages.JAIL_TEMP_PLAYER.get()
 							.replaceAll("<staff>", staff.getName())

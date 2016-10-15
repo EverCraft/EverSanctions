@@ -20,9 +20,9 @@ import java.util.Optional;
 
 import org.spongepowered.api.text.Text;
 
-import fr.evercraft.everapi.services.sanction.manual.SanctionManual;
+import fr.evercraft.everapi.services.sanction.Sanction;
 
-public abstract class EManual implements SanctionManual {
+public abstract class EManual implements Sanction {
 
 	private final Long date_start;
 	private Optional<Long> expiration;
@@ -62,6 +62,12 @@ public abstract class EManual implements SanctionManual {
 	
 	@Override
 	public String getSource() {
+		return this.source;
+	}
+	
+	@Override
+	public String getSourceName() {
+		// TODO
 		return this.source;
 	}
 	

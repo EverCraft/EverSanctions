@@ -28,9 +28,7 @@ import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.api.util.ban.Ban.Builder;
 
 import fr.evercraft.everapi.plugin.EChat;
-import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
-import fr.evercraft.everapi.sponge.UtilsNetwork;
 
 public class EAuto implements SanctionAuto {
 
@@ -44,7 +42,6 @@ public class EAuto implements SanctionAuto {
 	private final String source;
 	
 	private final Optional<String> option;
-	private Optional<InetAddress> address;
 	
 	private Optional<Long> pardon_date;
 	private Optional<Text> pardon_reason;
@@ -74,17 +71,17 @@ public class EAuto implements SanctionAuto {
 		this.pardon_date = pardon_date;
 		this.pardon_reason = pardon_reason;
 		this.pardon_source = pardon_source;
-		
-		if(this.option.isPresent() && this.getType().equals(Type.BAN_IP) || this.getType().equals(Type.BAN_PROFILE_AND_BAN_IP)) {
-			this.address = UtilsNetwork.getHost(this.option.get());
-		} else {
-			this.address = Optional.empty();
-		}
 	}
 	
 	@Override
 	public UUID getProfile() {
 		return this.uuid;
+	}
+	
+	@Override
+	public Text getReason() {
+		// TODO Auto-generated method stub
+		return Text.EMPTY;
 	}
 
 	@Override
@@ -103,14 +100,14 @@ public class EAuto implements SanctionAuto {
 	}
 	
 	@Override
-	public Optional<Jail> getJail() {
+	public String getSourceName() {
 		// TODO
-		return Optional.empty();
+		return this.source;
 	}
 	
 	@Override
 	public Optional<SanctionAuto.Level> getLevel() {
-		return this.getReason().getLevel(this.getLevelNumber());
+		return this.getReasonSanction().getLevel(this.getLevelNumber());
 	}
 
 	@Override
@@ -119,12 +116,12 @@ public class EAuto implements SanctionAuto {
 	}
 
 	@Override
-	public SanctionAuto.Type getType() {
+	public SanctionAuto.Type getTypeSanction() {
 		return this.type;
 	}
 	
 	@Override
-	public SanctionAuto.Reason getReason() {
+	public SanctionAuto.Reason getReasonSanction() {
 		return this.reason;
 	}
 	
@@ -140,11 +137,6 @@ public class EAuto implements SanctionAuto {
 	@Override
 	public Optional<String> getOption() {
 		return this.option;
-	}
-	
-	@Override
-	public Optional<InetAddress> getAddress() {
-		return this.address;
 	}
 
 	@Override

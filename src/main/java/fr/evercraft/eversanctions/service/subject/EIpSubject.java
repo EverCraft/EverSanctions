@@ -45,9 +45,9 @@ import com.google.common.collect.ImmutableList.Builder;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.services.sanction.Sanction;
 import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
-import fr.evercraft.everapi.services.sanction.manual.SanctionManual;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualIP;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
@@ -104,8 +104,8 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public Collection<SanctionManual> getAllManuals() {
-		Builder<SanctionManual> builder = new ImmutableList.Builder<SanctionManual>();
+	public Collection<Sanction> getAllManuals() {
+		Builder<Sanction> builder = new ImmutableList.Builder<Sanction>();
 		builder.addAll(this.ip_manual);
 		builder.addAll(this.profile_manual);
 		return builder.build();
@@ -113,9 +113,7 @@ public class EIpSubject implements SanctionIpSubject {
 	
 	@Override
 	public Collection<SanctionAuto> getAllAutos() {
-		Builder<SanctionAuto> builder = new ImmutableList.Builder<SanctionAuto>();
-		builder.addAll(this.profile_auto);
-		return builder.build();
+		return ImmutableList.copyOf(this.profile_auto);
 	}
 
 	public boolean isBanIpManual() {
@@ -176,11 +174,11 @@ public class EIpSubject implements SanctionIpSubject {
 	}
 	
 	@Override
-	public Collection<SanctionManual> pardonBan(final long date, final Text reason, final CommandSource source) {
+	public Collection<Sanction> pardonBan(final long date, final Text reason, final CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
-		ImmutableList.Builder<SanctionManual> pardons = ImmutableList.builder();
+		ImmutableList.Builder<Sanction> pardons = ImmutableList.builder();
 		
 		Optional<EManualIP> ip = this.ip_manual.stream().filter(ban -> !ban.isExpire()).findFirst();
 		List<EManualProfileBanIp> profiles = this.profile_manual.stream().filter(manual -> !manual.isExpire()).collect(Collectors.toList());
@@ -335,7 +333,7 @@ public class EIpSubject implements SanctionIpSubject {
 						+ "ORDER BY `creation` ASC;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, SanctionAuto.Type.BAN_IP.name());
-			preparedStatement.setString(2, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
+			preparedStatement.setString(2, SanctionAuto.Type.BAN_PROFILE_AND_IP.name());
 			preparedStatement.setString(3, this.getIdentifier());
 			ResultSet list = preparedStatement.executeQuery();
 			

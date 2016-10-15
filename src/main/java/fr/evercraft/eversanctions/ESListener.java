@@ -22,7 +22,10 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
@@ -31,9 +34,13 @@ import org.spongepowered.api.world.World;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.everapi.services.sanction.Sanction.SanctionJail;
+import fr.evercraft.everapi.services.sanction.Sanction.SanctionMute;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
+import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
+import fr.evercraft.eversanctions.command.jail.ESJail;
 
 public class ESListener {
 	private EverSanctions plugin;
@@ -42,8 +49,11 @@ public class ESListener {
 		this.plugin = plugin;
 	}
 	
-	@Listener(order=Order.FIRST)
-	public void onPlayerJoin(final ClientConnectionEvent.Auth event) {
+	/**
+	 * Ajoute le joueur dans le cache
+	 */
+	@Listener(order = Order.FIRST)
+	public void onClientConnectionEvent(final ClientConnectionEvent.Auth event) {
 		Optional<Ban.Profile> profile = this.plugin.getSanctionService().getBanFor(event.getProfile());
 		if (profile.isPresent()) {
 			if(profile.get().isIndefinite()) {
@@ -87,31 +97,250 @@ public class ESListener {
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
 		}
+		
+		if (!event.isCancelled()) {
+			this.plugin.getSanctionService().get(event.getProfile().getUniqueId());
+		}
+	}
+
+	/**
+	 * Ajoute le joueur à la liste
+	 */
+	@Listener
+	public void onClientConnectionEvent(final ClientConnectionEvent.Join event) {
+		this.plugin.getSanctionService().registerPlayer(event.getTargetEntity().getUniqueId());
+		
+
+		Optional<EPlayer> optPlayer = this.plugin.getEverAPI().getEServer().getEPlayer(event.getTargetEntity()); 
+		
+		// Joueur introuvable
+		if (!optPlayer.isPresent()) {
+			return;
+		}
+		
+		EPlayer player = optPlayer.get();
+		
+		// Mute
+		Optional<SanctionMute> optSanctionMute = player.getMute();
+		if (optSanctionMute.isPresent()) {
+			SanctionMute sanction = optSanctionMute.get();
+			if (sanction.isIndefinite()) {
+				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+						.append(ESMessages.MUTE_CONNECTION_TEMP.get()
+								.replaceAll("<staff>", sanction.getSourceName())
+								.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+								.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+								.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+								.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+						.replace("<reason>", sanction.getReason())
+						.build());
+			} else {
+				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+						.append(ESMessages.MUTE_CONNECTION_UNLIMITED.get()
+								.replaceAll("<staff>", sanction.getSourceName()))
+						.replace("<reason>", sanction.getReason())
+						.build());
+			}
+		}
+		
+		// Jail
+		Optional<SanctionJail> optSanctionJail = player.getJail();
+		if (optSanctionJail.isPresent()) {
+			SanctionJail sanction = optSanctionJail.get();
+			Optional<Jail> jail = sanction.getJail();
+			
+			if (jail.isPresent()) {					
+				if (sanction.isIndefinite()) {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.JAIL_CONNECTION_TEMP.get()
+									.replaceAll("<staff>", sanction.getSourceName())
+									.replaceAll("<jail_name>",jail.get().getName())
+									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+							.replace("<jail>", ESJail.getButtonJail(jail.get()))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				} else {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.JAIL_CONNECTION_UNLIMITED.get()
+									.replaceAll("<staff>", sanction.getSourceName())
+									.replaceAll("<jail_name>",jail.get().getName()))
+							.replace("<jail>", ESJail.getButtonJail(jail.get()))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Supprime le joueur de la liste
+	 */
+	@Listener
+	public void onClientConnectionEvent(final ClientConnectionEvent.Disconnect event) {
+		this.plugin.getSanctionService().removePlayer(event.getTargetEntity().getUniqueId());
 	}
 	
 	@Listener
 	public void onPlayerMove(MoveEntityEvent event) {
+		// Pas un joueur
 		if (event.getTargetEntity() instanceof Player) {
-			if (!event.getFromTransform().getExtent().equals(event.getToTransform().getExtent()) ||
-					Math.ceil(event.getFromTransform().getPosition().getX()) != Math.ceil(event.getToTransform().getPosition().getX()) ||
-					Math.ceil(event.getFromTransform().getPosition().getY()) != Math.ceil(event.getToTransform().getPosition().getY()) ||
-					Math.ceil(event.getFromTransform().getPosition().getZ()) != Math.ceil(event.getToTransform().getPosition().getZ())) {
+			return;
+		}
 			
-				Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer((Player) event.getTargetEntity());
-				if (optPlayer.isPresent()) {
-					EPlayer player = optPlayer.get();
+		// Même bloc
+		if (event.getFromTransform().getExtent().equals(event.getToTransform().getExtent()) &&
+				Math.ceil(event.getFromTransform().getPosition().getX()) == Math.ceil(event.getToTransform().getPosition().getX()) &&
+				Math.ceil(event.getFromTransform().getPosition().getY()) == Math.ceil(event.getToTransform().getPosition().getY()) &&
+				Math.ceil(event.getFromTransform().getPosition().getZ()) == Math.ceil(event.getToTransform().getPosition().getZ())) {
+			return;
+		}
+		
+		Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer((Player) event.getTargetEntity());
+		
+		// Joueur introuvable
+		if (optPlayer.isPresent()) {
+			return;
+		}
+				
+		EPlayer player = optPlayer.get();
+		
+		
+		// Jail
+		Optional<SanctionJail> optSanction = player.getJail();
+		if (optSanction.isPresent()) {
+			Optional<Jail> jail = optSanction.get().getJail();
+			
+			if (jail.isPresent()) {
+				Transform<World> transform = jail.get().getTransform();
+				if (!event.getToTransform().getExtent().equals(transform.getExtent()) ||
+					event.getToTransform().getPosition().distance(transform.getPosition()) >= jail.get().getRadius()) {
 					
-					// Jail
-					if(player.isJail()) {
-						Jail jail = player.getJail().get();
-						Transform<World> transform = jail.getTransform();
-						if (event.getToTransform().getExtent().equals(transform.getExtent()) ||
-							event.getToTransform().getPosition().distance(transform.getPosition()) >= jail.getRadius()) {
-							player.setTransform(transform);
-						}
+					event.setToTransform(transform);
+					SanctionJail sanction = optSanction.get();
+					if (sanction.isIndefinite()) {
+						player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+								.append(ESMessages.JAIL_DISABLE_MOVE_TEMP.get()
+										.replaceAll("<staff>", sanction.getSourceName())
+										.replaceAll("<jail_name>",jail.get().getName())
+										.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+										.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+										.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+										.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+								.replace("<jail>", ESJail.getButtonJail(jail.get()))
+								.replace("<reason>", sanction.getReason())
+								.build());
+					} else {
+						player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+								.append(ESMessages.JAIL_DISABLE_MOVE_UNLIMITED.get()
+										.replaceAll("<staff>", sanction.getSourceName())
+										.replaceAll("<jail_name>",jail.get().getName()))
+								.replace("<jail>", ESJail.getButtonJail(jail.get()))
+								.replace("<reason>", sanction.getReason())
+								.build());
 					}
 				}
-			}	
-		}
+			}
+		}	
 	}
+	
+	@Listener
+    public void onPlayerWriteChat(MessageChannelEvent.Chat event, @First Player player_sponge) {
+		Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer(player_sponge);
+		if (optPlayer.isPresent()) {
+			EPlayer player = optPlayer.get();
+			
+			// Mute
+			Optional<SanctionMute> optSanction = player.getMute();
+			if (optSanction.isPresent()) {
+				event.setCancelled(true);
+				
+				SanctionMute sanction = optSanction.get();
+				if (sanction.isIndefinite()) {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.MUTE_DISABLE_CHAT_TEMP.get()
+									.replaceAll("<staff>", sanction.getSourceName())
+									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				} else {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.MUTE_DISABLE_CHAT_UNLIMITED.get()
+									.replaceAll("<staff>", sanction.getSourceName()))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				}
+			}
+		}
+    }
+	
+	@Listener
+    public void onPlayerSendCommand(SendCommandEvent event, @First Player player_sponge) {
+		Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer(player_sponge);
+		if (optPlayer.isPresent()) {
+			EPlayer player = optPlayer.get();
+			
+			// Mute
+			Optional<SanctionMute> optSanctionMute = player.getMute();
+			if (optSanctionMute.isPresent() && this.plugin.getSanctionService().muteCommandsDisable(event.getCommand())) {
+				event.setCancelled(true);
+				
+				SanctionMute sanction = optSanctionMute.get();
+				if (sanction.isIndefinite()) {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.MUTE_DISABLE_COMMAND_TEMP.get()
+									.replaceAll("<staff>", sanction.getSourceName())
+									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				} else {
+					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+							.append(ESMessages.MUTE_DISABLE_COMMAND_UNLIMITED.get()
+									.replaceAll("<staff>", sanction.getSourceName()))
+							.replace("<reason>", sanction.getReason())
+							.build());
+				}
+			}
+			
+			Optional<SanctionJail> optSanctionJail = player.getJail();
+			if (optSanctionJail.isPresent() && !this.plugin.getSanctionService().jailCommandsEnable(event.getCommand())) {
+				SanctionJail sanction = optSanctionJail.get();
+				Optional<Jail> jail = sanction.getJail();
+				
+				if (jail.isPresent()) {
+					event.setCancelled(true);
+					
+					if (sanction.isIndefinite()) {
+						player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+								.append(ESMessages.JAIL_DISABLE_COMMAND_TEMP.get()
+										.replaceAll("<staff>", sanction.getSourceName())
+										.replaceAll("<jail_name>",jail.get().getName())
+										.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+										.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+										.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+										.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+								.replace("<jail>", ESJail.getButtonJail(jail.get()))
+								.replace("<reason>", sanction.getReason())
+								.build());
+					} else {
+						player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
+								.append(ESMessages.JAIL_DISABLE_COMMAND_UNLIMITED.get()
+										.replaceAll("<staff>", sanction.getSourceName())
+										.replaceAll("<jail_name>",jail.get().getName()))
+								.replace("<jail>", ESJail.getButtonJail(jail.get()))
+								.replace("<reason>", sanction.getReason())
+								.build());
+					}
+				}
+			}
+		}
+    }
 }

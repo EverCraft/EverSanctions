@@ -146,7 +146,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_PROFILE.name());
 			preparedStatement.setLong(2, System.currentTimeMillis());
 			preparedStatement.setString(3, SanctionAuto.Type.BAN_PROFILE.name());
-			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
+			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_IP.name());
 			preparedStatement.setLong(5, System.currentTimeMillis());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {
@@ -212,7 +212,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 			preparedStatement.setString(1, SanctionManualProfile.Type.BAN_IP.name());
 			preparedStatement.setLong(2, System.currentTimeMillis());
 			preparedStatement.setString(3, SanctionAuto.Type.BAN_IP.name());
-			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_BAN_IP.name());
+			preparedStatement.setString(4, SanctionAuto.Type.BAN_PROFILE_AND_IP.name());
 			preparedStatement.setLong(5, System.currentTimeMillis());
 			ResultSet list = preparedStatement.executeQuery();
 			while(list.next()) {

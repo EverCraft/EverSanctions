@@ -1,3 +1,19 @@
+/*
+ * This file is part of EverSanctions.
+ *
+ * EverSanctions is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * EverSanctions is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
@@ -80,7 +96,7 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 		
 		Optional<Jail> jail = this.plugin.getJailService().get(name);
 		if (jail.isPresent()) {
-			if (player.teleportSafe(jail.get().getTransform())) {
+			if (player.teleportSafe(jail.get().getTransform(), true)) {
 				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 						.append(ESMessages.JAILS_TELEPORT_PLAYER.get())
 						.replace("<jail>", ESJail.getButtonJail(jail.get()))

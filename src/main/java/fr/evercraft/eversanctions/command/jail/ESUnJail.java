@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -94,20 +93,13 @@ public class ESUnJail extends ECommand<EverSanctions> {
 		// Nombre d'argument correct
 		if (args.size() == 2) {
 			
-			Optional<EUser> user = this.plugin.getEServer().getEUser(args.get(0));
+			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandPardonBan(source, user.get(), args.get(1));
+				resultat = this.commandUnJail(source, user.get(), args.get(1));
 			// Le joueur est introuvable
 			} else {
-				Optional<GameProfile> gameprofile = this.plugin.getEServer().getGameProfile(args.get(0));
-				// Le joueur existe
-				if (gameprofile.isPresent()){
-					resultat = this.commandPardonBan(source, this.plugin.getEServer().getOrCreateEUser(gameprofile.get()), args.get(1));
-				// Le joueur est introuvable
-				} else {
-					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
-				}
+				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
 			}
 			
 		// Nombre d'argument incorrect
@@ -118,7 +110,7 @@ public class ESUnJail extends ECommand<EverSanctions> {
 		return resultat;
 	}
 	
-	private boolean commandPardonBan(final CommandSource staff, EUser user, String reason_string) {
+	private boolean commandUnJail(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_EQUALS.get()
@@ -152,7 +144,7 @@ public class ESUnJail extends ECommand<EverSanctions> {
 			.replaceAll("<reason>", reason_string)
 			.replaceAll("<player>", user.getName())));
 		
-		if(user instanceof EPlayer) {
+		if(user instanceof EPlayer && !user.isJail()) {
 			EPlayer player = (EPlayer) user;
 			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.UNJAIL_PLAYER.get()
 							.replaceAll("<staff>", staff.getName())

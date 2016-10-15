@@ -47,11 +47,10 @@ public class ESMessage extends EMessage {
 		
 		// Ban		
 		BAN_DESCRIPTION("ban.description", 							"Banni le joueur du serveur"),
-		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", 					"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>&7."),
+		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", 					"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>"),
 		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", 				"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BAN_TEMP_STAFF("ban.tempStaff", 							"&7Vous avez banni &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>&7."),
+		BAN_TEMP_STAFF("ban.tempStaff", 							"&7Vous avez banni &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
 		BAN_TEMP_PLAYER("ban.tempPlayer", 							"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BAN_ERROR_TIME("ban.errorTime", 							"&cErreur : &6'<time>' &cn'est pas une durée."),
 		BAN_ERROR_REASON("ban.errorReason", 						"&cErreur : La raison est obligatoire."),
 		BAN_ERROR_CANCEL("ban.errorCancel", 						"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
 		BAN_ERROR_EQUALS("ban.errorEquals", 						"&cErreur : Impossible de vous bannir vous-même."),
@@ -68,21 +67,19 @@ public class ESMessage extends EMessage {
 		// Banip
 		BANIP_DESCRIPTION("banip.description", 						"Banni l'adresse IP du joueur"),
 		
-		BANIP_IP_UNLIMITED_STAFF("banip.ip.unlimitedStaff", 		"&7Vous avez banni définitivement l'adresse IP &6<address> &7du serveur pour la raison : &6<reason>&7."),
+		BANIP_IP_UNLIMITED_STAFF("banip.ip.unlimitedStaff", 		"&7Vous avez banni définitivement l'adresse IP &6<address> &7du serveur pour la raison : &6<reason>"),
 		BANIP_IP_UNLIMITED_PLAYER("banip.ip.unlimitedPlayer", 		"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BANIP_IP_TEMP_STAFF("banip.ip.tempStaff", 					"&7Vous avez banni l'adresse IP&6<address> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>&7."),
+		BANIP_IP_TEMP_STAFF("banip.ip.tempStaff", 					"&7Vous avez banni l'adresse IP&6<address> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
 		BANIP_IP_TEMP_PLAYER("banip.ip.tempPlayer", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BANIP_IP_ERROR_TIME("banip.ip.errorTime", 					"&cErreur : &6'<time>' n'est pas une durée."),
 		BANIP_IP_ERROR_REASON("banip.ip.errorReason", 				"&cErreur : La raison est obligatoire."),
 		BANIP_IP_ERROR_CANCEL("banip.ip.errorCancel", 				"&cErreur : Impossible de bannir l'adresse IP <address> pour le moment."),
 		BANIP_IP_ERROR_EQUALS("banip.ip.errorEquals", 				"&cErreur : Impossible de bannir votre propre adresse IP."),
 		BANIP_IP_ERROR_NOEMPTY("banip.ip.errorNoEmpty", 			"&cErreur : L'addresse IP &6<player> &cest déjà banni."),
 		
-		BANIP_PLAYER_UNLIMITED_STAFF("banip.player.unlimitedStaff", "&7Vous avez banni définitivement l'adresse IP de &6<player> &7du serveur pour la raison : &6<reason>&7."),
+		BANIP_PLAYER_UNLIMITED_STAFF("banip.player.unlimitedStaff", "&7Vous avez banni définitivement l'adresse IP de &6<player> &7du serveur pour la raison : &6<reason>"),
 		BANIP_PLAYER_UNLIMITED_PLAYER("banip.player.unlimitedPlayer", "&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BANIP_PLAYER_TEMP_STAFF("banip.player.tempStaff", 			"&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>&7."),
+		BANIP_PLAYER_TEMP_STAFF("banip.player.tempStaff", 			"&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>"),
 		BANIP_PLAYER_TEMP_PLAYER("banip.player.tempPlayer", 		"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BANIP_PLAYER_ERROR_TIME("banip.player.errorTime", 			"&cErreur : &6'<time>' n'est pas une durée."),
 		BANIP_PLAYER_ERROR_REASON("banip.player.errorReason", 		"&cErreur : La raison est obligatoire."),
 		BANIP_PLAYER_ERROR_CANCEL("banip.player.errorCancel", 		"&cErreur : Impossible de bannir l'adresse de &6<player>&c pour le moment."),
 		BANIP_PLAYER_ERROR_EQUALS("banip.player.errorEquals", 		"&cErreur : Impossible de bannir votre propre adresse IP."),
@@ -104,21 +101,24 @@ public class ESMessage extends EMessage {
 		UNBANIP_PLAYER_ERROR_EMPTY("unbanip.player.errorEmpty", "&cErreur : L'adresse IP de &6<player> &cn'est pas banni."),
 		UNBANIP_PLAYER_CANCEL("unbanip.player.cancel", "&cErreur : Impossible de débannir l'adresse IP de &6<player> &cpour le moment."),
 		
-		
-		MUTE_DESCRIPTION("mute.description", "Mute le joueur"),
-		
 		// Jail	
 		JAIL_DESCRIPTION("jail.description", 										"Emprisonne le joueur"),
-		JAIL_UNLIMITED_STAFF("jail.unlimitedStaff", 								"&7Vous avez emprissonner définitivement &6<player> &7dans la prison &6<jail> &7pour la raison : &6<reason>&7."),
-		JAIL_UNLIMITED_PLAYER("jail.unlimitedPlayer", 								"&c&lVous avez été emprissonner par &6<staff> &c&lpour : &7<reason>"),
-		JAIL_TEMP_STAFF("jail.tempStaff", 											"&7Vous avez emprissonner &6<player> &7pendant une durée de &7<duration> &7dans la prison &6<jail> &7pour la raison : &6<reason>&7."),
-		JAIL_TEMP_PLAYER("jail.tempPlayer", 										"&c&lVous avez été emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour : &7<reason>&cRaison : &7<reason>"),
-		JAIL_ERROR_TIME("jail.errorTime", 											"&cErreur : &6'<time>' &cn'est pas une durée."),
+		JAIL_UNLIMITED_STAFF("jail.unlimitedStaff", 								"&7Vous avez emprissonner définitivement &6<player> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
+		JAIL_UNLIMITED_PLAYER("jail.unlimitedPlayer", 								"&c&lVous avez été emprissonner par &6<staff> &c&lpour la raison : &6<reason>"),
+		JAIL_TEMP_STAFF("jail.tempStaff", 											"&7Vous avez emprissonner &6<player> &7pendant une durée de &7<duration> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
+		JAIL_TEMP_PLAYER("jail.tempPlayer", 										"&c&lVous avez été emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
 		JAIL_ERROR_REASON("jail.errorReason", 										"&cErreur : La raison est obligatoire."),
 		JAIL_ERROR_CANCEL_UNLIMITED("jail.errorCancelUnlimited", 					"&cErreur : Impossible d'emprissonner &6<player> &cpour le moment."),
 		JAIL_ERROR_CANCEL_TEMP("jail.errorCancelTemp", 								"&cErreur : Impossible d'emprissonner &6<player> &cpour le moment."),
 		JAIL_ERROR_EQUALS("jail.errorEquals", 										"&cErreur : Impossible de vous emprissonner vous-même."),
 		JAIL_ERROR_NOEMPTY("jail.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà emprissonner."),
+		
+		JAIL_DISABLE_COMMAND_TEMP("jail.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
+		JAIL_DISABLE_COMMAND_UNLIMITED("jail.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
+		JAIL_DISABLE_MOVE_TEMP("jail.disableMoveTemp", 								"&cNe vous éloignez pas de votre prison."),
+		JAIL_DISABLE_MOVE_UNLIMITED("jail.disableMoveUnlimited", 					"&cNe vous éloignez pas de votre prison."),
+		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
+		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
 		
 		// UnJail
 		UNJAIL_DESCRIPTION("unjail.description", 									"Libéré le joueur d'une prison"),
@@ -133,6 +133,32 @@ public class ESMessage extends EMessage {
 		JAIL_NAME_HOVER("jail.nameHover", 											"&cRayon : &6<radius> block(s)[RT]&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
 		JAIL_UNKNOWN("jail.unknown", 												"&cErreur : Impossible de trouver un prison avec le nom &6<jail>&c."),
 		JAIL_EMPTY("jail.empty",													"&cErreur : Il y a aucune prison défini sur le serveur."),
+		
+		// Mute		
+		MUTE_DESCRIPTION("mute.description", 										"Mute le joueur"),
+		MUTE_UNLIMITED_STAFF("mute.unlimitedStaff", 								"&7Vous avez définitivement rendu muet &6<player> &7pour la raison : &6<reason>"),
+		MUTE_UNLIMITED_PLAYER("mute.unlimitedPlayer", 								"&6<staff> &c&lvous a définitivement rendu muet pour la raison : &6<reason>[RT]"),
+		MUTE_TEMP_STAFF("mute.tempStaff", 											"&7Vous avez rendu muet &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
+		MUTE_TEMP_PLAYER("mute.tempPlayer", 										"&6<staff> &c&lvous a rendu muet pendant &6<duration> &c&lpour la raison : &6<reason>"),
+		MUTE_ERROR_REASON("mute.errorReason", 										"&cErreur : La raison est obligatoire."),
+		MUTE_ERROR_CANCEL("mute.errorCancel", 										"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
+		MUTE_ERROR_EQUALS("mute.errorEquals", 										"&cErreur : Impossible de vous bannir vous-même."),
+		MUTE_ERROR_NOEMPTY("mute.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà banni."),
+		
+		MUTE_DISABLE_CHAT_TEMP("mute.disableChatTemp",								"&cVous êtes encore muet pendant &6<duration> &cpour &6<reason>&c."),
+		MUTE_DISABLE_CHAT_UNLIMITED("mute.disableChatUnlimited",					"&cVous muet indéfiniment &cpour &6<reason>&c."),
+		MUTE_DISABLE_COMMAND_TEMP("mute.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
+		MUTE_DISABLE_COMMAND_UNLIMITED("mute.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
+		MUTE_CONNECTION_TEMP("mute.connectionTemp", 								"&c&lVous êtes définitivement muet pour avoir : &6<reason>[RT]"),
+		MUTE_CONNECTION_UNLIMITED("mute.connectionUnlimited", 						"&c&lVous êtes définitivement muet pour avoir pendant encore &6<duration> &c&lpour avoir : &6<reason>"),
+		
+		// UnMute
+		UNMUTE_DESCRIPTION("unmute.description", 									"Débanni le joueur du serveur"),
+		UNMUTE_STAFF("unmute.staff", 												"&7Vous avez débanni &6<player>&7."),
+		UNMUTE_ERROR_REASON("unmute.errorReason", 									"&cErreur : La raison est obligatoire."),
+		UNMUTE_ERROR_EQUALS("unmute.errorEquals", 									"&cErreur : Impossible de vous débannir vous-même."),
+		UNMUTE_ERROR_EMPTY("unmute.errorEmpty", 									"&cErreur : &6<player> &cn'est pas banni."),
+		UNMUTE_CANCEL("unmute.cancel", 												"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
 		
 		// Jails
 		JAILS_DESCRIPTION("jails.description", 										"Gestion des prisons"),

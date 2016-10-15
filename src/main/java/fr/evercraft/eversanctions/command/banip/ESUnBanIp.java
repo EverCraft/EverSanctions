@@ -114,7 +114,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR.getText()));
 				}
 			} else {
-				Optional<EUser> user = this.plugin.getEServer().getEUser(args.get(0));
+				Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 				// Le joueur existe
 				if (user.isPresent()){
 					resultat = this.commandUnBanIP(source, user.get(), args.get(1));

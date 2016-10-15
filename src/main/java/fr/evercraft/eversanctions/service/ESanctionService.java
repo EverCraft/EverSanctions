@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -51,11 +52,16 @@ public abstract class ESanctionService implements SanctionService {
 	
 	private final ConcurrentMap<String, EAutoReason> reasons;
 	
+	private final ConcurrentSkipListSet<String> jail_commands_enable;
+	private final ConcurrentSkipListSet<String> mute_commands_disable;
+	
 	public ESanctionService(final EverSanctions plugin) {
 		this.plugin = plugin;
 		
 		this.reasons = new ConcurrentHashMap<String, EAutoReason>();
 		this.users = new ConcurrentHashMap<UUID, EUserSubject>();
+		this.jail_commands_enable = new ConcurrentSkipListSet<String>();
+		this.mute_commands_disable = new ConcurrentSkipListSet<String>();
 		this.users_cache = CacheBuilder.newBuilder()
 			    .maximumSize(100)
 			    .expireAfterAccess(5, TimeUnit.MINUTES)
@@ -99,8 +105,14 @@ public abstract class ESanctionService implements SanctionService {
 	 * Rechargement : Vide le cache et recharge tous les joueurs
 	 */
 	public void reload() {
+		this.jail_commands_enable.clear();
+		this.mute_commands_disable.clear();
 		this.users_cache.cleanUp();
 		this.ips_cache.cleanUp();
+		
+		this.jail_commands_enable.addAll(this.plugin.getConfigs().getJailCommandsEnable());
+		this.mute_commands_disable.addAll(this.plugin.getConfigs().getMuteCommandsDisable());
+		
 		for (EUserSubject subject : this.users.values()) {
 			subject.reload();
 		}
@@ -209,5 +221,13 @@ public abstract class ESanctionService implements SanctionService {
 	@Override
 	public Optional<SanctionAuto.Reason> getReason(String identifier) {
 		return Optional.ofNullable(this.reasons.get(identifier.toLowerCase()));
+	}
+	
+	public boolean jailCommandsEnable(String command) {
+		return this.jail_commands_enable.contains(command);
+	}
+	
+	public boolean muteCommandsDisable(String command) {
+		return this.mute_commands_disable.contains(command);
 	}
 }

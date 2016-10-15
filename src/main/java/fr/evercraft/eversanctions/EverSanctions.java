@@ -37,6 +37,8 @@ import fr.evercraft.eversanctions.command.jails.ESJailsDelete;
 import fr.evercraft.eversanctions.command.jails.ESJailsList;
 import fr.evercraft.eversanctions.command.jails.ESJailsSetRadius;
 import fr.evercraft.eversanctions.command.jails.ESJailsTeleport;
+import fr.evercraft.eversanctions.command.mute.ESMute;
+import fr.evercraft.eversanctions.command.mute.ESUnMute;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
@@ -93,6 +95,9 @@ public class EverSanctions extends EPlugin {
 		
 		new ESJail(this);
 		new ESUnJail(this);
+		
+		new ESMute(this);
+		new ESUnMute(this);
 		
 		ESJails jail = new ESJails(this);
 		jail.add(new ESJailsAdd(this, jail));
