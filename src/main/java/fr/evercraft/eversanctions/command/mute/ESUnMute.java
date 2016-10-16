@@ -126,7 +126,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		}
 		
 		// Le joueur n'a pas de ban en cours
-		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
+		if (!user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_EMPTY.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
@@ -146,7 +146,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		
 		if (user instanceof EPlayer && !user.isMute()) {
 			EPlayer player = (EPlayer) user;
-			player.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_STAFF.get()
+			player.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_PLAYER.get()
 				.replaceAll("<player>", user.getName())
 				.replaceAll("<reason>", reason_string)));
 		}

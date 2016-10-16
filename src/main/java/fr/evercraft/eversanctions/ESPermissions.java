@@ -23,14 +23,29 @@ import com.google.common.base.Preconditions;
 import fr.evercraft.everapi.plugin.EnumPermission;
 
 public enum ESPermissions implements EnumPermission {
-	EVERSANCTIONS("command"),
+	EVERSANCTIONS("plugin.command"),
 	
-	HELP("help"),
-	RELOAD("reload"),
+	HELP("plugin.help"),
+	RELOAD("plugin.reload"),
+	
+	PROFILE("profile.command"),
+	PROFILE_OTHERS("profile.others"),
 	
 	BAN("ban.command"),
+	BAN_UNLIMITED("ban.unlimited"),
+	BAN_OFFLINE("ban.offline"),
+	
 	BANIP("banip.command"),
+	BANIP_UNLIMITED("banip.unlimited"),
+	BANIP_OFFLINE("banip.offline"),
+	
 	MUTE("mute.command"),
+	MUTE_UNLIMITED("mute.unlimited"),
+	MUTE_OFFLINE("mute.offline"),
+	
+	JAIL("jail.command"),
+	JAIL_UNLIMITED("jail.command"),
+	JAIL_OFFLINE("jail.offline"),
 	
 	JAILS("jails.command"),
 	JAILS_ADD("jails.add"),
@@ -38,12 +53,6 @@ public enum ESPermissions implements EnumPermission {
 	JAILS_LIST("jails.list"),
 	JAILS_TELEPORT("jails.teleport"),
 	JAILS_SETRADIUS("jails.setradius"),
-	JAIL("jail.command"),
-	
-	TEMP_BAN("tempban.command"),
-	TEMP_BANIP("tempbanip.command"),
-	TEMP_MUTE("tempmute.command"),
-	TEMP_JAIL("tempjail.command"),
 	
 	UNBAN("unban.command"),
 	UNBANIP("unbanip.command"),

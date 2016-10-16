@@ -124,7 +124,7 @@ public class ESMute extends ECommand<EverSanctions> {
 			return false;
 		}
 		
-		// Le joueur a déjà un ban en cours
+		// Le joueur a déjà un mute en cours
 		if (user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_NOEMPTY.get()
 				.replaceAll("<player>", user.getName())));
@@ -172,7 +172,7 @@ public class ESMute extends ECommand<EverSanctions> {
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
-			player.kick(EChat.of(ESMessages.MUTE_UNLIMITED_PLAYER.get()
+			player.sendMessage(EChat.of(ESMessages.MUTE_UNLIMITED_PLAYER.get()
 					.replaceAll("<staff>", staff.getName())
 					.replaceAll("<reason>", reason)));
 		}

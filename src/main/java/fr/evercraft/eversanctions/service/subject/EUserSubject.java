@@ -185,6 +185,11 @@ public class EUserSubject implements SanctionUserSubject {
 		return Optional.empty();
 	}
 	
+	@Override
+	public Collection<Sanction> getAll() {
+		return ImmutableList.copyOf(this.sanctions);
+	}
+	
 	/*
 	 * DataBase
 	 */
@@ -234,6 +239,8 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		this.plugin.getSanctionService().add(ban);
 		this.sanctions.add(manual);
+		this.ban = this.findFirst(SanctionBanProfile.class);
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(manual));
 		return true;
 	}
@@ -302,6 +309,12 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.sanctions.add(mute);
+		this.mute = this.findFirst(SanctionMute.class);
+		
+		if (!this.mute.isPresent()) {
+			this.plugin.getEServer().broadcast("empty !!!");
+		}
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(mute));
 		return true;
 	}
@@ -332,6 +345,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.sanctions.add(manual);
+		this.jail = this.findFirst(SanctionJail.class);
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddManual(manual));
 		return true;
 	}
@@ -357,6 +372,8 @@ public class EUserSubject implements SanctionUserSubject {
 		final Ban.Profile ban = manual.get().getBan(user.get().getProfile());
 		
 		this.plugin.getSanctionService().remove(ban);
+		this.ban = this.findFirst(SanctionBanProfile.class);
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
@@ -432,6 +449,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		manual.get().pardon(date, reason, source.getIdentifier());
+		this.mute = this.findFirst(SanctionMute.class);
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
@@ -454,6 +473,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		manual.get().pardon(date, reason, source.getIdentifier());
+		this.jail = this.findFirst(SanctionJail.class);
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonManual(manual.get()));
 		return Optional.of(manual.get());
 	}
@@ -516,6 +537,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		this.sanctions.add(auto);
+		this.update();
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddAuto(auto));
 		return true;
 	}
@@ -532,6 +555,8 @@ public class EUserSubject implements SanctionUserSubject {
 		}
 		
 		auto.get().pardon(date, reason, source.getIdentifier());
+		this.update();
+		
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonAuto(auto.get()));
 		return true;
 	}

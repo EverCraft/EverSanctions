@@ -45,6 +45,10 @@ public class ESMessage extends EMessage {
 		CONNECTION_BANIP_UNLIMITED("connection.banipUnlimited", 	"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
 		CONNECTION_BANIP_TEMP("connection.banipTemp", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
 		
+		// Profile
+		PROFILE_DESCRIPTION("profile.description", 					"Liste des sanctions d'un joueur"),
+		PROFILE_ERROR_TYPE("profile.", 					""),
+		
 		// Ban		
 		BAN_DESCRIPTION("ban.description", 							"Banni le joueur du serveur"),
 		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", 					"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>"),
@@ -141,23 +145,24 @@ public class ESMessage extends EMessage {
 		MUTE_TEMP_STAFF("mute.tempStaff", 											"&7Vous avez rendu muet &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
 		MUTE_TEMP_PLAYER("mute.tempPlayer", 										"&6<staff> &c&lvous a rendu muet pendant &6<duration> &c&lpour la raison : &6<reason>"),
 		MUTE_ERROR_REASON("mute.errorReason", 										"&cErreur : La raison est obligatoire."),
-		MUTE_ERROR_CANCEL("mute.errorCancel", 										"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
-		MUTE_ERROR_EQUALS("mute.errorEquals", 										"&cErreur : Impossible de vous bannir vous-même."),
-		MUTE_ERROR_NOEMPTY("mute.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà banni."),
+		MUTE_ERROR_CANCEL("mute.errorCancel", 										"&cErreur : Impossible de rendre muet &6<player> &cpour le moment."),
+		MUTE_ERROR_EQUALS("mute.errorEquals", 										"&cErreur : Impossible de vous rendre muet."),
+		MUTE_ERROR_NOEMPTY("mute.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà mute."),
 		
 		MUTE_DISABLE_CHAT_TEMP("mute.disableChatTemp",								"&cVous êtes encore muet pendant &6<duration> &cpour &6<reason>&c."),
 		MUTE_DISABLE_CHAT_UNLIMITED("mute.disableChatUnlimited",					"&cVous muet indéfiniment &cpour &6<reason>&c."),
 		MUTE_DISABLE_COMMAND_TEMP("mute.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
 		MUTE_DISABLE_COMMAND_UNLIMITED("mute.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
-		MUTE_CONNECTION_TEMP("mute.connectionTemp", 								"&c&lVous êtes définitivement muet pour avoir : &6<reason>[RT]"),
-		MUTE_CONNECTION_UNLIMITED("mute.connectionUnlimited", 						"&c&lVous êtes définitivement muet pour avoir pendant encore &6<duration> &c&lpour avoir : &6<reason>"),
+		MUTE_CONNECTION_TEMP("mute.connectionTemp", 								"&c&lVous êtes muet pour avoir pendant encore &6<duration> &c&lpour avoir : &6<reason>"),
+		MUTE_CONNECTION_UNLIMITED("mute.connectionUnlimited", 						"&c&lVous êtes définitivement muet pour avoir : &6<reason>[RT]"),
 		
 		// UnMute
 		UNMUTE_DESCRIPTION("unmute.description", 									"Débanni le joueur du serveur"),
-		UNMUTE_STAFF("unmute.staff", 												"&7Vous avez débanni &6<player>&7."),
+		UNMUTE_STAFF("unmute.staff", 												"&7Vous avez rendu la parole à &6<player>&7."),
+		UNMUTE_PLAYER("unmute.player", 												"&7Vous pouvez désormais reparler grâce à &6<staff>&7."),
 		UNMUTE_ERROR_REASON("unmute.errorReason", 									"&cErreur : La raison est obligatoire."),
 		UNMUTE_ERROR_EQUALS("unmute.errorEquals", 									"&cErreur : Impossible de vous débannir vous-même."),
-		UNMUTE_ERROR_EMPTY("unmute.errorEmpty", 									"&cErreur : &6<player> &cn'est pas banni."),
+		UNMUTE_ERROR_EMPTY("unmute.errorEmpty", 									"&cErreur : &6<player> &cn'est pas mute."),
 		UNMUTE_CANCEL("unmute.cancel", 												"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
 		
 		// Jails
