@@ -57,21 +57,28 @@ public class ESListener {
 	public void onClientConnectionEvent(final ClientConnectionEvent.Auth event) {
 		Optional<Ban.Profile> profile = this.plugin.getSanctionService().getBanFor(event.getProfile());
 		if (profile.isPresent()) {
+			long creation = profile.get().getCreationDate().toEpochMilli();
 			if(profile.get().isIndefinite()) {
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_UNLIMITED.get()
 						.replaceAll("<staff>", EChat.serialize(profile.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<player>", profile.get().getProfile().getName().orElse(profile.get().getProfile().getUniqueId().toString()))
-						.replaceAll("<reason>", EChat.serialize(profile.get().getReason().orElse(Text.EMPTY)))));
+						.replaceAll("<reason>", EChat.serialize(profile.get().getReason().orElse(Text.EMPTY)))
+						.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation))
+						.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(creation))
+						.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation))));
 			} else {
-				long time = profile.get().getExpirationDate().get().toEpochMilli();
+				long expiration = profile.get().getExpirationDate().get().toEpochMilli();
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BAN_TEMP.get()
 						.replaceAll("<staff>", EChat.serialize(profile.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<player>", profile.get().getProfile().getName().orElse(profile.get().getProfile().getUniqueId().toString()))
 						.replaceAll("<reason>", EChat.serialize(profile.get().getReason().orElse(Text.EMPTY)))
-						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(time))
-						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(time))
-						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(time))
-						.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(time))));
+						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(expiration))
+						.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation))
+						.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(creation))
+						.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation))
+						.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
+						.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
+						.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
@@ -79,21 +86,28 @@ public class ESListener {
 		
 		Optional<Ban.Ip> ip = this.plugin.getSanctionService().getBanFor(event.getConnection().getAddress().getAddress());
 		if (ip.isPresent()) {
+			long creation = ip.get().getCreationDate().toEpochMilli();
 			if(ip.get().isIndefinite()) {
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BANIP_UNLIMITED.get()
 						.replaceAll("<staff>", EChat.serialize(ip.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<address>", UtilsNetwork.getHostString(event.getConnection().getAddress().getAddress()))
-						.replaceAll("<reason>", EChat.serialize(ip.get().getReason().orElse(Text.EMPTY)))));
+						.replaceAll("<reason>", EChat.serialize(ip.get().getReason().orElse(Text.EMPTY)))
+						.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation))
+						.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(creation))
+						.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation))));
 			} else {
-				long time = ip.get().getExpirationDate().get().toEpochMilli();
+				long expiration = ip.get().getExpirationDate().get().toEpochMilli();
 				event.setMessage(EChat.of(ESMessages.CONNECTION_BANIP_TEMP.get()
 						.replaceAll("<staff>", EChat.serialize(ip.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN))))
 						.replaceAll("<address>", UtilsNetwork.getHostString(event.getConnection().getAddress().getAddress()))
 						.replaceAll("<reason>", EChat.serialize(ip.get().getReason().orElse(Text.EMPTY)))
-						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(time))
-						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(time))
-						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(time))
-						.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(time))));
+						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDate(expiration))
+						.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation))
+						.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(creation))
+						.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation))
+						.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
+						.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
+						.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
@@ -127,15 +141,18 @@ public class ESListener {
 			if (sanction.isIndefinite()) {
 				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.MUTE_CONNECTION_TEMP.get()
 								.replaceAll("<staff>", sanction.getSourceName())
+								.replaceAll("<reason>", EChat.serialize(sanction.getReason())
 								.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-								.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-								.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-								.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())
-								.replace("<reason>", EChat.serialize(sanction.getReason()))));
+								.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+								.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+								.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+								.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+								.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+								.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()))));
 			} else {
 				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.MUTE_CONNECTION_UNLIMITED.get()
 								.replaceAll("<staff>", sanction.getSourceName())
-								.replace("<reason>", EChat.serialize(sanction.getReason())));
+								.replaceAll("<reason>", EChat.serialize(sanction.getReason())));
 			}
 		}
 		
@@ -152,9 +169,12 @@ public class ESListener {
 									.replaceAll("<staff>", sanction.getSourceName())
 									.replaceAll("<jail_name>",jail.get().getName())
 									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()))
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+									.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()))
 									.replaceAll("<reason>", EChat.serialize(sanction.getReason())))
 							.replace("<jail>", ESJail.getButtonJail(jail.get()))
 							.build());
@@ -163,7 +183,10 @@ public class ESListener {
 							.append(ESMessages.JAIL_CONNECTION_UNLIMITED.get()
 									.replaceAll("<staff>", sanction.getSourceName())
 									.replaceAll("<jail_name>",jail.get().getName())
-									.replaceAll("<reason>", EChat.serialize(sanction.getReason())))
+									.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate())))
 							.replace("<jail>", ESJail.getButtonJail(jail.get()))
 							.build());
 				}
@@ -218,9 +241,12 @@ public class ESListener {
 										.replaceAll("<jail_name>",jail.get().getName())
 										.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
 										.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-										.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-										.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-										.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+										.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+										.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+										.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+										.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+										.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+										.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
 								.replace("<jail>", ESJail.getButtonJail(jail.get()))
 								.build());
 					} else {
@@ -228,7 +254,10 @@ public class ESListener {
 								.append(ESMessages.JAIL_DISABLE_MOVE_UNLIMITED.get()
 										.replaceAll("<staff>", sanction.getSourceName())
 										.replaceAll("<jail_name>",jail.get().getName())
-										.replaceAll("<reason>", EChat.serialize(sanction.getReason())))
+										.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
+										.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+										.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+										.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate())))
 								.replace("<jail>", ESJail.getButtonJail(jail.get()))
 								.build());
 					}
@@ -254,13 +283,19 @@ public class ESListener {
 									.replaceAll("<staff>", sanction.getSourceName())
 									.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
 									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())));
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+									.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())));
 				} else {
 					player.sendMessage(ESMessages.PREFIX.get() + ESMessages.MUTE_DISABLE_CHAT_UNLIMITED.get()
 									.replaceAll("<staff>", sanction.getSourceName())
-									.replaceAll("<reason>", EChat.serialize(sanction.getReason())));
+									.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate())));
 				}
 			}
 		}
@@ -283,13 +318,19 @@ public class ESListener {
 									.replaceAll("<staff>", sanction.getSourceName())
 									.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
 									.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-									.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-									.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-									.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())));
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+									.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+									.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())));
 				} else {
 					player.sendMessage(ESMessages.PREFIX.get() + ESMessages.MUTE_DISABLE_COMMAND_UNLIMITED.get()
 									.replaceAll("<staff>", sanction.getSourceName())
-									.replaceAll("<reason>", EChat.serialize(sanction.getReason())));
+									.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
+									.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+									.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+									.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate())));
 				}
 			}
 			
@@ -308,9 +349,12 @@ public class ESListener {
 										.replaceAll("<jail_name>",jail.get().getName())
 										.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
 										.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
-										.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
-										.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
-										.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
+										.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+										.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+										.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+										.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+										.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+										.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get())))
 								.replace("<jail>", ESJail.getButtonJail(jail.get()))
 								.build());
 					} else {
@@ -318,7 +362,10 @@ public class ESListener {
 								.append(ESMessages.JAIL_DISABLE_COMMAND_UNLIMITED.get()
 										.replaceAll("<staff>", sanction.getSourceName())
 										.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
-										.replaceAll("<jail_name>",jail.get().getName()))
+										.replaceAll("<jail_name>",jail.get().getName())
+										.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+										.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+										.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate())))
 								.replace("<jail>", ESJail.getButtonJail(jail.get()))
 								.build());
 					}

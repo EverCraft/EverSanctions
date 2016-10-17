@@ -131,12 +131,56 @@ public class ESProfile extends ECommand<EverSanctions> {
 		
 		List<Text> list = new ArrayList<Text>();
 		valid.forEach(sanction -> {
+			String message = "";
 			// Auto
 			if (sanction instanceof SanctionAuto) {
+				SanctionAuto auto = (SanctionAuto) sanction;
 				
+				if(auto.getOption().isPresent()) {
+					if (sanction.isPardon()) {
+						message = ESMessages.PROFILE_LINE_PARDON_AUTO_OPTION.get();
+					} else if(sanction.isExpire()) {
+						message = ESMessages.PROFILE_LINE_DISABLE_AUTO_OPTION.get();
+					} else {
+						message = ESMessages.PROFILE_LINE_ENABLE_AUTO_OPTION.get();
+					}
+				} else {
+					if (sanction.isPardon()) {
+						message = ESMessages.PROFILE_LINE_PARDON_AUTO.get();
+					} else if(sanction.isExpire()) {
+						message = ESMessages.PROFILE_LINE_DISABLE_AUTO.get();
+					} else {
+						message = ESMessages.PROFILE_LINE_ENABLE_AUTO.get();
+					}
+				}
 			// Manual
 			} else {
-				
+				if(sanction instanceof Sanction.SanctionBanIp || sanction instanceof Sanction.SanctionJail) {
+					if (sanction.isPardon()) {
+						message = ESMessages.PROFILE_LINE_PARDON_MANUAL_OPTION.get();
+					} else if(sanction.isExpire()) {
+						message = ESMessages.PROFILE_LINE_DISABLE_MANUAL_OPTION.get();
+					} else {
+						message = ESMessages.PROFILE_LINE_ENABLE_MANUAL_OPTION.get();
+					}
+				} else {
+					if (sanction.isPardon()) {
+						message = ESMessages.PROFILE_LINE_PARDON_MANUAL.get();
+					} else if(sanction.isExpire()) {
+						message = ESMessages.PROFILE_LINE_DISABLE_MANUAL.get();
+					} else {
+						message = ESMessages.PROFILE_LINE_ENABLE_MANUAL.get();
+					}
+				}
+				message = message.replaceAll("<staff>", sanction.getSourceName())
+								.replaceAll("<reason>", EChat.serialize(sanction.getReason()))
+								.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
+								.replaceAll("<creation_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
+								.replaceAll("<creation_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()))
+								.replaceAll("<creation_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()))
+								.replaceAll("<expiration_time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()))
+								.replaceAll("<expiration_date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()))
+								.replaceAll("<expiration_datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()));
 			}
 		});
 		

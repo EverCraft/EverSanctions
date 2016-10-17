@@ -46,64 +46,162 @@ public class ESMessage extends EMessage {
 		CONNECTION_BANIP_TEMP("connection.banipTemp", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant encore : &7<duration>"),
 		
 		// Profile
-		PROFILE_DESCRIPTION("profile.description", 					"Liste des sanctions d'un joueur"),
-		PROFILE_ERROR_TYPE("profile.", 					""),
+		PROFILE_DESCRIPTION("profile.description", 									"Liste des sanctions d'un joueur"),
+		PROFILE_LINE_ENABLE_MANUAL("profile.lineEnableManual", 						"    &6&l➤ &a<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>"),
+		PROFILE_LINE_PARDON_MANUAL("profile.linePardonManual", 						"    &6&l➤ &c<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &cAnnulation :[RT]"
+																				  + "            &cRaison : <pardon_reason>[RT]"
+																				  + "            &cPar : <pardon_staff>[RT]"
+																				  + "            &cDate : <pardon_datetime>"),
+		PROFILE_LINE_DISABLE_MANUAL("profile.lineDisableManual", 					"    &6&l➤ &a<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>"),
+		PROFILE_LINE_ENABLE_MANUAL_OPTION("profile.lineEnableManualOption",			"    &6&l➤ &a<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>"),
+		PROFILE_LINE_PARDON_MANUAL_OPTION("profile.linePardonManualOption", 		"    &6&l➤ &c<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>[RT]"
+																				  + "        &cAnnulation :[RT]"
+																				  + "            &cRaison : <pardon_reason>[RT]"
+																				  + "            &cPar : <pardon_staff>[RT]"
+																				  + "            &cDate : <pardon_datetime>"),
+		PROFILE_LINE_DISABLE_MANUAL_OPTION("profile.lineDisableManualOption", 		"    &6&l➤ &a<type> :[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>"),
+		PROFILE_LINE_ENABLE_AUTO("profile.lineEnableAuto", 							"    &6&l➤ &a<reason> : niveau <level>[RT]"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>"),
+		PROFILE_LINE_PARDON_AUTO("profile.linePardonAuto", 							"    &6&l➤ &a<reason> : niveau <level>"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &cAnnulation :[RT]"
+																				  + "            &cRaison : <pardon_reason>[RT]"
+																				  + "            &cPar : <pardon_staff>[RT]"
+																				  + "            &cDate : <pardon_datetime>"),
+		PROFILE_LINE_DISABLE_AUTO("profile.lineDisableAuto", 						"    &6&l➤ &c<reason> : niveau <level>[RT]"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"),
+		PROFILE_LINE_ENABLE_AUTO_OPTION("profile.lineEnableAutoOption",				"    &6&l➤ &a<reason> : niveau <level>[RT]"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>"),
+		PROFILE_LINE_DISABLE_AUTO_OPTION("profile.lineDisableAutoOption",			"    &6&l➤ &c<reason> : niveau <level>[RT]"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>"),
+		PROFILE_LINE_PARDON_AUTO_OPTION("profile.linePardonAutoOption",				"    &6&l➤ &a<reason> : niveau <level>[RT]"
+																				  + "        &7Type : <type>[RT]"
+																				  + "        &7Raison : <reason>[RT]"
+																				  + "        &7Par : <staff>[RT]"
+																				  + "        &7Création : <creation_datetime>[RT]"
+																				  + "        &7Expiration : <expiration_datetime>[RT]"
+																				  + "        &7Option : <option>[RT]"
+																				  + "        &cAnnulation :[RT]"
+																				  + "            &cRaison : <pardon_reason>[RT]"
+																				  + "            &cPar : <pardon_staff>[RT]"
+																				  + "            &cDate : <pardon_datetime>"),
+		PROFILE_AUTO_BAN_PROFILE("profile.autoBanProfile", 							"BAN_PROFILE"),
+		PROFILE_AUTO_BAN_IP("profile.autoBanIp", 									"BAN_IP"),
+		PROFILE_AUTO_BAN_PROFILE_AND_IP("profile.autoBanProfileAndIp", 				"BAN_PROFILE_AND_IP"),
+		PROFILE_AUTO_MUTE("profile.autoMute", 										"MUTE"),
+		PROFILE_AUTO_JAIL("profile.autoJail", 										"JAIL"),
+		PROFILE_AUTO_MUTE_AND_JAIL("profile.autoMuteAndJail", 						"MUTE_AND_JAIL"),
+		PROFILE_MANUAL_BAN_PROFILE("profile.manualBanProfile", 						"BAN_PROFILE"),
+		PROFILE_MANUAL_BAN_IP("profile.manualBanIp", 								"BAN_IP"),
+		PROFILE_MANUAL_MUTE("profile.manualMute", 									"MUTE"),
+		PROFILE_MANUAL_JAIL("profile.manualJail", 									"JAIL"),
+		PROFILE_ERROR_TYPE("profile.errorType", 									""),
 		
 		// Ban		
-		BAN_DESCRIPTION("ban.description", 							"Banni le joueur du serveur"),
-		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", 					"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>"),
-		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", 				"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BAN_TEMP_STAFF("ban.tempStaff", 							"&7Vous avez banni &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
-		BAN_TEMP_PLAYER("ban.tempPlayer", 							"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BAN_ERROR_REASON("ban.errorReason", 						"&cErreur : La raison est obligatoire."),
-		BAN_ERROR_CANCEL("ban.errorCancel", 						"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
-		BAN_ERROR_EQUALS("ban.errorEquals", 						"&cErreur : Impossible de vous bannir vous-même."),
-		BAN_ERROR_NOEMPTY("ban.errorNoEmpty", 						"&cErreur : &6<player> &cest déjà banni."),
+		BAN_DESCRIPTION("ban.description", 											"Banni le joueur du serveur"),
+		BAN_UNLIMITED_STAFF("ban.unlimitedStaff", 									"&7Vous avez banni définitivement &6<player> &7du serveur pour la raison : &6<reason>"),
+		BAN_UNLIMITED_PLAYER("ban.unlimitedPlayer", 								"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		BAN_TEMP_STAFF("ban.tempStaff", 											"&7Vous avez banni &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
+		BAN_TEMP_PLAYER("ban.tempPlayer", 											"&c&lBanni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		BAN_ERROR_REASON("ban.errorReason", 										"&cErreur : La raison est obligatoire."),
+		BAN_ERROR_CANCEL("ban.errorCancel", 										"&cErreur : Impossible de bannir &6<player> &cpour le moment."),
+		BAN_ERROR_EQUALS("ban.errorEquals", 										"&cErreur : Impossible de vous bannir vous-même."),
+		BAN_ERROR_NOEMPTY("ban.errorNoEmpty", 										"&cErreur : &6<player> &cest déjà banni."),
 		
 		// UnBan
-		UNBAN_DESCRIPTION("unban.description", 						"Débanni le joueur du serveur"),
-		UNBAN_STAFF("unban.staff", 									"&7Vous avez débanni &6<player>&7."),
-		UNBAN_ERROR_REASON("unban.errorReason", 					"&cErreur : La raison est obligatoire."),
-		UNBAN_ERROR_EQUALS("unban.errorEquals", 					"&cErreur : Impossible de vous débannir vous-même."),
-		UNBAN_ERROR_EMPTY("unban.errorEmpty", 						"&cErreur : &6<player> &cn'est pas banni."),
-		UNBAN_CANCEL("unban.cancel", 								"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
+		UNBAN_DESCRIPTION("unban.description", 										"Débanni le joueur du serveur"),
+		UNBAN_STAFF("unban.staff", 													"&7Vous avez débanni &6<player>&7."),
+		UNBAN_ERROR_REASON("unban.errorReason", 									"&cErreur : La raison est obligatoire."),
+		UNBAN_ERROR_EQUALS("unban.errorEquals", 									"&cErreur : Impossible de vous débannir vous-même."),
+		UNBAN_ERROR_EMPTY("unban.errorEmpty", 										"&cErreur : &6<player> &cn'est pas banni."),
+		UNBAN_CANCEL("unban.cancel", 												"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
 		
 		// Banip
-		BANIP_DESCRIPTION("banip.description", 						"Banni l'adresse IP du joueur"),
+		BANIP_DESCRIPTION("banip.description", 										"Banni l'adresse IP du joueur"),
 		
-		BANIP_IP_UNLIMITED_STAFF("banip.ip.unlimitedStaff", 		"&7Vous avez banni définitivement l'adresse IP &6<address> &7du serveur pour la raison : &6<reason>"),
-		BANIP_IP_UNLIMITED_PLAYER("banip.ip.unlimitedPlayer", 		"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BANIP_IP_TEMP_STAFF("banip.ip.tempStaff", 					"&7Vous avez banni l'adresse IP&6<address> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
-		BANIP_IP_TEMP_PLAYER("banip.ip.tempPlayer", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BANIP_IP_ERROR_REASON("banip.ip.errorReason", 				"&cErreur : La raison est obligatoire."),
-		BANIP_IP_ERROR_CANCEL("banip.ip.errorCancel", 				"&cErreur : Impossible de bannir l'adresse IP <address> pour le moment."),
-		BANIP_IP_ERROR_EQUALS("banip.ip.errorEquals", 				"&cErreur : Impossible de bannir votre propre adresse IP."),
-		BANIP_IP_ERROR_NOEMPTY("banip.ip.errorNoEmpty", 			"&cErreur : L'addresse IP &6<player> &cest déjà banni."),
+		BANIP_IP_UNLIMITED_STAFF("banip.ip.unlimitedStaff", 						"&7Vous avez banni définitivement l'adresse IP &6<address> &7du serveur pour la raison : &6<reason>"),
+		BANIP_IP_UNLIMITED_PLAYER("banip.ip.unlimitedPlayer", 						"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		BANIP_IP_TEMP_STAFF("banip.ip.tempStaff", 									"&7Vous avez banni l'adresse IP&6<address> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
+		BANIP_IP_TEMP_PLAYER("banip.ip.tempPlayer", 								"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		BANIP_IP_ERROR_REASON("banip.ip.errorReason", 								"&cErreur : La raison est obligatoire."),
+		BANIP_IP_ERROR_CANCEL("banip.ip.errorCancel", 								"&cErreur : Impossible de bannir l'adresse IP <address> pour le moment."),
+		BANIP_IP_ERROR_EQUALS("banip.ip.errorEquals", 								"&cErreur : Impossible de bannir votre propre adresse IP."),
+		BANIP_IP_ERROR_NOEMPTY("banip.ip.errorNoEmpty", 							"&cErreur : L'addresse IP &6<player> &cest déjà banni."),
 		
-		BANIP_PLAYER_UNLIMITED_STAFF("banip.player.unlimitedStaff", "&7Vous avez banni définitivement l'adresse IP de &6<player> &7du serveur pour la raison : &6<reason>"),
-		BANIP_PLAYER_UNLIMITED_PLAYER("banip.player.unlimitedPlayer", "&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
-		BANIP_PLAYER_TEMP_STAFF("banip.player.tempStaff", 			"&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>"),
-		BANIP_PLAYER_TEMP_PLAYER("banip.player.tempPlayer", 		"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
-		BANIP_PLAYER_ERROR_REASON("banip.player.errorReason", 		"&cErreur : La raison est obligatoire."),
-		BANIP_PLAYER_ERROR_CANCEL("banip.player.errorCancel", 		"&cErreur : Impossible de bannir l'adresse de &6<player>&c pour le moment."),
-		BANIP_PLAYER_ERROR_EQUALS("banip.player.errorEquals", 		"&cErreur : Impossible de bannir votre propre adresse IP."),
-		BANIP_PLAYER_ERROR_NOEMPTY("banip.player.errorNoEmpty", 	"&cErreur : L'adresse IP de &6<player> &cest déjà banni."),
-		BANIP_PLAYER_ERROR_IP("banip.player.errorIP", 				"&cErreur : Aucune adresse IP connu de &6<player>&c."),
+		BANIP_PLAYER_UNLIMITED_STAFF("banip.player.unlimitedStaff",					"&7Vous avez banni définitivement l'adresse IP de &6<player> &7du serveur pour la raison : &6<reason>"),
+		BANIP_PLAYER_UNLIMITED_PLAYER("banip.player.unlimitedPlayer", 				"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT]"),
+		BANIP_PLAYER_TEMP_STAFF("banip.player.tempStaff", 							"&7Vous avez banni &6<player> &7d'une durée de &7<duration> &7pour la raison : &6<reason>"),
+		BANIP_PLAYER_TEMP_PLAYER("banip.player.tempPlayer", 						"&c&lAdresse IP banni du serveur par <staff>[RT][RT]&cRaison : &7<reason>[RT][RT]&cPendant : &7<duration>"),
+		BANIP_PLAYER_ERROR_REASON("banip.player.errorReason", 						"&cErreur : La raison est obligatoire."),
+		BANIP_PLAYER_ERROR_CANCEL("banip.player.errorCancel", 						"&cErreur : Impossible de bannir l'adresse de &6<player>&c pour le moment."),
+		BANIP_PLAYER_ERROR_EQUALS("banip.player.errorEquals", 						"&cErreur : Impossible de bannir votre propre adresse IP."),
+		BANIP_PLAYER_ERROR_NOEMPTY("banip.player.errorNoEmpty", 					"&cErreur : L'adresse IP de &6<player> &cest déjà banni."),
+		BANIP_PLAYER_ERROR_IP("banip.player.errorIP", 								"&cErreur : Aucune adresse IP connu de &6<player>&c."),
 		
 		// UnBanIp
-		UNBANIP_DESCRIPTION("unbanip.description", "Débanni l'adresse IP du serveur"),
+		UNBANIP_DESCRIPTION("unbanip.description", 									"Débanni l'adresse IP du serveur"),
 		
-		UNBANIP_IP_STAFF("unbanip.ip.staff", "&7Vous avez débanni l'adresse IP &6<address>&7."),
-		UNBANIP_IP_ERROR_REASON("unbanip.ip.errorReason", "&cErreur : La raison est obligatoire."),
-		UNBANIP_IP_ERROR_EQUALS("unbanip.ip.errorEquals", "&cErreur : Impossible de débannir votre propre adresse IP."),
-		UNBANIP_IP_ERROR_EMPTY("unbanip.ip.errorEmpty", "&cErreur : L'adresse IP  &6<address> &cn'est pas banni."),
-		UNBANIP_IP_CANCEL("unbanip.ip.cancel", "&cErreur : Impossible de débannir l'adresse IP &6<address> &cpour le moment."),
+		UNBANIP_IP_STAFF("unbanip.ip.staff", 										"&7Vous avez débanni l'adresse IP &6<address>&7."),
+		UNBANIP_IP_ERROR_REASON("unbanip.ip.errorReason", 							"&cErreur : La raison est obligatoire."),
+		UNBANIP_IP_ERROR_EQUALS("unbanip.ip.errorEquals",							"&cErreur : Impossible de débannir votre propre adresse IP."),
+		UNBANIP_IP_ERROR_EMPTY("unbanip.ip.errorEmpty", 							"&cErreur : L'adresse IP  &6<address> &cn'est pas banni."),
+		UNBANIP_IP_CANCEL("unbanip.ip.cancel", 										"&cErreur : Impossible de débannir l'adresse IP &6<address> &cpour le moment."),
 		
-		UNBANIP_PLAYER_STAFF("unbanip.player.staff", "&7Vous avez débanni l'adresse IP de &6<player>&7."),
-		UNBANIP_PLAYER_ERROR_REASON("unbanip.player.errorReason", "&cErreur : La raison est obligatoire."),
-		UNBANIP_PLAYER_ERROR_EQUALS("unbanip.player.errorEquals", "&cErreur : Impossible de débannir votre propre adresse IP."),
-		UNBANIP_PLAYER_ERROR_EMPTY("unbanip.player.errorEmpty", "&cErreur : L'adresse IP de &6<player> &cn'est pas banni."),
-		UNBANIP_PLAYER_CANCEL("unbanip.player.cancel", "&cErreur : Impossible de débannir l'adresse IP de &6<player> &cpour le moment."),
+		UNBANIP_PLAYER_STAFF("unbanip.player.staff", 								"&7Vous avez débanni l'adresse IP de &6<player>&7."),
+		UNBANIP_PLAYER_ERROR_REASON("unbanip.player.errorReason", 					"&cErreur : La raison est obligatoire."),
+		UNBANIP_PLAYER_ERROR_EQUALS("unbanip.player.errorEquals", 					"&cErreur : Impossible de débannir votre propre adresse IP."),
+		UNBANIP_PLAYER_ERROR_EMPTY("unbanip.player.errorEmpty", 					"&cErreur : L'adresse IP de &6<player> &cn'est pas banni."),
+		UNBANIP_PLAYER_CANCEL("unbanip.player.cancel", 								"&cErreur : Impossible de débannir l'adresse IP de &6<player> &cpour le moment."),
 		
 		// Jail	
 		JAIL_DESCRIPTION("jail.description", 										"Emprisonne le joueur"),
