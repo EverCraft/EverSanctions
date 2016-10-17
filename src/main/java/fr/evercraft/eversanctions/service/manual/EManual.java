@@ -86,6 +86,11 @@ public abstract class EManual implements Sanction {
 		return this.pardon_source;
 	}
 	
+	@Override
+	public Optional<String> getPardonSourceName() {
+		return this.pardon_source;
+	}
+	
 	public void pardon(Long date, Text reason, String source) {
 		this.pardon_date = Optional.ofNullable(date);
 		this.pardon_reason = Optional.ofNullable(reason);

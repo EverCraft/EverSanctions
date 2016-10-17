@@ -155,6 +155,11 @@ public class EAuto implements SanctionAuto {
 	}
 
 	@Override
+	public Optional<String> getPardonSourceName() {
+		return this.pardon_source;
+	}
+	
+	@Override
 	public Optional<Ban.Profile> getBan(GameProfile profile) {
 		if(this.isBan()) {
 			Builder builder = Ban.builder()

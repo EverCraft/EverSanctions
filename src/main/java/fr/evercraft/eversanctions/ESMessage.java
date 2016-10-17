@@ -47,94 +47,30 @@ public class ESMessage extends EMessage {
 		
 		// Profile
 		PROFILE_DESCRIPTION("profile.description", 									"Liste des sanctions d'un joueur"),
-		PROFILE_LINE_ENABLE_MANUAL("profile.lineEnableManual", 						"    &6&l➤ &a<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>"),
-		PROFILE_LINE_PARDON_MANUAL("profile.linePardonManual", 						"    &6&l➤ &c<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &cAnnulation :[RT]"
-																				  + "            &cRaison : <pardon_reason>[RT]"
-																				  + "            &cPar : <pardon_staff>[RT]"
-																				  + "            &cDate : <pardon_datetime>"),
-		PROFILE_LINE_DISABLE_MANUAL("profile.lineDisableManual", 					"    &6&l➤ &a<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>"),
-		PROFILE_LINE_ENABLE_MANUAL_OPTION("profile.lineEnableManualOption",			"    &6&l➤ &a<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>"),
-		PROFILE_LINE_PARDON_MANUAL_OPTION("profile.linePardonManualOption", 		"    &6&l➤ &c<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>[RT]"
-																				  + "        &cAnnulation :[RT]"
-																				  + "            &cRaison : <pardon_reason>[RT]"
-																				  + "            &cPar : <pardon_staff>[RT]"
-																				  + "            &cDate : <pardon_datetime>"),
-		PROFILE_LINE_DISABLE_MANUAL_OPTION("profile.lineDisableManualOption", 		"    &6&l➤ &a<type> :[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>"),
-		PROFILE_LINE_ENABLE_AUTO("profile.lineEnableAuto", 							"    &6&l➤ &a<reason> : niveau <level>[RT]"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>"),
-		PROFILE_LINE_PARDON_AUTO("profile.linePardonAuto", 							"    &6&l➤ &a<reason> : niveau <level>"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &cAnnulation :[RT]"
-																				  + "            &cRaison : <pardon_reason>[RT]"
-																				  + "            &cPar : <pardon_staff>[RT]"
-																				  + "            &cDate : <pardon_datetime>"),
-		PROFILE_LINE_DISABLE_AUTO("profile.lineDisableAuto", 						"    &6&l➤ &c<reason> : niveau <level>[RT]"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"),
-		PROFILE_LINE_ENABLE_AUTO_OPTION("profile.lineEnableAutoOption",				"    &6&l➤ &a<reason> : niveau <level>[RT]"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>"),
-		PROFILE_LINE_DISABLE_AUTO_OPTION("profile.lineDisableAutoOption",			"    &6&l➤ &c<reason> : niveau <level>[RT]"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>"),
-		PROFILE_LINE_PARDON_AUTO_OPTION("profile.linePardonAutoOption",				"    &6&l➤ &a<reason> : niveau <level>[RT]"
-																				  + "        &7Type : <type>[RT]"
-																				  + "        &7Raison : <reason>[RT]"
-																				  + "        &7Par : <staff>[RT]"
-																				  + "        &7Création : <creation_datetime>[RT]"
-																				  + "        &7Expiration : <expiration_datetime>[RT]"
-																				  + "        &7Option : <option>[RT]"
-																				  + "        &cAnnulation :[RT]"
-																				  + "            &cRaison : <pardon_reason>[RT]"
-																				  + "            &cPar : <pardon_staff>[RT]"
-																				  + "            &cDate : <pardon_datetime>"),
+
+		PROFILE_LINE_ENABLE_MANUAL("profile.lineEnableManual", 						"    &6&l➤ &a<type> :[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"),
+		PROFILE_LINE_ENABLE_AUTO("profile.lineEnableAuto", 							"    &6&l➤ &a<reason> : niveau <level>[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"),
+		
+		PROFILE_LINE_PARDON_MANUAL("profile.linePardonManual", 						"    &6&l➤ &c<type> :[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"
+																				  + "[RT]        &cAnnulation :[RT]<line_pardon_reason><line_pardon_staff><line_pardon_date>"),
+		PROFILE_LINE_PARDON_AUTO("profile.linePardonAuto", 							"    &6&l➤ &c<reason> : niveau <level>[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"
+																				  + "[RT]        &cAnnulation :[RT]<line_pardon_reason><line_pardon_staff><line_pardon_date>"),
+		
+		PROFILE_LINE_DISABLE_MANUAL("profile.lineDisableManual", 					"    &6&l➤ &c<type> :[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"),
+		PROFILE_LINE_DISABLE_AUTO("profile.lineDisableAuto", 						"    &6&l➤ &c<reason> : niveau <level>[RT]<line_reason><line_staff><line_ip><line_jail><line_creation><line_expiration>"),
+		
+		PROFILE_LINE_TYPE("profile.lineType", 										"        &7Type : <type>[RT]"),
+		PROFILE_LINE_REASON("profile.lineReason", 									"        &7Raison : <reason>[RT]"),
+		PROFILE_LINE_STAFF("profile.lineStaff", 									"        &7Par : <staff>[RT]"),
+		PROFILE_LINE_CREATION("profile.lineCreation", 								"        &7Création : <datetime>[RT]"),
+		PROFILE_LINE_EXPIRATION_TEMP("profile.lineExpirationTemp", 					"        &7Expiration : <datetime>"),
+		PROFILE_LINE_EXPIRATION_UNLIMITED("profile.lineExpirationUnlimited",		"        &7Expiration : Aucune"),
+		PROFILE_LINE_IP("profile.lineIp",											"        &7Ip : <address>[RT]"),
+		PROFILE_LINE_JAIL("profile.lineJail",										"        &7Jail : <jail>[RT]"),
+		PROFILE_LINE_PARDON_STAFF("profile.linePardonStaff", 						"            &cPar : <staff>[RT]"),
+		PROFILE_LINE_PARDON_REASON("profile.linePardonReason", 						"            &cRaison : <reason>[RT]"),
+		PROFILE_LINE_PARDON_DATE("profile.linePardonDate",	 						"            &cDate : <datetime>"),
+		
 		PROFILE_AUTO_BAN_PROFILE("profile.autoBanProfile", 							"BAN_PROFILE"),
 		PROFILE_AUTO_BAN_IP("profile.autoBanIp", 									"BAN_IP"),
 		PROFILE_AUTO_BAN_PROFILE_AND_IP("profile.autoBanProfileAndIp", 				"BAN_PROFILE_AND_IP"),
@@ -145,6 +81,9 @@ public class ESMessage extends EMessage {
 		PROFILE_MANUAL_BAN_IP("profile.manualBanIp", 								"BAN_IP"),
 		PROFILE_MANUAL_MUTE("profile.manualMute", 									"MUTE"),
 		PROFILE_MANUAL_JAIL("profile.manualJail", 									"JAIL"),
+		PROFILE_TITLE_OTHERS("profile.titleOthers", 								"&aSanctions : &c<player>"),
+		PROFILE_TITLE_EQUALS("profile.titleEquals", 								"&aVos sanctions"),
+		PROFILE_EMPTY("profile.empty", 												"&7Aucun sanction"),
 		PROFILE_ERROR_TYPE("profile.errorType", 									""),
 		
 		// Ban		
