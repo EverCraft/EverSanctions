@@ -133,7 +133,7 @@ public class ESUnJail extends ECommand<EverSanctions> {
 		}
 		
 		// Si l'event a été cancel
-		Optional<SanctionManualProfile.Ban> pardon = user.pardonBan(System.currentTimeMillis(),  reason, staff);
+		Optional<SanctionManualProfile.Jail> pardon = user.pardonJail(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
