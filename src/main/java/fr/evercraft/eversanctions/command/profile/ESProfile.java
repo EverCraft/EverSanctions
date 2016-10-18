@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.profile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.spongepowered.api.text.format.TextColors;
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
+import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.sanction.Sanction;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
@@ -72,7 +74,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + "|" + EAMessages.ARGS_IP.get() + "> [" + EAMessages.ARGS_TYPE.get() + "]")
+		return Text.builder("/" + this.getName() + " [" + EAMessages.ARGS_PLAYER.get() + "|" + EAMessages.ARGS_IP.get() + "] [" + EAMessages.ARGS_TYPE.get() + "]")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -97,7 +99,15 @@ public class ESProfile extends ECommand<EverSanctions> {
 		boolean resultat = false;
 		
 		// Nombre d'argument correct
-		if (args.size() == 1) {
+		if (args.isEmpty()) {
+			// Si la source est un joueur
+			if (source instanceof EPlayer) {
+				resultat = this.commandProfile(source, (EPlayer) source, Optional.empty());
+			// La source n'est pas un joueur
+			} else {
+				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR_FOR_PLAYER.getText()));
+			}
+		} else if (args.size() == 1) {
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()) {
@@ -222,7 +232,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 						.replaceAll("<level>", level.toString());
 			}
 			
-			list.add(EChat.of(message
+			message = message
 					.replaceAll("<line_type>", this.get(line_type))
 					.replaceAll("<line_reason>", this.get(line_reason))
 					.replaceAll("<line_staff>", this.get(line_staff))
@@ -232,7 +242,9 @@ public class ESProfile extends ECommand<EverSanctions> {
 					.replaceAll("<line_jail>", this.get(line_jail))
 					.replaceAll("<line_pardon_staff>", this.get(line_pardon_staff))
 					.replaceAll("<line_pardon_reason>", this.get(line_pardon_reason))
-					.replaceAll("<line_pardon_date>", this.get(line_pardon_date))));
+					.replaceAll("<line_pardon_date>", this.get(line_pardon_date));
+					
+			list.addAll(EChat.of(Arrays.asList(message.split("\n"))));
 		});
 		
 		if (list.isEmpty()) {

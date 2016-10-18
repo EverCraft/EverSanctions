@@ -37,8 +37,8 @@ public class ESConfig extends EConfig {
 	
 	@Override
 	public void loadDefault() {
-		addDefault("debug", false, "Displays plugin performance in the logs");
-		addDefault("language", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
+		addDefault("DEBUG", false, "Displays plugin performance in the logs");
+		addDefault("LANGUAGE", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
 		
 		// SQL
 		addComment("SQL", 				"Save the user in a database : ",
@@ -49,16 +49,20 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "eversanctions_");
 		
-		addDefault("ban.max-time", "5y");
 		
-		addDefault("ban-ip.max-time", "5y");
 		
-		addDefault("jail.radius", 20);
-		addDefault("jail.max-time", "5y");
-		addDefault("jail.commands-enable", Arrays.asList("profile"));
+		addDefault("auto.sanctions", "5y");
 		
-		addDefault("mute.max-time", "5y");
-		addDefault("mute.commands-disable", Arrays.asList("msg", "reply", "mail"));
+		addDefault("manual.ban.max-time", "5y");
+		
+		addDefault("manual.ban-ip.max-time", "5y");
+		
+		addDefault("manual.jail.radius", 20);
+		addDefault("manual.jail.max-time", "5y");
+		addDefault("manual.jail.commands-enable", Arrays.asList("profile"));
+		
+		addDefault("manual.mute.max-time", "5y");
+		addDefault("manual.mute.commands-disable", Arrays.asList("msg", "reply", "mail"));
 	}
 	
 	/*
@@ -66,7 +70,7 @@ public class ESConfig extends EConfig {
 	 */
 	
 	public Optional<Long> getBanMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("ban.max-time").getString("5y"), true);
+		return UtilsDate.parseDateDiff(this.get("manual.ban.max-time").getString("5y"), true);
 	}
 	
 	/*
@@ -74,7 +78,7 @@ public class ESConfig extends EConfig {
 	 */
 	
 	public Optional<Long> getBanIpMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("ban-ip.max-time").getString("5y"), true);
+		return UtilsDate.parseDateDiff(this.get("manual.ban-ip.max-time").getString("5y"), true);
 	}
 	
 	/*
@@ -82,15 +86,15 @@ public class ESConfig extends EConfig {
 	 */
 	
 	public Optional<Long> getJailMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("jail.max-time").getString("5y"), true);
+		return UtilsDate.parseDateDiff(this.get("manual.jail.max-time").getString("5y"), true);
 	}
 	
 	public int getJailRadius() {
-		return this.get("jail.radius").getInt(20);
+		return this.get("manual.jail.radius").getInt(20);
 	}
 	
 	public List<String> getJailCommandsEnable() {
-		return this.getListString("jail.commands-enable");
+		return this.getListString("manual.jail.commands-enable");
 	}
 	
 	/*
@@ -98,10 +102,10 @@ public class ESConfig extends EConfig {
 	 */
 	
 	public Optional<Long> getMuteMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("mute.max-time").getString("5y"), true);
+		return UtilsDate.parseDateDiff(this.get("manual.mute.max-time").getString("5y"), true);
 	}
 	
 	public List<String> getMuteCommandsDisable() {
-		return this.getListString("mute.commands-disable");
+		return this.getListString("manual.mute.commands-disable");
 	}
 }
