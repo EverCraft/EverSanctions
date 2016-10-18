@@ -54,7 +54,7 @@ import fr.evercraft.eversanctions.service.EJailService;
 		    @Dependency(id = "everapi", version = EverAPI.VERSION),
 		    @Dependency(id = "spongeapi", version = EverAPI.SPONGEAPI_VERSION)
 		})
-public class EverSanctions extends EPlugin {
+public class EverSanctions extends EPlugin<EverSanctions> {
 	private ESConfig configs;
 	private ESMessage messages;
 	

@@ -17,14 +17,23 @@
 package fr.evercraft.eversanctions;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import fr.evercraft.everapi.java.UtilsInteger;
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
+import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.everapi.services.sanction.SanctionService;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsDate;
+import fr.evercraft.eversanctions.service.auto.EAutoLevel;
+import fr.evercraft.eversanctions.service.auto.EAutoReason;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
-public class ESConfig extends EConfig {
+public class ESConfig extends EConfig<EverSanctions> {
 
 	public ESConfig(final EverSanctions plugin) {
 		super(plugin);
@@ -49,10 +58,7 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "eversanctions_");
 		
-		
-		
-		addDefault("auto.sanctions", "5y");
-		
+		// Manual
 		addDefault("manual.ban.max-time", "5y");
 		
 		addDefault("manual.ban-ip.max-time", "5y");
@@ -63,6 +69,48 @@ public class ESConfig extends EConfig {
 		
 		addDefault("manual.mute.max-time", "5y");
 		addDefault("manual.mute.commands-disable", Arrays.asList("msg", "reply", "mail"));
+		
+		
+		// Auto
+		Map<String, Object> types = new HashMap<String, Object>();
+		Map<String, Object> types_values = new HashMap<String, Object>();
+		Map<String, Object> levels = new HashMap<String, Object>();
+		Map<String, String> levels_values = new HashMap<String, String>();
+		
+		// Cheat
+		levels_values.put("type", "BAN_PROFILE");
+		levels_values.put("temp", "15d");
+		levels.put("1", levels_values);
+		
+		levels_values = new HashMap<String, String>();
+		levels_values.put("type", "BAN_PROFILE");
+		levels_values.put("temp", "30d");
+		levels.put("2", levels_values);
+		
+		levels_values = new HashMap<String, String>();
+		levels_values.put("type", "BAN_PROFILE");
+		levels_values.put("temp", "UNLIMITED");
+		levels.put("3", levels_values);
+		
+		types_values.put("reason", "Pour avoir cheat sur le serveur");
+		types_values.put("levels", levels);
+		
+		types.put("CHEAT", types_values);
+		
+		// DDOS
+		types_values = new HashMap<String, Object>();
+		types_values.put("reason", "Pour avoir ménacé de DDOS le serveur ou pour l'avoir fait.");
+		types_values.put("type", "BAN_PROFILE_AND_IP");
+		types_values.put("temp", "UNLIMITED");
+		
+		types.put("DDOS", types_values);
+		
+		// Jail
+		types_values = new HashMap<String, Object>();
+		levels = new HashMap<String, Object>();
+		levels_values = new HashMap<String, String>();
+		
+		addDefault("sanctions", types);
 	}
 	
 	/*
@@ -107,5 +155,90 @@ public class ESConfig extends EConfig {
 	
 	public List<String> getMuteCommandsDisable() {
 		return this.getListString("manual.mute.commands-disable");
+	}
+	
+	public Map<String, EAutoReason> getSanctions() {
+		Map<String, EAutoReason> sanctions = new HashMap<String, EAutoReason>();
+		this.get("sanctions").getChildrenMap().forEach((key, value) -> {
+			if (key instanceof String) {
+				String name = (String) key;
+				Map<Object, ? extends CommentedConfigurationNode> config = value.getChildrenMap();
+				String type_default = config.get("type").getString("");
+				String reason_default = config.get("reason").getString("Reason ...");
+				String temp_default = config.get("temp").getString(SanctionService.UNLIMITED);
+				String jail_default = config.get("jail").getString("");
+				final Map<Integer, EAutoLevel> levels = new HashMap<Integer, EAutoLevel>();
+				CommentedConfigurationNode config_levels = config.get("levels");
+				
+				
+				if(config_levels.isVirtual()) {
+					try {
+						SanctionAuto.Type type = SanctionAuto.Type.valueOf(type_default);
+						
+						Optional<String> duration = Optional.empty();
+						if (!temp_default.equalsIgnoreCase(SanctionService.UNLIMITED)) {
+							duration = Optional.of(temp_default);
+						}
+						
+						if (type.equals(SanctionAuto.Type.JAIL) || type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
+							Optional<Jail> jail = this.plugin.getJailService().get(jail_default);
+							if (jail.isPresent()) {
+								levels.put(1, new EAutoLevel(type, duration, reason_default, jail.get()));
+							} else {
+								
+							}
+						} else {
+							levels.put(1, new EAutoLevel(type, duration, reason_default));
+						}
+					} catch (IllegalArgumentException e) {
+						this.plugin.getLogger().warn("Error type '" + type_default + "' : (sanction='" + name + "')");
+					}
+				} else {		
+					config_levels.getChildrenMap().forEach((key_levels, value_levels) -> {
+						if (key_levels instanceof String) {
+							Optional<Integer> level = UtilsInteger.parseInt((String) key_levels);
+							if (level.isPresent()) {
+								Map<Object, ? extends CommentedConfigurationNode> config_level = value.getChildrenMap();
+								
+								try {
+									SanctionAuto.Type type = SanctionAuto.Type.valueOf(config_level.get("type").getString(type_default));
+									String reason = config_level.get("reason").getString(reason_default);
+									String temp = config_level.get("temp").getString(temp_default);
+									String jail_name = config.get("jail").getString(jail_default);
+																		
+									Optional<String> duration = Optional.empty();
+									if (!temp.equalsIgnoreCase(SanctionService.UNLIMITED)) {
+										duration = Optional.of(temp);
+									}
+									
+									if (type.equals(SanctionAuto.Type.JAIL) || type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
+										Optional<Jail> jail = this.plugin.getJailService().get(jail_name);
+										if (jail.isPresent()) {
+											levels.put(level.get(), new EAutoLevel(type, duration, reason, jail.get()));
+										} else {
+											
+										}
+									} else {
+										levels.put(level.get(), new EAutoLevel(type, duration, reason));
+									}
+								} catch (IllegalArgumentException e) {
+									
+								}
+							}
+						}
+					});
+				}
+				
+				if (!levels.isEmpty()) {
+					sanctions.put(name, new EAutoReason(name, levels));
+				} else {
+					
+				}
+				
+			}
+		});
+		
+		
+		return sanctions;
 	}
 }

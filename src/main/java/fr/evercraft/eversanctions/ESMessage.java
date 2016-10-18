@@ -28,7 +28,7 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.plugin.file.EnumMessage;
 
-public class ESMessage extends EMessage {
+public class ESMessage extends EMessage<EverSanctions> {
 
 	public ESMessage(final EverSanctions plugin) {
 		super(plugin, ESMessages.values());
