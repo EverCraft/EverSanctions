@@ -145,7 +145,7 @@ public class ESBan extends ECommand<EverSanctions> {
 			return this.commandUnlimitedBan(staff, user, creation, reason);
 		}
 		
-		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
+		Optional<Long> time = UtilsDate.parseDuration(creation, time_string, true);
 		
 		// Temps incorrect
 		if (!time.isPresent()) {

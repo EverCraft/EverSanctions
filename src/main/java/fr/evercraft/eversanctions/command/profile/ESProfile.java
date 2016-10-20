@@ -52,10 +52,20 @@ public class ESProfile extends ECommand<EverSanctions> {
 			};
 	
 	public enum Type {
-		BAN_PROFILE,
-		BAN_IP,
-		MUTE,
-		JAIL;
+		BAN_PROFILE(Sanction.SanctionBanProfile.class),
+		BAN_IP(Sanction.SanctionBanIp.class),
+		MUTE(Sanction.SanctionMute.class),
+		JAIL(Sanction.SanctionJail.class);
+		
+		private Class<?> type;
+		
+		Type(Class<?> type) {
+			this.type = type;
+		}
+		
+		public boolean predicate(Class<?> o) {
+			return o.isAssignableFrom(this.type.getClass());
+		}
 	}
 	
 	public ESProfile(final EverSanctions plugin) {
@@ -139,7 +149,14 @@ public class ESProfile extends ECommand<EverSanctions> {
 	
 	private boolean commandProfile(final CommandSource staff, EUser user, final Optional<Type> type) {
 		TreeSet<Sanction> valid = new TreeSet<Sanction>(ESProfile.COMPARATOR);
-		valid.addAll(user.getAllSanctions());
+
+		if (type.isPresent()) {
+			user.getAllSanctions().stream()
+					.filter(sanction -> type.get().predicate(sanction.getClass()))
+					.forEach(sanction -> valid.add(sanction));
+		} else {
+			valid.addAll(user.getAllSanctions());
+		}
 		
 		List<Text> list = new ArrayList<Text>();
 		valid.forEach(sanction -> {

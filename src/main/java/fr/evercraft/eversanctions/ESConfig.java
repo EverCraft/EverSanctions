@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import fr.evercraft.everapi.java.UtilsInteger;
@@ -118,7 +119,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 	 */
 	
 	public Optional<Long> getBanMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("manual.ban.max-time").getString("5y"), true);
+		return UtilsDate.parseDuration(this.get("manual.ban.max-time").getString("5y"), true);
 	}
 	
 	/*
@@ -126,7 +127,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 	 */
 	
 	public Optional<Long> getBanIpMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("manual.ban-ip.max-time").getString("5y"), true);
+		return UtilsDate.parseDuration(this.get("manual.ban-ip.max-time").getString("5y"), true);
 	}
 	
 	/*
@@ -134,7 +135,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 	 */
 	
 	public Optional<Long> getJailMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("manual.jail.max-time").getString("5y"), true);
+		return UtilsDate.parseDuration(this.get("manual.jail.max-time").getString("5y"), true);
 	}
 	
 	public int getJailRadius() {
@@ -150,7 +151,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 	 */
 	
 	public Optional<Long> getMuteMaxTime() {
-		return UtilsDate.parseDateDiff(this.get("manual.mute.max-time").getString("5y"), true);
+		return UtilsDate.parseDuration(this.get("manual.mute.max-time").getString("5y"), true);
 	}
 	
 	public List<String> getMuteCommandsDisable() {
@@ -159,16 +160,19 @@ public class ESConfig extends EConfig<EverSanctions> {
 	
 	public Map<String, EAutoReason> getSanctions() {
 		Map<String, EAutoReason> sanctions = new HashMap<String, EAutoReason>();
-		this.get("sanctions").getChildrenMap().forEach((key, value) -> {
-			if (key instanceof String) {
-				String name = (String) key;
-				Map<Object, ? extends CommentedConfigurationNode> config = value.getChildrenMap();
-				String type_default = config.get("type").getString("");
-				String reason_default = config.get("reason").getString("Reason ...");
-				String temp_default = config.get("temp").getString(SanctionService.UNLIMITED);
-				String jail_default = config.get("jail").getString("");
+		for (Entry<Object, ? extends CommentedConfigurationNode> node : this.get("sanctions").getChildrenMap().entrySet()) {
+			if (node.getKey() instanceof String) {
+				String name = (String) node.getKey();
+				CommentedConfigurationNode config = node.getValue();
+				if (config == null) {
+					this.plugin.getLogger().warn("null");
+				}
+				String type_default = config.getNode("type").getString("");
+				String reason_default = config.getNode("reason").getString("Reason ...");
+				String temp_default = config.getNode("temp").getString(SanctionService.UNLIMITED);
+				String jail_default = config.getNode("jail").getString("");
 				final Map<Integer, EAutoLevel> levels = new HashMap<Integer, EAutoLevel>();
-				CommentedConfigurationNode config_levels = config.get("levels");
+				CommentedConfigurationNode config_levels = config.getNode("levels");
 				
 				
 				if(config_levels.isVirtual()) {
@@ -194,17 +198,15 @@ public class ESConfig extends EConfig<EverSanctions> {
 						this.plugin.getLogger().warn("Error type '" + type_default + "' : (sanction='" + name + "')");
 					}
 				} else {		
-					config_levels.getChildrenMap().forEach((key_levels, value_levels) -> {
+					config_levels.getChildrenMap().forEach((key_levels, config_level) -> {
 						if (key_levels instanceof String) {
 							Optional<Integer> level = UtilsInteger.parseInt((String) key_levels);
 							if (level.isPresent()) {
-								Map<Object, ? extends CommentedConfigurationNode> config_level = value.getChildrenMap();
-								
 								try {
-									SanctionAuto.Type type = SanctionAuto.Type.valueOf(config_level.get("type").getString(type_default));
-									String reason = config_level.get("reason").getString(reason_default);
-									String temp = config_level.get("temp").getString(temp_default);
-									String jail_name = config.get("jail").getString(jail_default);
+									SanctionAuto.Type type = SanctionAuto.Type.valueOf(config_level.getNode("type").getString(type_default));
+									String reason = config_level.getNode("reason").getString(reason_default);
+									String temp = config_level.getNode("temp").getString(temp_default);
+									String jail_name = config_level.getNode("jail").getString(jail_default);
 																		
 									Optional<String> duration = Optional.empty();
 									if (!temp.equalsIgnoreCase(SanctionService.UNLIMITED)) {
@@ -230,13 +232,13 @@ public class ESConfig extends EConfig<EverSanctions> {
 				}
 				
 				if (!levels.isEmpty()) {
-					sanctions.put(name, new EAutoReason(name, levels));
+					sanctions.put(name.toLowerCase(), new EAutoReason(name, levels));
 				} else {
 					
 				}
 				
 			}
-		});
+		}
 		
 		
 		return sanctions;

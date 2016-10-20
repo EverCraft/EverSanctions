@@ -164,7 +164,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			return this.commandUnlimitedJail(staff, user, jail.get(), creation, reason);
 		}
 		
-		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
+		Optional<Long> time = UtilsDate.parseDuration(creation, time_string, true);
 		
 		// Temps incorrect
 		if (!time.isPresent()) {

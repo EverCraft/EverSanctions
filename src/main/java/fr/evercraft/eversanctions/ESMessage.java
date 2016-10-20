@@ -237,7 +237,33 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAILS_SETRADIUS_DEFAULT("jails.setradius.default", 							"&7Vous avez défini le rayon de la prison <jail> &7avec la valeur par défault (&6<radius> block(s)&7)"),
 		JAILS_SETRADIUS_VALUE("jails.setradius.value", 								"&7Vous avez défini le rayon de la prison <jail> &7à &6<radius> block(s)&7."),
 		JAILS_SETRADIUS_CANCEL_DEFAULT("jails.setradius.cancelDefault", 			"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment."),
-		JAILS_SETRADIUS_CANCEL_VALUE("jails.setradius.cancelValue", 				"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment.");
+		JAILS_SETRADIUS_CANCEL_VALUE("jails.setradius.cancelValue", 				"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment."),
+		
+		SANCTIONS_DESCRIPTION("sanctions.description", 								"Affiche la liste des sanctions disponibles"),
+		SANCTIONS_LIST_EMPTY("sanctions.list.empty", 											"&7Aucune sanctions"),
+		SANCTIONS_LIST_TITLE("sanctions.list.title", 								"&aListe des sanctions"),
+		SANCTIONS_LIST_LINE("sanctions.list.line", 									"    &6&l➤  &6<name>"),
+		SANCTIONS_LIST_LINE_HOVER("sanctions.list.lineHover", 						"&cCliquer ici pour avoir plus d'information sur la sanction &6<name>"),
+		SANCTIONS_REASON_UNKNOWN("sanctions.reason.unknown", 						"&cErreur : Il y n'y a pas de sanction &6<name>&c."),
+		SANCTIONS_REASON_TITLE("sanctions.reason.title", 							"&aSanction &6<name>"),
+		SANCTIONS_REASON_LINE_TEMP("sanctions.reason.temp", 						"    &6&l➤  &6Niveau &c<num> &6:[RT]"
+																				  + "        &7Type : &c<type>[RT]"
+																				  + "        &7Temps : &c<duration>[RT]"
+																				  + "        &7Raison : &c<reason>"),
+		SANCTIONS_REASON_LINE_TEMP_JAIL("sanctions.reason.tempJail", 				"    &6&l➤  &6Niveau &c<num> &6:[RT]"
+																				  + "        &7Type : &c<type>[RT]"
+																				  + "        &7Prison : &c<jail>[RT]"
+																				  + "        &7Temps : &c<duration>[RT]"
+																				  + "        &7Raison : &c<reason>"),
+		SANCTIONS_REASON_LINE_UNLIMITED("sanctions.reason.unlimited", 				"    &6&l➤  &6Niveau &c<num> &6:[RT]"
+																				  + "        &7Type : &c<type>[RT]"
+																				  + "        &7Temps : &cUNLIMITED[RT]"
+																				  + "        &7Raison : &c<reason>[RT]"),
+		SANCTIONS_REASON_LINE_UNLIMITED_JAIL("sanctions.reason.unlimitedJail", 		"    &6&l➤  &6Niveau &c<num> &6:"
+																				  + "        &7Type : &c<type>[RT]"
+																				  + "        &7Prison : &c<jail>[RT]"
+																				  + "        &7Temps : &cUNLIMITED[RT]"
+																				  + "        &7Raison : &c<reason>");
 		
 		private final String path;
 	    private final Object french;

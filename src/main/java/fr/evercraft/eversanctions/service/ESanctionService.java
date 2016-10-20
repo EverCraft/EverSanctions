@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.service;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 
 import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
@@ -105,11 +107,13 @@ public abstract class ESanctionService implements SanctionService {
 	 * Rechargement : Vide le cache et recharge tous les joueurs
 	 */
 	public void reload() {
+		this.reasons.clear();
 		this.jail_commands_enable.clear();
 		this.mute_commands_disable.clear();
 		this.users_cache.cleanUp();
 		this.ips_cache.cleanUp();
 		
+		this.reasons.putAll(this.plugin.getConfigs().getSanctions());
 		this.jail_commands_enable.addAll(this.plugin.getConfigs().getJailCommandsEnable());
 		this.mute_commands_disable.addAll(this.plugin.getConfigs().getMuteCommandsDisable());
 		
@@ -221,6 +225,11 @@ public abstract class ESanctionService implements SanctionService {
 	@Override
 	public Optional<SanctionAuto.Reason> getReason(String identifier) {
 		return Optional.ofNullable(this.reasons.get(identifier.toLowerCase()));
+	}
+	
+	@Override
+	public Collection<SanctionAuto.Reason> getAllReasons() {
+		return ImmutableList.copyOf(this.reasons.values());
 	}
 	
 	public boolean jailCommandsEnable(String command) {

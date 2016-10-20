@@ -56,7 +56,7 @@ public class EAutoLevel implements SanctionAuto.Level {
 	@Override
 	public Optional<Long> getExpirationDate(long creation) {
 		if(this.duration.isPresent()) {
-			return UtilsDate.parseDateDiff(creation, this.duration.get(), true);
+			return UtilsDate.parseDuration(creation, this.duration.get(), true);
 		}
 		return Optional.empty();
 	}

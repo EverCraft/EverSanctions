@@ -16,9 +16,9 @@
  */
 package fr.evercraft.eversanctions.service.auto;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
@@ -31,6 +31,7 @@ public class EAutoReason implements SanctionAuto.Reason {
 	public EAutoReason(final String name, Map<Integer, EAutoLevel> levels) {
 		this.name = name;
 		this.levels = new ConcurrentSkipListMap<Integer, EAutoLevel>((Integer o1, Integer o2) -> o1.compareTo(o2));
+		this.levels.putAll(levels);
 	}
 
 	@Override
@@ -48,9 +49,8 @@ public class EAutoReason implements SanctionAuto.Reason {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Collection<SanctionAuto.Level> getLevels() {
-		return (Collection) this.levels.values();
+	public TreeMap<Integer, SanctionAuto.Level> getLevels() {
+		return new TreeMap<Integer, SanctionAuto.Level>(this.levels);
 	}
 	
 }

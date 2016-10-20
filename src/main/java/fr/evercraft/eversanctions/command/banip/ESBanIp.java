@@ -167,7 +167,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			return this.commandUnlimitedBanIP(staff, subject, creation, reason);
 		}
 		
-		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
+		Optional<Long> time = UtilsDate.parseDuration(creation, time_string, true);
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
@@ -279,7 +279,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			return this.commandUnlimitedPlayerBanIP(staff, user, last.get(), creation, reason);
 		}
 		
-		Optional<Long> time = UtilsDate.parseDateDiff(creation, time_string, true);
+		Optional<Long> time = UtilsDate.parseDuration(creation, time_string, true);
 		
 		// Temps incorrect
 		if (!time.isPresent()) {

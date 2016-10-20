@@ -40,6 +40,7 @@ import fr.evercraft.eversanctions.command.jails.ESJailsTeleport;
 import fr.evercraft.eversanctions.command.mute.ESMute;
 import fr.evercraft.eversanctions.command.mute.ESUnMute;
 import fr.evercraft.eversanctions.command.profile.ESProfile;
+import fr.evercraft.eversanctions.command.sanction.ESSanctions;
 import fr.evercraft.eversanctions.command.sub.ESReload;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
@@ -89,7 +90,8 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 		command.add(new ESReload(this, command));
 		
 		new ESProfile(this);
-		
+		new ESSanctions(this);
+				
 		new ESBan(this);
 		new ESUnBan(this);
 		
