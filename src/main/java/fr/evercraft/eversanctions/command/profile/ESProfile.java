@@ -50,21 +50,23 @@ public class ESProfile extends ECommand<EverSanctions> {
 				if (!o1.isExpire() && o2.isExpire()) return -1;
 				return o2.getCreationDate().compareTo(o1.getCreationDate());
 			};
-	
+			
 	public enum Type {
 		BAN_PROFILE(Sanction.SanctionBanProfile.class),
 		BAN_IP(Sanction.SanctionBanIp.class),
+		BAN_PROFILE_AND_IP(SanctionAuto.SanctionBanProfileAndIp.class),
 		MUTE(Sanction.SanctionMute.class),
-		JAIL(Sanction.SanctionJail.class);
+		JAIL(Sanction.SanctionJail.class),
+		JAIL_AND_MUTE(SanctionAuto.SanctionMuteAndJail.class);
 		
 		private Class<?> type;
 		
-		Type(Class<?> type) {
+		Type(final Class<?> type) {
 			this.type = type;
 		}
 		
 		public boolean predicate(Class<?> o) {
-			return o.isAssignableFrom(this.type.getClass());
+			return this.type.isAssignableFrom(o);
 		}
 	}
 	
@@ -269,10 +271,19 @@ public class ESProfile extends ECommand<EverSanctions> {
 		}
 		
 		String title;
-		if(user.getIdentifier().equals(staff.getIdentifier())) {
-			title = ESMessages.PROFILE_TITLE_EQUALS.get();
+		if (type.isPresent()) {
+			if(user.getIdentifier().equals(staff.getIdentifier())) {
+				title = ESMessages.PROFILE_TITLE_EQUALS_TYPE.get();
+			} else {
+				title = ESMessages.PROFILE_TITLE_OTHERS_TYPE.get();
+			}
+			title = title.replaceAll("<type>", type.get().name());
 		} else {
-			title = ESMessages.PROFILE_TITLE_OTHERS.get();
+			if(user.getIdentifier().equals(staff.getIdentifier())) {
+				title = ESMessages.PROFILE_TITLE_EQUALS.get();
+			} else {
+				title = ESMessages.PROFILE_TITLE_OTHERS.get();
+			}
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
@@ -288,18 +299,18 @@ public class ESProfile extends ECommand<EverSanctions> {
 	}
 	
 	public String getType(SanctionAuto sanction) {
-		if(sanction instanceof SanctionAuto.SanctionBanProfile) {
+		if(sanction instanceof SanctionAuto.SanctionBanProfileAndIp) {
+			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.get();
+		} else if(sanction instanceof SanctionAuto.SanctionBanProfile) {
 			return ESMessages.PROFILE_AUTO_BAN_PROFILE.get();
 		} else if(sanction instanceof SanctionAuto.SanctionBanIp) {
 			return ESMessages.PROFILE_AUTO_BAN_IP.get();
-		} else if(sanction instanceof SanctionAuto.SanctionBanProfileAndIp) {
-			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.get();
+		} else if(sanction instanceof SanctionAuto.SanctionMuteAndJail) {
+			return ESMessages.PROFILE_AUTO_MUTE_AND_JAIL.get();
 		} else if(sanction instanceof SanctionAuto.SanctionMute) {
 			return ESMessages.PROFILE_AUTO_MUTE.get();
 		} else if(sanction instanceof SanctionAuto.SanctionJail) {
 			return ESMessages.PROFILE_AUTO_JAIL.get();
-		} else if(sanction instanceof SanctionAuto.SanctionMuteAndJail) {
-			return ESMessages.PROFILE_AUTO_MUTE_AND_JAIL.get();
 		}
 		return "";
 	}

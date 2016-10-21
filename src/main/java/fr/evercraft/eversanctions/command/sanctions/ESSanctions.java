@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with EverSanctions.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.evercraft.eversanctions.command.sanction;
+package fr.evercraft.eversanctions.command.sanctions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +42,12 @@ public class ESSanctions extends ECommand<EverSanctions> {
 	
 	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(ESPermissions.PROFILE.get());
+		return source.hasPermission(ESPermissions.SANCTIONS.get());
 	} 
 
 	@Override
 	public Text description(final CommandSource source) {
-		return ESMessages.PROFILE_DESCRIPTION.getText();
+		return ESMessages.SANCTIONS_DESCRIPTION.getText();
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		if (args.isEmpty()) {
 			resultat = this.commandSanctions(source);
 		} else if (args.size() == 1) {
-			Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(0));
+			Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(0).toUpperCase());
 			if (reason.isPresent()) {
 				resultat = this.commandSanctions(source, reason.get());
 			} else {
@@ -137,12 +137,11 @@ public class ESSanctions extends ECommand<EverSanctions> {
 			
 			list.add(EChat.of(message
 					.replaceAll("<num>", String.valueOf(num))
-					.replaceAll("<type>", level.getType().name())
+					.replaceAll("<type>", this.getType(level.getType()))
 					.replaceAll("<reason>", level.getReason())
 					.replaceAll("<count>", String.valueOf(reason.getLevels().size()))));
 		});
 		
-		staff.sendMessage(EChat.of("size : " + reason.getLevels().size()));
 		if (list.isEmpty()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.COMMAND_ERROR.get()));
 			return false;
@@ -156,5 +155,22 @@ public class ESSanctions extends ECommand<EverSanctions> {
 					.build(), 
 				list, staff);
 		return true;
+	}
+	
+	public String getType(SanctionAuto.Type type) {
+		if(type.equals(SanctionAuto.Type.BAN_PROFILE_AND_IP)) {
+			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.get();
+		} else if(type.equals(SanctionAuto.Type.BAN_PROFILE)) {
+			return ESMessages.PROFILE_AUTO_BAN_PROFILE.get();
+		} else if(type.equals(SanctionAuto.Type.BAN_IP)) {
+			return ESMessages.PROFILE_AUTO_BAN_IP.get();
+		} else if(type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
+			return ESMessages.PROFILE_AUTO_MUTE_AND_JAIL.get();
+		} else if(type.equals(SanctionAuto.Type.MUTE)) {
+			return ESMessages.PROFILE_AUTO_MUTE.get();
+		} else if(type.equals(SanctionAuto.Type.JAIL)) {
+			return ESMessages.PROFILE_AUTO_JAIL.get();
+		}
+		return "";
 	}
 }

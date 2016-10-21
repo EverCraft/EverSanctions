@@ -31,6 +31,17 @@ public enum ESPermissions implements EnumPermission {
 	PROFILE("profile.command"),
 	PROFILE_OTHERS("profile.others"),
 	
+	
+	// Auto
+	SANCTIONS("sanction.command"),
+	
+	SANCTION("sanction.command"),
+	SANCTION_OFFLINE("sanction.offline"),
+	
+	UNSANCTION("unban.command"),
+	
+	
+	// Manual
 	BAN("ban.command"),
 	BAN_UNLIMITED("ban.unlimited"),
 	BAN_OFFLINE("ban.offline"),
