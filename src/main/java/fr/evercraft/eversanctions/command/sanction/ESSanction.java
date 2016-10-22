@@ -31,9 +31,7 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
-import fr.evercraft.everapi.services.sanction.SanctionService;
-import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
-import fr.evercraft.everapi.sponge.UtilsDate;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -84,7 +82,13 @@ public class ESSanction extends ECommand<EverSanctions> {
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandMute(source, user.get(), args.get(1), args.get(2));
+				Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(1));
+				if (reason.isPresent()) {
+					resultat = this.commandSanction(source, user.get(), reason.get());
+				} else {
+					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_UNKNOWN.get()
+							.replaceAll("<name>", args.get(0))));
+				}
 			// Le joueur est introuvable
 			} else {
 				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
@@ -97,93 +101,40 @@ public class ESSanction extends ECommand<EverSanctions> {
 		return resultat;
 	}
 	
-	private boolean commandMute(final CommandSource staff, EUser user, final String time_string, final String reason) {
+	private boolean commandSanction(final CommandSource staff, EUser user, final SanctionAuto.Reason reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_EQUALS.get()
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_EQUALS.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		// Le joueur a déjà un mute en cours
-		if (user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_NOEMPTY.get()
+		// Le joueur a déjà une sanction en cours
+		if (user.getAuto(reason).isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_NOEMPTY.get()
 				.replaceAll("<player>", user.getName())));
-			return false;
-		}
-		
-		// Aucune raison
-		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
 		long creation = System.currentTimeMillis();
-			
-		// Ban définitif
-		if (time_string.equalsIgnoreCase(SanctionService.UNLIMITED)) {
-			return this.commandUnlimitedMute(staff, user, creation, reason);
-		}
+		Optional<SanctionAuto> sanction = user.addSanction(reason, creation, staff);
 		
-		Optional<Long> time = UtilsDate.parseDuration(creation, time_string, true);
-		
-		// Temps incorrect
-		if (!time.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
-				.replaceAll("<time>", time_string)));
-			return false;
-		}
-		
-		// Ban tempotaire
-		return this.commandTempMute(staff, user, creation, time.get(), reason);
-	}
-	
-	private boolean commandUnlimitedMute(final CommandSource staff, final EUser user, final long creation, final String reason) {
-		// Ban annulé
-		if (!user.mute(creation, Optional.empty(), EChat.of(reason), staff)) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_CANCEL.get()
+		// Sanction annulé
+		if (sanction.isPresent()) {
+			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_UNLIMITED_STAFF.get()
-			 .replaceAll("<reason>", reason)
-			 .replaceAll("<player>", user.getName())));
+		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_STAFF.get()
+				.replaceAll("<player>", user.getName())
+				.replaceAll("<reason>", EChat.serialize(sanction.get().getReason()))));
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
-			player.sendMessage(EChat.of(ESMessages.MUTE_UNLIMITED_PLAYER.get()
+			player.sendMessage(EChat.of(ESMessages.SANCTION_PLAYER.get()
 					.replaceAll("<staff>", staff.getName())
-					.replaceAll("<reason>", reason)));
-		}
-		return true;
-	}
-	
-	private boolean commandTempMute(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
-		if (!user.mute(creation, Optional.of(expiration), EChat.of(reason), staff)) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
-			return false;
-		}
-		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_TEMP_STAFF.get()
-			 .replaceAll("<player>", user.getName())
-			 .replaceAll("<reason>", reason)
-			 .replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-			 .replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-			 .replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-			 .replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
-		
-		if(user instanceof EPlayer) {
-			EPlayer player = (EPlayer) user;
-			player.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.MUTE_TEMP_PLAYER.get()
-				 .replaceAll("<staff>", staff.getName())
-				 .replaceAll("<reason>", reason)
-				 .replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-				 .replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-				 .replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-				 .replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
+					.replaceAll("<reason>", EChat.serialize(sanction.get().getReason()))));
 		}
 		return true;
 	}

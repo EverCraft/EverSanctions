@@ -243,6 +243,13 @@ public class ESMessage extends EMessage<EverSanctions> {
 		
 		// Auto
 		SANCTION_DESCRIPTION("sanction.description", 								"Sanctionné un joueur"),
+		SANCTION_STAFF("sanction.tempStaff", 										"&7Vous avez rendu muet &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
+		SANCTION_PLAYER("sanction.tempPlayer", 										"&6<staff> &c&lvous a rendu muet pendant &6<duration> &c&lpour la raison : &6<reason>"),
+		SANCTION_ERROR_REASON("sanction.errorReason", 								"&cErreur : La raison est obligatoire."),
+		SANCTION_ERROR_CANCEL("sanction.errorCancel", 								"&cErreur : Impossible de rendre muet &6<player> &cpour le moment."),
+		SANCTION_ERROR_EQUALS("sanction.errorEquals", 								"&cErreur : Impossible de vous rendre muet."),
+		SANCTION_ERROR_NOEMPTY("sanction.errorNoEmpty", 							"&cErreur : &6<player> &cest déjà mute."),
+		SANCTION_ERROR_UNKNOWN("sanction.errorUnknown",								"&cErreur : Il y n'y a pas de sanction &6<name>&c."),
 		
 		UNSANCTION_DESCRIPTION("unsanction.description", 							"Annulé une sanction à un joueur"),
 		
@@ -271,12 +278,12 @@ public class ESMessage extends EMessage<EverSanctions> {
 																				  + "        &7Prison : &c<jail>[RT]"
 																				  + "        &7Temps : &cUNLIMITED[RT]"
 																				  + "        &7Raison : &c<reason>"),
-		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 								"Ban le compte du joueur"),
-		SANCTIONS_TYPE_BAN_IP("sanctions.type.banIP", 										"Ban l'adresse IP"),
-		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 					"Ban le compte du joueur et son adresse IP"),
-		SANCTIONS_TYPE_MUTE("sanctions.type.mute", 											"Rend muet le compte du joueur"),
-		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 											"Met en prison le compte du joueur"),
-		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 							"Rend muet et met en prison le compte du joueur");
+		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 					"Ban le compte du joueur"),
+		SANCTIONS_TYPE_BAN_IP("sanctions.type.banIP", 								"Ban l'adresse IP"),
+		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 		"Ban le compte du joueur et son adresse IP"),
+		SANCTIONS_TYPE_MUTE("sanctions.type.mute", 									"Rend muet le compte du joueur"),
+		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 									"Met en prison le compte du joueur"),
+		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet et met en prison le compte du joueur");
 		
 		private final String path;
 	    private final Object french;

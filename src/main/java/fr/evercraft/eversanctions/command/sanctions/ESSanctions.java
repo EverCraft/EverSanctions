@@ -76,7 +76,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		if (args.isEmpty()) {
 			resultat = this.commandSanctions(source);
 		} else if (args.size() == 1) {
-			Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(0).toUpperCase());
+			Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(0));
 			if (reason.isPresent()) {
 				resultat = this.commandSanctions(source, reason.get());
 			} else {

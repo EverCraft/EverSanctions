@@ -133,7 +133,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			// Le joueur existe
 			if (user.isPresent()) {
 				try {
-					Optional<Type> type = Optional.ofNullable(Type.valueOf(args.get(1)));
+					Optional<Type> type = Optional.ofNullable(Type.valueOf(args.get(1).toUpperCase()));
 					resultat = this.commandProfile(source, user.get(), type);
 				} catch (IllegalArgumentException e) {
 					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PROFILE_ERROR_TYPE.get()

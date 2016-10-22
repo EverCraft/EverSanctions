@@ -112,10 +112,6 @@ public class EUserSubject implements SanctionUserSubject {
 		this.jail = this.findFirst(SanctionJail.class, sanction -> sanction.getJail().isPresent());
 	}
 
-	public Optional<EAuto> getAuto(final SanctionAuto.Reason reason) {
-		return this.findFirst(EAuto.class, sanction -> ((EAuto) sanction).getReason().equals(reason));
-	}
-
 	/*
 	 * Boolean
 	 */
@@ -484,21 +480,21 @@ public class EUserSubject implements SanctionUserSubject {
 	 */
 	
 	@Override
-	public boolean addSanction(SanctionAuto.Reason reason, long creation, CommandSource source) {
+	public Optional<SanctionAuto> addSanction(SanctionAuto.Reason reason, long creation, CommandSource source) {
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
 		
 		Optional<EUser> user = this.plugin.getEServer().getEUser(this.getUniqueId());
 		// User introuvable
 		if (!user.isPresent()) {
-			return false;
+			return Optional.empty();
 		}
 		
 		int level_int = this.getLevel(reason);
 		Optional<SanctionAuto.Level> level = reason.getLevel(level_int);
 		// Level introuvable
 		if (!level.isPresent()) {
-			return false;
+			return Optional.empty();
 		}
 		
 		
@@ -513,24 +509,24 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		if(auto.isBan()) {
 			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile()).get(), user.get()))) {
-				return false;
+				return Optional.empty();
 			}
 		}
 		
 		if(auto.isBanIP()) {
 			// IP inconnu
 			if(!user.get().getLastIP().isPresent()) {
-				return false;
+				return Optional.empty();
 			}
 			
 			// SubjectIP inconnu
 			final Optional<EIpSubject> subject_ip = this.plugin.getSanctionService().getSubject(user.get().getLastIP().get());
 			if (!subject_ip.isPresent()) {
-				return false;
+				return Optional.empty();
 			}
 			
 			if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), auto.getBan(user.get().getProfile(), user.get().getLastIP().get()).get()))) {
-				return false;
+				return Optional.empty();
 			}
 			
 			subject_ip.get().add(auto);
@@ -540,10 +536,10 @@ public class EUserSubject implements SanctionUserSubject {
 		this.update();
 		
 		this.plugin.getThreadAsync().execute(() -> this.sqlAddAuto(auto));
-		return true;
+		return Optional.of(auto);
 	}
 	
-	public boolean pardonSanction(SanctionAuto.Reason type, long date, Text reason, CommandSource source) {
+	public Optional<SanctionAuto> pardonSanction(SanctionAuto.Reason type, long date, Text reason, CommandSource source) {
 		Preconditions.checkNotNull(type, "type");
 		Preconditions.checkNotNull(reason, "reason");
 		Preconditions.checkNotNull(source, "source");
@@ -551,14 +547,14 @@ public class EUserSubject implements SanctionUserSubject {
 		Optional<EAuto> auto = this.findFirst(EAuto.class);
 		// Aucun auto
 		if(!auto.isPresent()) {
-			return false;
+			return Optional.empty();
 		}
 		
 		auto.get().pardon(date, reason, source.getIdentifier());
 		this.update();
 		
 		this.plugin.getThreadAsync().execute(() -> this.sqlPardonAuto(auto.get()));
-		return true;
+		return Optional.of(auto.get());
 	}
 	
 	public int getLevel(final SanctionAuto.Reason reason) {
@@ -573,8 +569,8 @@ public class EUserSubject implements SanctionUserSubject {
 	}
 
 	@Override
-	public Collection<SanctionAuto> getAuto(SanctionAuto.Type type) {
-		return this.find(SanctionAuto.class, sanction -> sanction.getTypeSanction().equals(type));
+	public Optional<SanctionAuto> getAuto(SanctionAuto.Reason reason) {
+		return this.findFirst(SanctionAuto.class, sanction -> sanction.getReason().equals(reason));
 	}
 
 	@Override

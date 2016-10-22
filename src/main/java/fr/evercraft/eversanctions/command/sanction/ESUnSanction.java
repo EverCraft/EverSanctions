@@ -32,7 +32,7 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
-import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
+import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -40,12 +40,12 @@ import fr.evercraft.eversanctions.EverSanctions;
 public class ESUnSanction extends ECommand<EverSanctions> {
 	
 	public ESUnSanction(final EverSanctions plugin) {
-        super(plugin, "unmute");
+        super(plugin, "unsanction");
     }
 	
 	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(ESPermissions.UNMUTE.get());
+		return source.hasPermission(ESPermissions.UNSANCTION.get());
 	}
 
 	@Override
@@ -78,10 +78,11 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 	protected List<String> getArg(final String arg) {
 		List<String> args = super.getArg(arg);
 		// Le message est transformer en un seul argument
-		if (args.size() > 2) {
+		if (args.size() > 3) {
 			List<String> args_send = new ArrayList<String>();
 			args_send.add(args.get(0));
-			args_send.add(Pattern.compile("^[ \"]*" + args.get(0) + "[ \"][ ]*").matcher(arg).replaceAll(""));
+			args_send.add(args.get(1));
+			args_send.add(Pattern.compile("^[ \"]*" + args.get(0) + "[ \"]*" + args.get(1) + "[ \"][ ]*").matcher(arg).replaceAll(""));
 			return args_send;
 		}
 		return args;
@@ -93,12 +94,18 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 		boolean resultat = false;
 		
 		// Nombre d'argument correct
-		if (args.size() == 2) {
+		if (args.size() == 3) {
 			
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
-			if (user.isPresent()){
-				resultat = this.commandUnMute(source, user.get(), args.get(1));
+			if (user.isPresent()) {
+				Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(1));
+				if (reason.isPresent()) {
+					resultat = this.commandUnSanction(source, user.get(), reason.get(), args.get(0));
+				} else {
+					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_UNKNOWN.get()
+							.replaceAll("<name>", args.get(0))));
+				}
 			// Le joueur est introuvable
 			} else {
 				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
@@ -112,7 +119,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 		return resultat;
 	}
 	
-	private boolean commandUnMute(final CommandSource staff, EUser user, String reason_string) {
+	private boolean commandUnSanction(final CommandSource staff, EUser user, SanctionAuto.Reason reason, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_EQUALS.get()
@@ -120,22 +127,22 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			return false;
 		}
 		
-		Text reason = EChat.of(reason_string);
-		if (reason.isEmpty()) {
+		Text reason_text = EChat.of(reason_string);
+		if (reason_text.isEmpty()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_REASON.get()
 						.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
-		// Le joueur n'a pas de ban en cours
-		if (!user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
+		// Le joueur n'a pas de sanction en cours
+		if (!user.getAuto(reason).isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_EMPTY.get()
 				.replaceAll("<player>", user.getName())));
 			return false;
 		}
 		
 		// Si l'event a été cancel
-		Optional<SanctionManualProfile.Mute> pardon = user.pardonMute(System.currentTimeMillis(),  reason, staff);
+		Optional<SanctionAuto> pardon = user.pardonSanction(reason, System.currentTimeMillis(),  reason_text, staff);
 		if (!pardon.isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_CANCEL.get()
 						.replaceAll("<player>", user.getName())));
