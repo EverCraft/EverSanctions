@@ -570,7 +570,7 @@ public class EUserSubject implements SanctionUserSubject {
 
 	@Override
 	public Optional<SanctionAuto> getAuto(SanctionAuto.Reason reason) {
-		return this.findFirst(SanctionAuto.class, sanction -> sanction.getReason().equals(reason));
+		return this.findFirst(SanctionAuto.class, sanction -> sanction.getReasonSanction().equals(reason));
 	}
 
 	@Override
@@ -841,9 +841,12 @@ public class EUserSubject implements SanctionUserSubject {
 			while(list.next()) {
 				long creation = list.getLong("creation");
 				String source = list.getString("source");
-				Optional<Text> pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
 				Optional<String> pardon_source = Optional.ofNullable(list.getString("pardon_source"));
 				
+				Optional<Text> pardon_reason = Optional.empty();
+				if(list.getString("pardon_reason") != null) {
+					pardon_reason = Optional.ofNullable(EChat.of(list.getString("pardon_reason")));
+				}
 				Optional<Long> expiration = Optional.of(list.getLong("expiration"));
 				if(list.wasNull()) {
 					expiration = Optional.empty();
