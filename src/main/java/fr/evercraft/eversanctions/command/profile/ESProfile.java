@@ -17,7 +17,6 @@
 package fr.evercraft.eversanctions.command.profile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -173,7 +172,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			String line_pardon_reason = ESMessages.PROFILE_LINE_PARDON_REASON.get();
 			String line_pardon_date = ESMessages.PROFILE_LINE_PARDON_DATE.get();
 			
-			line_staff = line_staff.replaceAll("<staff>", sanction.getSourceName());
+			line_staff = line_staff.replaceAll("<staff>", sanction.getSourceName(this.plugin.getEServer()));
 			line_reason = line_reason.replaceAll("<reason>", EChat.serialize(sanction.getReason()));
 			line_creation = line_creation
 					.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
@@ -182,7 +181,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			
 			// Pardon
 			if (sanction.isPardon()) {
-				line_pardon_staff = line_pardon_staff.replaceAll("<staff>", sanction.getPardonSourceName().get());
+				line_pardon_staff = line_pardon_staff.replaceAll("<staff>", sanction.getPardonSourceName(this.plugin.getEServer()).get());
 				line_pardon_reason = line_pardon_reason.replaceAll("<reason>", EChat.serialize(sanction.getPardonReason().get()));
 				line_pardon_date = line_pardon_date
 						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getPardonDate().get()))
@@ -263,7 +262,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 					.replaceAll("<line_pardon_reason>", this.get(line_pardon_reason))
 					.replaceAll("<line_pardon_date>", this.get(line_pardon_date));
 					
-			list.addAll(EChat.of(Arrays.asList(message.split("\n"))));
+			list.add(EChat.of(message));
 		});
 		
 		if (list.isEmpty()) {

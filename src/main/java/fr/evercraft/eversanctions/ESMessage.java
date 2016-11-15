@@ -158,10 +158,10 @@ public class ESMessage extends EMessage<EverSanctions> {
 		
 		JAIL_DISABLE_COMMAND_TEMP("jail.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
 		JAIL_DISABLE_COMMAND_UNLIMITED("jail.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
-		JAIL_DISABLE_MOVE_TEMP("jail.disableMoveTemp", 								"&cNe vous éloignez pas de votre prison."),
-		JAIL_DISABLE_MOVE_UNLIMITED("jail.disableMoveUnlimited", 					"&cNe vous éloignez pas de votre prison."),
-		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
-		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
+		JAIL_DISABLE_MOVE("jail.disableMove", 										"&4Ne vous éloignez pas de votre prison."),
+		JAIL_DISABLE_INTERACT("jail.disableInteract", 								"&4Vous ne pouvez pas intéragir car vous êtes en prison."),
+		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
+		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
 		
 		// UnJail
 		UNJAIL_DESCRIPTION("unjail.description", 									"Libéré le joueur d'une prison"),

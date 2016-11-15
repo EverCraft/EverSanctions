@@ -121,7 +121,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(ESMessages.JAILS_LIST_TITLE.getText().toBuilder()
-				.onClick(TextActions.runCommand(this.getName())).build(), lists, player);			
+				.onClick(TextActions.runCommand("/" + this.getName())).build(), lists, player);			
 		return false;
 	}
 	

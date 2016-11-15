@@ -119,7 +119,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 		long creation = System.currentTimeMillis();
 		Optional<SanctionAuto> sanction = user.addSanction(reason, creation, staff);
 		
-		// Sanction annulé
+		// Sanction annule
 		if (!sanction.isPresent()) {
 			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_CANCEL.get()
 						.replaceAll("<player>", user.getName())));

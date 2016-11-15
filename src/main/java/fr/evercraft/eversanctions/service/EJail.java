@@ -66,20 +66,20 @@ public class EJail implements Jail {
 	public boolean update(final Transform<World> transform) {
 		this.location = new LocationSQL(this.plugin, transform);
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
-		return false;
+		return true;
 	}
 	
 	public boolean update(final Optional<Integer> radius) {
 		this.radius = radius;
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
-		return false;
+		return true;
 	}
 	
 	public boolean update(final Transform<World> transform, final Optional<Integer> radius) {
 		this.location = new LocationSQL(this.plugin, transform);
 		this.radius = radius;
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
-		return false;
+		return true;
 	}
 	
 	public void updateAsync() {
