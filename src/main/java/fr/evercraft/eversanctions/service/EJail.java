@@ -26,7 +26,7 @@ import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.server.location.LocationSQL;
-import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.eversanctions.EverSanctions;
 
 public class EJail implements Jail {

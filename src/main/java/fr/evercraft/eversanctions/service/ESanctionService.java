@@ -82,25 +82,25 @@ public abstract class ESanctionService implements SanctionService {
 			        }
 			    });
 		this.ips_cache = CacheBuilder.newBuilder()
-					    .maximumSize(100)
-					    .expireAfterAccess(10, TimeUnit.MINUTES)
-					    .build(new CacheLoader<String, EIpSubject>() {
-					    	/**
-					    	 * Ajoute un joueur au cache
-					    	 */
-					        @Override
-					        public EIpSubject load(String address_string){
-					        	Chronometer chronometer = new Chronometer();
-					        	
-					        	Optional<InetAddress> address = UtilsNetwork.getHost(address_string);
-					        	if(address.isPresent()) {
-						        	EIpSubject subject = new EIpSubject(ESanctionService.this.plugin, address.get());
-						        	ESanctionService.this.plugin.getLogger().debug("Loading ip '" + address_string + "' in " +  chronometer.getMilliseconds().toString() + " ms");
-						            return subject;
-					        	}
-					        	return null;
-					        }
-					    });
+			    .maximumSize(100)
+			    .expireAfterAccess(10, TimeUnit.MINUTES)
+			    .build(new CacheLoader<String, EIpSubject>() {
+			    	/**
+			    	 * Ajoute une ip au cache
+			    	 */
+			        @Override
+			        public EIpSubject load(String address_string){
+			        	Chronometer chronometer = new Chronometer();
+			        	
+			        	Optional<InetAddress> address = UtilsNetwork.getHost(address_string);
+			        	if(address.isPresent()) {
+				        	EIpSubject subject = new EIpSubject(ESanctionService.this.plugin, address.get());
+				        	ESanctionService.this.plugin.getLogger().debug("Loading ip '" + address_string + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+				            return subject;
+			        	}
+			        	return null;
+			        }
+			    });
 	}
 	
 	/**
@@ -173,7 +173,6 @@ public abstract class ESanctionService implements SanctionService {
 			this.users.putIfAbsent(uuid, player);
 			this.plugin.getLogger().debug("Loading player '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 		}
-		//this.plugin.getManagerEvent().post(player, PermUserEvent.Action.USER_ADDED);
 	}
 	
 	/**
@@ -187,7 +186,6 @@ public abstract class ESanctionService implements SanctionService {
 		// Si le joueur existe
 		if (player != null) {
 			this.users_cache.put(uuid, player);
-			//this.plugin.getManagerEvent().post(player, PermUserEvent.Action.USER_REMOVED);
 			this.plugin.getLogger().debug("Unloading the player : " + uuid.toString());
 		}
 	}

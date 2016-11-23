@@ -35,8 +35,8 @@ import com.google.common.collect.ImmutableList;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.server.location.LocationSQL;
-import fr.evercraft.everapi.services.sanction.Jail;
-import fr.evercraft.everapi.services.sanction.JailService;
+import fr.evercraft.everapi.services.jail.Jail;
+import fr.evercraft.everapi.services.jail.JailService;
 import fr.evercraft.eversanctions.EverSanctions;
 
 public class EJailService implements JailService {

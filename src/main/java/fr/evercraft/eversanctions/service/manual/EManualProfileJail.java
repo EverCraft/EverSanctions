@@ -47,7 +47,7 @@ public class EManualProfileJail extends EManualProfile implements SanctionManual
 	}
 
 	@Override
-	public Optional<fr.evercraft.everapi.services.sanction.Jail> getJail() {
+	public Optional<fr.evercraft.everapi.services.jail.Jail> getJail() {
 		return this.plugin.getJailService().get(this.jail);
 	}
 }

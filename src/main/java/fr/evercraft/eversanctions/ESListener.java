@@ -37,9 +37,9 @@ import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.player.EPlayer;
-import fr.evercraft.everapi.services.sanction.Jail;
 import fr.evercraft.everapi.services.sanction.Sanction.SanctionJail;
 import fr.evercraft.everapi.services.sanction.Sanction.SanctionMute;
+import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.everapi.text.ETextBuilder;
@@ -85,6 +85,7 @@ public class ESListener {
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
+			return;
 		}
 		
 		Optional<Ban.Ip> ip = this.plugin.getSanctionService().getBanFor(event.getConnection().getAddress().getAddress());
@@ -114,6 +115,7 @@ public class ESListener {
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
+			return;
 		}
 		
 		if (!event.isCancelled()) {
@@ -165,7 +167,8 @@ public class ESListener {
 			SanctionJail sanction = optSanctionJail.get();
 			Optional<Jail> jail = sanction.getJail();
 			
-			if (jail.isPresent()) {					
+			if (jail.isPresent()) {	
+				player.setTransform(jail.get().getTransform());
 				if (sanction.isIndefinite()) {
 					player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
 							.append(ESMessages.JAIL_CONNECTION_UNLIMITED.get()
@@ -201,7 +204,21 @@ public class ESListener {
 	 * Supprime le joueur de la liste
 	 */
 	@Listener
-	public void onClientConnectionEvent(final ClientConnectionEvent.Disconnect event) {
+	public void onClientConnectionEvent(final ClientConnectionEvent.Disconnect event, @Getter("getTargetEntity") Player player_sponge) {
+		Optional<EPlayer> optPlayer = this.plugin.getEServer().getEPlayer(player_sponge);
+		// Joueur introuvable
+		if (!optPlayer.isPresent()) {
+			EPlayer player = optPlayer.get();
+			
+			// Jail
+			Optional<SanctionJail> optSanction = player.getJail();
+			if (optSanction.isPresent()) {
+				Optional<Jail> jail = optSanction.get().getJail();
+				if (jail.isPresent() && player.getBack().isPresent()) {
+					player.setTransform(player.getBack().get());
+				}
+			}	
+		}
 		this.plugin.getSanctionService().removePlayer(event.getTargetEntity().getUniqueId());
 	}
 	
@@ -240,7 +257,7 @@ public class ESListener {
 	}
 	
 	@Listener
-	public void onPlayerInteractEntity(InteractEntityEvent.Primary event, @First Player player) {
+	public void onPlayerInteractEntity(InteractEntityEvent event, @First Player player) {
 		if (event.isCancelled()) {
 			return;
 		}

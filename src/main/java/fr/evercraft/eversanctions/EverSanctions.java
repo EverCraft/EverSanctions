@@ -23,27 +23,10 @@ import org.spongepowered.api.service.ban.BanService;
 import fr.evercraft.everapi.EverAPI;
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
-import fr.evercraft.everapi.services.sanction.JailService;
+import fr.evercraft.everapi.services.jail.JailService;
 import fr.evercraft.everapi.services.sanction.SanctionService;
-import fr.evercraft.eversanctions.command.ban.ESBan;
-import fr.evercraft.eversanctions.command.ban.ESUnBan;
-import fr.evercraft.eversanctions.command.banip.ESBanIp;
-import fr.evercraft.eversanctions.command.banip.ESUnBanIp;
-import fr.evercraft.eversanctions.command.jail.ESJail;
-import fr.evercraft.eversanctions.command.jail.ESUnJail;
-import fr.evercraft.eversanctions.command.jails.ESJails;
-import fr.evercraft.eversanctions.command.jails.ESJailsAdd;
-import fr.evercraft.eversanctions.command.jails.ESJailsDelete;
-import fr.evercraft.eversanctions.command.jails.ESJailsList;
-import fr.evercraft.eversanctions.command.jails.ESJailsSetRadius;
-import fr.evercraft.eversanctions.command.jails.ESJailsTeleport;
-import fr.evercraft.eversanctions.command.mute.ESMute;
-import fr.evercraft.eversanctions.command.mute.ESUnMute;
-import fr.evercraft.eversanctions.command.profile.ESProfile;
-import fr.evercraft.eversanctions.command.sanction.ESSanction;
-import fr.evercraft.eversanctions.command.sanction.ESUnSanction;
-import fr.evercraft.eversanctions.command.sanctions.ESSanctions;
-import fr.evercraft.eversanctions.command.sub.ESReload;
+import fr.evercraft.eversanctions.command.ESManagerCommands;
+import fr.evercraft.eversanctions.event.ESManagerEvents;
 import fr.evercraft.eversanctions.service.EBanService;
 import fr.evercraft.eversanctions.service.EJailService;
 
@@ -60,11 +43,13 @@ import fr.evercraft.eversanctions.service.EJailService;
 public class EverSanctions extends EPlugin<EverSanctions> {
 	private ESConfig configs;
 	private ESMessage messages;
-	
 	private ESDataBase database;
 	
 	private EBanService ban_service;
 	private EJailService jail_service;
+	
+	private ESManagerCommands commands;
+	private ESManagerEvents events;
 	
 	@Override
 	protected void onPreEnable() throws PluginDisableException {		
@@ -72,6 +57,7 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 		this.messages = new ESMessage(this);
 		
 		this.database = new ESDataBase(this);
+		this.events = new ESManagerEvents(this);
 	}
 	
 	@Override
@@ -82,38 +68,12 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 		this.getGame().getServiceManager().setProvider(this, BanService.class, this.ban_service);
 		this.getGame().getServiceManager().setProvider(this, SanctionService.class, this.ban_service);
 		this.getGame().getServiceManager().setProvider(this, JailService.class, this.jail_service);
-		
-		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
 	
 	@Override
 	protected void onCompleteEnable() {		
-		ESCommand command = new ESCommand(this);
-		command.add(new ESReload(this, command));
-		
-		new ESProfile(this);
-		new ESSanctions(this);
-		new ESSanction(this);
-		new ESUnSanction(this);
-				
-		new ESBan(this);
-		new ESUnBan(this);
-		
-		new ESBanIp(this);
-		new ESUnBanIp(this);
-		
-		new ESJail(this);
-		new ESUnJail(this);
-		
-		new ESMute(this);
-		new ESUnMute(this);
-		
-		ESJails jail = new ESJails(this);
-		jail.add(new ESJailsAdd(this, jail));
-		jail.add(new ESJailsDelete(this, jail));
-		jail.add(new ESJailsList(this, jail));
-		jail.add(new ESJailsSetRadius(this, jail));
-		jail.add(new ESJailsTeleport(this, jail));
+		this.commands = new ESManagerCommands(this);
+		this.getGame().getEventManager().registerListeners(this, new ESListener(this));
 	}
 	
 	@Override
@@ -127,6 +87,7 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 		this.database.reload();
 		this.ban_service.reload();
 		this.jail_service.reload();
+		this.commands.reload();
 	}
 	
 	protected void onDisable() {
@@ -154,5 +115,13 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 	
 	public EJailService getJailService() {
 		return this.jail_service;
+	}
+	
+	public ESManagerCommands getManagerCommands() {
+		return this.commands;
+	}
+	
+	public ESManagerEvents getManagerEvents() {
+		return this.events;
 	}
 }

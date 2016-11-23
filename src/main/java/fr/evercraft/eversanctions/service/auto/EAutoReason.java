@@ -17,7 +17,6 @@
 package fr.evercraft.eversanctions.service.auto;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -40,12 +39,12 @@ public class EAutoReason implements SanctionAuto.Reason {
 	}
 	
 	@Override
-	public Optional<SanctionAuto.Level> getLevel(int level) {
+	public SanctionAuto.Level getLevel(int level) {
 		if(level <= 0) {
 			new IllegalArgumentException("Level is negative");
 		}
 		
-		return Optional.ofNullable(this.levels.floorEntry(level).getValue());
+		return this.levels.floorEntry(level).getValue();
 	}
 
 	@Override

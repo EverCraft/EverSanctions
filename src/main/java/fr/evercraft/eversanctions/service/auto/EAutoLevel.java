@@ -18,7 +18,7 @@ package fr.evercraft.eversanctions.service.auto;
 
 import java.util.Optional;
 
-import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsDate;
 

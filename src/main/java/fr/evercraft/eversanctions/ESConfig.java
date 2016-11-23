@@ -26,7 +26,7 @@ import java.util.Optional;
 import fr.evercraft.everapi.java.UtilsInteger;
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
-import fr.evercraft.everapi.services.sanction.Jail;
+import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsDate;
@@ -165,7 +165,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 				String name = (String) node.getKey();
 				CommentedConfigurationNode config = node.getValue();
 				if (config == null) {
-					this.plugin.getLogger().warn("null");
+					this.plugin.getLogger().warn("Config : Il n'y a aucune sanction automatique de définie !");
 				}
 				String type_default = config.getNode("type").getString("");
 				String reason_default = config.getNode("reason").getString("Reason ...");
@@ -189,13 +189,13 @@ public class ESConfig extends EConfig<EverSanctions> {
 							if (jail.isPresent()) {
 								levels.put(1, new EAutoLevel(type, duration, reason_default, jail.get()));
 							} else {
-								
+								this.plugin.getLogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "')");
 							}
 						} else {
 							levels.put(1, new EAutoLevel(type, duration, reason_default));
 						}
 					} catch (IllegalArgumentException e) {
-						this.plugin.getLogger().warn("Error type '" + type_default + "' : (sanction='" + name + "')");
+						this.plugin.getLogger().warn("Config : Type de sanction inconnu '" + type_default + "' : (sanctionauto='" + name + "')");
 					}
 				} else {		
 					config_levels.getChildrenMap().forEach((key_levels, config_level) -> {
@@ -218,13 +218,13 @@ public class ESConfig extends EConfig<EverSanctions> {
 										if (jail.isPresent()) {
 											levels.put(level.get(), new EAutoLevel(type, duration, reason, jail.get()));
 										} else {
-											
+											this.plugin.getLogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "';level='" + level.get() + "')");
 										}
 									} else {
 										levels.put(level.get(), new EAutoLevel(type, duration, reason));
 									}
 								} catch (IllegalArgumentException e) {
-									
+									this.plugin.getLogger().warn("Config : Type de sanction inconnu '" + type_default + "' : (sanctionauto='" + name + "';level='" + level.get() + "')");
 								}
 							}
 						}

@@ -53,6 +53,8 @@ import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.auto.EAuto;
+import fr.evercraft.eversanctions.service.auto.EAutoBanIp;
+import fr.evercraft.eversanctions.service.auto.EAutoBanProfileAndIp;
 import fr.evercraft.eversanctions.service.manual.EManualIP;
 import fr.evercraft.eversanctions.service.manual.EManualProfileBanIp;
 
@@ -354,16 +356,21 @@ public class EIpSubject implements SanctionIpSubject {
 					if(list.wasNull()) {
 						pardon_date = Optional.empty();
 					}
-					Optional<String> context = Optional.ofNullable(list.getString("context"));
-					
+					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("context"));
 					Optional<SanctionAuto.Type> type = SanctionAuto.Type.get(list.getString("type"));
 					Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(list.getString("reason"));
-					if (type.isPresent() && reason.isPresent()) {
+					if (address.isPresent() && type.isPresent() && reason.isPresent()) {
 						int level_type = Optional.ofNullable(levels.get(type.get())).orElse(0) + 1;
 						if(pardon_date != null) {
 							levels.put(type.get(), level_type);
 						}
-						profiles.add(new EAuto(uuid, creation, expiration, reason.get(), type.get(), level_type, source, context, pardon_date, pardon_reason, pardon_source));
+						if (type.get().equals(SanctionAuto.Type.BAN_IP)) {
+							profiles.add(new EAutoBanIp(uuid, creation, expiration, reason.get(), type.get(), level_type, source, address.get(), 
+									pardon_date, pardon_reason, pardon_source));
+						} else if (type.get().equals(SanctionAuto.Type.BAN_PROFILE_AND_IP)) {
+							profiles.add(new EAutoBanProfileAndIp(uuid, creation, expiration, reason.get(), type.get(), level_type, source, address.get(), 
+									pardon_date, pardon_reason, pardon_source));
+						}
 					}
 				} catch (IllegalArgumentException e) {}
 			}
