@@ -16,15 +16,10 @@
  */
 package fr.evercraft.eversanctions;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-
 import com.google.common.base.Preconditions;
 
-import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.message.EMessageFormat;
+import fr.evercraft.everapi.message.format.EFormatString;
 import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.plugin.file.EnumMessage;
 
@@ -286,15 +281,27 @@ public class ESMessage extends EMessage<EverSanctions> {
 		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet et met en prison le compte du joueur");
 		
 		private final String path;
-	    private final Object french;
-	    private final Object english;
-	    private Object message;
+	    private final EMessageFormat french;
+	    private final EMessageFormat english;
+	    private EMessageFormat message;
 	    
-	    private ESMessages(final String path, final Object french) {   	
+	    private ESMessages(final String path, final String french) {   	
+	    	this(path, 
+	    		EMessageFormat.builder().chat(new EFormatString(french), true).build(), 
+	    		EMessageFormat.builder().chat(new EFormatString(french), true).build());
+	    }
+	    
+	    private ESMessages(final String path, final String french, final String english) {   	
+	    	this(path, 
+	    		EMessageFormat.builder().chat(new EFormatString(french), true).build(), 
+	    		EMessageFormat.builder().chat(new EFormatString(english), true).build());
+	    }
+	    
+	    private ESMessages(final String path, final EMessageFormat french) {   	
 	    	this(path, french, french);
 	    }
 	    
-	    private ESMessages(final String path, final Object french, final Object english) {
+	    private ESMessages(final String path, final EMessageFormat french, final EMessageFormat english) {
 	    	Preconditions.checkNotNull(french, "Le message '" + this.name() + "' n'est pas définit");
 	    	
 	    	this.path = path;	    	
@@ -319,31 +326,12 @@ public class ESMessage extends EMessage<EverSanctions> {
 			return this.english;
 		}
 		
-		public String get() {
-			if (this.message instanceof String) {
-				return (String) this.message;
-			}
-			return this.message.toString();
-		}
-			
-		@SuppressWarnings("unchecked")
-		public List<String> getList() {
-			if (this.message instanceof List) {
-				return (List<String>) this.message;
-			}
-			return Arrays.asList(this.message.toString());
+		public EMessageFormat getMessage() {
+			return this.message;
 		}
 		
-		public void set(Object message) {
+		public void set(EMessageFormat message) {
 			this.message = message;
-		}
-
-		public Text getText() {
-			return EChat.of(this.get());
-		}
-		
-		public TextColor getColor() {
-			return EChat.getTextColor(this.get());
 		}
 	}
 }
