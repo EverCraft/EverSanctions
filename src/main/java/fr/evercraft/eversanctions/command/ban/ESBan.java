@@ -17,7 +17,9 @@
 package fr.evercraft.eversanctions.command.ban;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -28,6 +30,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
+import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.server.player.EPlayer;
@@ -57,7 +60,7 @@ public class ESBan extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + "> <" + EAMessages.ARGS_TIME.get() + "> <" + EAMessages.ARGS_REASON.get() + ">")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.getString() + "> <" + EAMessages.ARGS_TIME.getString() + "> <" + EAMessages.ARGS_REASON.getString() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -119,22 +122,25 @@ public class ESBan extends ECommand<EverSanctions> {
 	private boolean commandBan(final CommandSource staff, EUser user, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.BAN_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur a déjà un ban en cours
 		if (user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_NOEMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.BAN_ERROR_NOEMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Aucune raison
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.BAN_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -149,8 +155,10 @@ public class ESBan extends ECommand<EverSanctions> {
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
-				.replaceAll("<time>", time_string)));
+			EAMessages.IS_NOT_TIME.sender()
+				.prefix(ESMessages.PREFIX)
+				.replace("<time>", time_string)
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -161,48 +169,54 @@ public class ESBan extends ECommand<EverSanctions> {
 	private boolean commandUnlimitedBan(final CommandSource staff, final EUser user, final long creation, final String reason) {
 		// Ban annulé
 		if (!user.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.BAN_ERROR_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_UNLIMITED_STAFF.get()
-			 .replaceAll("<reason>", reason)
-			 .replaceAll("<player>", user.getName())));
+		ESMessages.BAN_UNLIMITED_STAFF.sender()
+			.replace("<reason>", reason)
+			.replace("<player>", user.getName())
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
-			player.kick(EChat.of(ESMessages.BAN_UNLIMITED_PLAYER.get()
-					.replaceAll("<staff>", staff.getName())
-					.replaceAll("<reason>", reason)));
+			player.kick(ESMessages.BAN_UNLIMITED_PLAYER.getFormat().toText(
+				"<staff>", staff.getName(),
+				"<reason>", reason));
 		}
 		return true;
 	}
 	
 	private boolean commandTempBan(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
 		if (!user.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.BAN_ERROR_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.BAN_TEMP_STAFF.get()
-			 .replaceAll("<player>", user.getName())
-			 .replaceAll("<reason>", reason)
-			 .replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-			 .replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-			 .replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-			 .replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
+		ESMessages.BAN_TEMP_STAFF.sender()
+			.replace("<player>", user.getName())
+			.replace("<reason>", reason)
+			.replace("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
+			.replace("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
+			.replace("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
+			.replace("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
-			player.kick(EChat.of(ESMessages.BAN_TEMP_PLAYER.get()
-					.replaceAll("<staff>", staff.getName())
-					.replaceAll("<reason>", reason)
-					.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-					.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-					.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-					.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))));
+			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+			replaces.put("<staff>", EReplace.of(staff.getName()));
+			replaces.put("<reason>", EReplace.of(reason));
+			replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+			replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+			replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+			replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+			
+			player.kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText(replaces));
 		}
 		return true;
 	}

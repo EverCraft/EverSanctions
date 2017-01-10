@@ -50,12 +50,12 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 
 	@Override
 	public Text description(final CommandSource source) {
-		return EChat.of(ESMessages.JAILS_DELETE_DESCRIPTION.get());
+		return ESMessages.JAILS_DELETE_DESCRIPTION.getText();
 	}
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_JAIL.get() + ">")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_JAIL.getString() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();

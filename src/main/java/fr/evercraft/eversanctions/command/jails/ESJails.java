@@ -38,7 +38,7 @@ public class ESJails extends EParentCommand<EverSanctions> {
 
 	@Override
 	public Text description(final CommandSource source) {
-		return EChat.of(ESMessages.JAILS_DESCRIPTION.get());
+		return ESMessages.JAILS_DESCRIPTION.getText();
 	}
 
 	@Override

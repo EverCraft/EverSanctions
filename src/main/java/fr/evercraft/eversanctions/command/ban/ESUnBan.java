@@ -41,7 +41,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 	public ESUnBan(final EverSanctions plugin) {
         super(plugin, "unban", "pardon");
         
-     // TODO Remove command : pardon
+    	// TODO Remove command : pardon
     }
 	
 	@Override
@@ -56,7 +56,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.get() + "> <" + EAMessages.ARGS_REASON.get() + ">")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.getString() + "> <" + EAMessages.ARGS_REASON.getString() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -100,7 +100,9 @@ public class ESUnBan extends ECommand<EverSanctions> {
 				resultat = this.commandPardonBan(source, user.get(), args.get(1));
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 			
 		// Nombre d'argument incorrect
@@ -114,36 +116,41 @@ public class ESUnBan extends ECommand<EverSanctions> {
 	private boolean commandPardonBan(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNBAN_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNBAN_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
 		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_ERROR_EMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNBAN_ERROR_EMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Si l'event a été cancel
 		Optional<SanctionManualProfile.Ban> pardon = user.pardonBan(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNBAN_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBAN_STAFF.get()
-			.replaceAll("<reason>", reason_string)
-			.replaceAll("<player>", user.getName())));
+		ESMessages.UNBAN_STAFF.sender()
+			.replace("<reason>", reason_string)
+			.replace("<player>", user.getName())
+			.sendTo(staff);
 		return true;
 	}
 }

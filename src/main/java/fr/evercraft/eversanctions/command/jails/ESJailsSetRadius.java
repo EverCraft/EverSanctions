@@ -50,12 +50,12 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 
 	@Override
 	public Text description(final CommandSource source) {
-		return EChat.of(ESMessages.JAILS_SETRADIUS_DESCRIPTION.get());
+		return ESMessages.JAILS_SETRADIUS_DESCRIPTION.getText();
 	}
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_JAIL.get() + "> [" + EAMessages.ARGS_RADIUS.get() + "]")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_JAIL.getString() + "> [" + EAMessages.ARGS_RADIUS.getString() + "]")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
