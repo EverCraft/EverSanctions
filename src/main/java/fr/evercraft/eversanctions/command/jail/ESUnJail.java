@@ -99,7 +99,9 @@ public class ESUnJail extends ECommand<EverSanctions> {
 				resultat = this.commandUnJail(source, user.get(), args.get(1));
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 			
 		// Nombre d'argument incorrect
@@ -113,42 +115,47 @@ public class ESUnJail extends ECommand<EverSanctions> {
 	private boolean commandUnJail(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNJAIL_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNJAIL_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
 		if (!user.getManual(SanctionManualProfile.Type.JAIL).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_ERROR_EMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNJAIL_ERROR_EMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Si l'event a été cancel
 		Optional<SanctionManualProfile.Jail> pardon = user.pardonJail(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNJAIL_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNJAIL_STAFF.get()
-			.replaceAll("<reason>", reason_string)
-			.replaceAll("<player>", user.getName())));
+		ESMessages.UNJAIL_STAFF.sender()
+			.replace("<reason>", reason_string)
+			.replace("<player>", user.getName())
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer && !user.isJail()) {
-			EPlayer player = (EPlayer) user;
-			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.UNJAIL_PLAYER.get()
-							.replaceAll("<staff>", staff.getName())
-							.replaceAll("<reason>", reason_string));
+			ESMessages.UNJAIL_PLAYER.sender()
+				.replace("<staff>", staff.getName())
+				.replace("<reason>", reason_string)
+				.sendTo((EPlayer) user);
 		}
 		return true;
 	}

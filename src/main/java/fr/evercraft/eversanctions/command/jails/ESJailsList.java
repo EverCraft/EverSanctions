@@ -17,7 +17,9 @@
 package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import org.spongepowered.api.command.CommandException;
@@ -28,10 +30,9 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
-import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.location.LocationSQL;
-import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -89,29 +90,27 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		List<Text> lists = new ArrayList<Text>();
 		if (player.hasPermission(ESPermissions.JAILS_DELETE.get())) {
 			for (EJail jail : jails) {
+				Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+				replaces.put("<jail>", EReplace.of(() -> ESJail.getButtonJail(jail)));
+				replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+				replaces.put("<delete>", EReplace.of(() -> this.getButtonDelete(jail.getName(), jail.getLocationSQL())));
+				
 				if (jail.getTransform() != null) {
-					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE_DELETE.get())
-						.replace("<jail>", ESJail.getButtonJail(jail))
-						.replace("<radius>", String.valueOf(jail.getRadius()))
-						.replace("<teleport>", this.getButtonTeleport(jail.getName(), jail.getTransform()))
-						.replace("<delete>", this.getButtonDelete(jail.getName(), jail.getLocationSQL()))
-						.build());
+					replaces.put("<teleport>", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
+					lists.add(ESMessages.JAILS_LIST_LINE_DELETE.getFormat().toText(replaces));
 				} else {
-					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.get())
-						.replace("<jail>", ESJail.getButtonJail(jail))
-						.replace("<radius>", String.valueOf(jail.getRadius()))
-						.replace("<delete>", this.getButtonDelete(jail.getName(), jail.getLocationSQL()))
-						.build());
+					lists.add(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.getFormat().toText(replaces));
 				}
 			}
 		} else {
 			for (EJail jail : jails) {
+				Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+				replaces.put("<jail>", EReplace.of(() -> ESJail.getButtonJail(jail)));
+				replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+				replaces.put("<teleport>", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
+				
 				if (jail.getTransform() != null) {
-					lists.add(ETextBuilder.toBuilder(ESMessages.JAILS_LIST_LINE.get())
-						.replace("<jail>", ESJail.getButtonJail(jail))
-						.replace("<radius>", String.valueOf(jail.getRadius()))
-						.replace("<teleport>", this.getButtonTeleport(jail.getName(), jail.getTransform()))
-						.build());
+					lists.add(ESMessages.JAILS_LIST_LINE.getFormat().toText(replaces));
 				}
 			}
 		}
@@ -128,16 +127,16 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 
 	private Text getButtonTeleport(final String name, final Transform<World> location){
 		return ESMessages.JAILS_LIST_TELEPORT.getText().toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAILS_LIST_TELEPORT_HOVER.get()
-							.replaceAll("<jail>", name))))
+					.onHover(TextActions.showText(ESMessages.JAILS_LIST_TELEPORT_HOVER.getFormat()
+							.toText("<jail>", name)))
 					.onClick(TextActions.runCommand("/jails teleport \"" + name + "\""))
 					.build();
 	}
 	
 	private Text getButtonDelete(final String name, final LocationSQL location){
 		return ESMessages.JAILS_LIST_DELETE.getText().toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAILS_LIST_DELETE_HOVER.get()
-							.replaceAll("<jail>", name))))
+					.onHover(TextActions.showText(ESMessages.JAILS_LIST_DELETE_HOVER.getFormat()
+							.toText("<jail>", name)))
 					.onClick(TextActions.runCommand("/jails delete \"" + name + "\""))
 					.build();
 	}

@@ -111,7 +111,9 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 				if (subject.isPresent()) {
 					resultat = this.commandUnBanIP(source, subject.get(), args.get(1));
 				} else {
-					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR.getText()));
+					EAMessages.COMMAND_ERROR.sender()
+						.prefix(ESMessages.PREFIX)
+						.sendTo(source);
 				}
 			} else {
 				Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
@@ -120,7 +122,9 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 					resultat = this.commandUnBanIP(source, user.get(), args.get(1));
 				// Le joueur est introuvable
 				} else {
-					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+					EAMessages.PLAYER_NOT_FOUND.sender()
+						.prefix(ESMessages.PREFIX)
+						.sendTo(source);
 				}
 			}
 
@@ -135,70 +139,80 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 	private boolean commandUnBanIP(final CommandSource staff, SanctionIpSubject subject, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(subject.getAddress()))) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_IP_ERROR_EQUALS.get()
-				.replaceAll("<address>", subject.getIdentifier())));
+			ESMessages.UNBANIP_IP_ERROR_EQUALS.sender()
+				.replace("<address>", subject.getIdentifier())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_IP_ERROR_REASON.get()
-				.replaceAll("<address>", subject.getIdentifier())));
+			ESMessages.UNBANIP_IP_ERROR_REASON.sender()
+				.replace("<address>", subject.getIdentifier())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
 		if (!subject.isBanManual()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_IP_ERROR_EMPTY.get()
-			.replaceAll("<address>", subject.getIdentifier())));
+			ESMessages.UNBANIP_IP_ERROR_EMPTY.sender()
+				.replace("<address>", subject.getIdentifier())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Si l'event a été cancel
 		if (!subject.pardonBan(System.currentTimeMillis(),  reason, staff).isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_IP_CANCEL.get()
-			.replaceAll("<address>", subject.getIdentifier())));
+			ESMessages.UNBANIP_IP_CANCEL.sender()
+				.replace("<address>", subject.getIdentifier())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_IP_STAFF.get()
-			.replaceAll("<reason>", reason_string)
-			.replaceAll("<address>", subject.getIdentifier())));
+		ESMessages.UNBANIP_IP_STAFF.sender()
+			.replace("<reason>", reason_string)
+			.replace("<address>", subject.getIdentifier())
+			.sendTo(staff);
 		return true;
 	}
 	
 	private boolean commandUnBanIP(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_PLAYER_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNBANIP_PLAYER_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_PLAYER_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNBANIP_PLAYER_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
 		if (!user.isBanIp()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_PLAYER_ERROR_EMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNBANIP_PLAYER_ERROR_EMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Si l'event a été cancel
 		if (user.pardonBanIp(System.currentTimeMillis(),  reason, staff).isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_PLAYER_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNBANIP_PLAYER_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNBANIP_PLAYER_STAFF.get()
-			.replaceAll("<reason>", reason_string)
-			.replaceAll("<player>", user.getName())));
+		ESMessages.UNBANIP_PLAYER_STAFF.sender()
+			.replace("<reason>", reason_string)
+			.replace("<player>", user.getName())
+			.sendTo(staff);
 		return true;
 	}
 }

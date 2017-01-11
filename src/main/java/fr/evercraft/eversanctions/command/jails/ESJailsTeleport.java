@@ -31,7 +31,6 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.services.jail.Jail;
-import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -81,7 +80,9 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 				resultat = this.commandJailTeleport((EPlayer) source, args.get(0)); 
 			// La source n'est pas un joueur
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR_FOR_PLAYER.getText()));
+				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		// Nombre d'argument incorrect
 		} else {
@@ -97,16 +98,19 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 		Optional<Jail> jail = this.plugin.getJailService().get(name);
 		if (jail.isPresent()) {
 			if (player.teleportSafe(jail.get().getTransform(), true)) {
-				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-						.append(ESMessages.JAILS_TELEPORT_PLAYER.get())
-						.replace("<jail>", ESJail.getButtonJail(jail.get()))
-						.build());
+				ESMessages.JAILS_TELEPORT_PLAYER.sender()
+					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.sendTo(player);
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_TELEPORT_PLAYER_ERROR.get().replaceAll("<jail>", name));
+				ESMessages.JAILS_TELEPORT_PLAYER_ERROR.sender()
+					.replace("<jail>", name)
+					.sendTo(player);
 			}
 		} else {
-			player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAIL_UNKNOWN.get().replaceAll("<jail>", name));
+			ESMessages.JAIL_UNKNOWN.sender()
+				.replace("<jail>", name)
+				.sendTo(player);
 		}
 		return false;
 	}

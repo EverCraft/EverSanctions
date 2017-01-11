@@ -30,7 +30,6 @@ import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.player.EPlayer;
-import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -92,8 +91,9 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
 		if (!jail.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAIL_UNKNOWN.get()
-					.replaceAll("<jail>", jail_name)));
+			ESMessages.JAIL_UNKNOWN.sender()
+				.replace("<jail>", jail_name)
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -103,8 +103,10 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 			try {
 				return this.commandJailSetRadius(staff, jail.get(), Integer.parseInt(radius_string.get())); 
 			} catch (NumberFormatException e) {
-				staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_NUMBER.get()
-						.replaceAll("<number>", radius_string.get())));
+				EAMessages.IS_NOT_NUMBER.sender()
+					.prefix(ESMessages.PREFIX)
+					.replace("<number>", radius_string.get())
+					.sendTo(staff);
 			}
 		}
 		return false;
@@ -112,32 +114,32 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	
 	private boolean commandJailSetRadius(final CommandSource staff, final EJail jail) {
 		if (jail.update(Optional.empty())) {
-			staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAILS_SETRADIUS_DEFAULT.get()
-							.replaceAll("<radius>", String.valueOf(jail.getRadius())))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAILS_SETRADIUS_DEFAULT.sender()
+				.replace("<radius>", String.valueOf(jail.getRadius()))
+				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.sendTo(staff);
 			return true;
 		} else {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAILS_SETRADIUS_CANCEL_DEFAULT.get()
-				.replaceAll("<radius>", String.valueOf(jail.getRadius()))
-				.replaceAll("<jail>", jail.getName())));
+			ESMessages.JAILS_SETRADIUS_CANCEL_DEFAULT.sender()
+				.replace("<radius>", String.valueOf(jail.getRadius()))
+				.replace("<jail>", jail.getName())
+				.sendTo(staff);
 		}
 		return false;
 	}
 
 	private boolean commandJailSetRadius(final CommandSource staff, final EJail jail, final int radius) {
 		if (jail.update(Optional.of(radius))) {
-			staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAILS_SETRADIUS_VALUE.get()
-							.replaceAll("<radius>", String.valueOf(jail.getRadius())))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAILS_SETRADIUS_VALUE.sender()
+				.replace("<radius>", String.valueOf(jail.getRadius()))
+				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.sendTo(staff);
 			return true;
 		} else {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAILS_SETRADIUS_CANCEL_VALUE.get()
-				.replaceAll("<radius>", String.valueOf(jail.getRadius()))
-				.replaceAll("<jail>", jail.getName())));
+			ESMessages.JAILS_SETRADIUS_CANCEL_VALUE.sender()
+				.replace("<radius>", String.valueOf(jail.getRadius()))
+				.replace("<jail>", jail.getName())
+				.sendTo(staff);
 		}
 		return false;
 	}

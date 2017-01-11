@@ -99,7 +99,9 @@ public class ESUnMute extends ECommand<EverSanctions> {
 				resultat = this.commandUnMute(source, user.get(), args.get(1));
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 			
 		// Nombre d'argument incorrect
@@ -113,42 +115,47 @@ public class ESUnMute extends ECommand<EverSanctions> {
 	private boolean commandUnMute(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNMUTE_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNMUTE_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur n'a pas de ban en cours
 		if (!user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_ERROR_EMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.UNMUTE_ERROR_EMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Si l'event a été cancel
 		Optional<SanctionManualProfile.Mute> pardon = user.pardonMute(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.UNMUTE_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_STAFF.get()
-			.replaceAll("<reason>", reason_string)
-			.replaceAll("<player>", user.getName())));
+		ESMessages.UNMUTE_CANCEL.sender()
+			.replace("<player>", user.getName())
+			.replace("<reason>", reason_string)
+			.sendTo(staff);
 		
 		if (user instanceof EPlayer && !user.isMute()) {
-			EPlayer player = (EPlayer) user;
-			player.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.UNMUTE_PLAYER.get()
-				.replaceAll("<player>", user.getName())
-				.replaceAll("<reason>", reason_string)));
+			ESMessages.UNMUTE_PLAYER.sender()
+				.replace("<player>", user.getName())
+				.replace("<reason>", reason_string)
+				.sendTo((EPlayer) user);
 		}
 		return true;
 	}

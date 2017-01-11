@@ -31,7 +31,6 @@ import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.services.jail.Jail;
-import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -84,7 +83,9 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				resultat = this.commandJailSet((EPlayer) source, args.get(0)); 
 			// La source n'est pas un joueur
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR_FOR_PLAYER.getText()));
+				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		} else if (args.size() == 2) {
 			// Si la source est un joueur
@@ -92,12 +93,16 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				try {
 					resultat = this.commandJailSet((EPlayer) source, args.get(0), Integer.parseInt(args.get(1))); 
 				} catch (NumberFormatException e) {
-					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_NUMBER.get()
-							.replaceAll("<number>", args.get(1))));
+					EAMessages.IS_NOT_NUMBER.sender()
+						.prefix(ESMessages.PREFIX)
+						.replace("<number>", args.get(1))
+						.sendTo(source);
 				}
 			// La source n'est pas un joueur
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR_FOR_PLAYER.getText()));
+				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		// Nombre d'argument incorrect
 		} else {
@@ -113,24 +118,26 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
 		if (jail.isPresent()) {
 			if (jail.get().update(player.getTransform())) {
-				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-						.append(ESMessages.JAILS_ADD_REPLACE.get())
-						.replace("<jail>", ESJail.getButtonJail(jail.get()))
-						.build());
+				ESMessages.JAILS_ADD_REPLACE.sender()
+					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.sendTo(player);
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_REPLACE.get().replaceAll("<jail>", name));
+				ESMessages.JAILS_ADD_CANCEL_REPLACE.sender()
+					.replace("<jail>", name)
+					.sendTo(player);
 			}
 		} else {
 			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.empty());
 			if (jail_new.isPresent()) {
-				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-						.append(ESMessages.JAILS_ADD_NEW.get())
-						.replace("<jail>", ESJail.getButtonJail(jail_new.get()))
-						.build());
+				ESMessages.JAILS_ADD_NEW.sender()
+					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.sendTo(player);
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_NEW.get().replaceAll("<jail>", name));
+				ESMessages.JAILS_ADD_CANCEL_NEW.sender()
+					.replace("<jail>", name)
+					.sendTo(player);
 			}
 		}
 		return false;
@@ -142,24 +149,26 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
 		if (jail.isPresent()) {
 			if (jail.get().update(player.getTransform(), Optional.of(radius))) {
-				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-						.append(ESMessages.JAILS_ADD_REPLACE.get())
-						.replace("<jail>", ESJail.getButtonJail(jail.get()))
-						.build());
+				ESMessages.JAILS_ADD_REPLACE.sender()
+					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.sendTo(player);
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_REPLACE.get().replaceAll("<jail>", name));
+				ESMessages.JAILS_ADD_CANCEL_REPLACE.sender()
+					.replace("<jail>", name)
+					.sendTo(player);
 			}
 		} else {
 			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.of(radius));
 			if (jail_new.isPresent()) {
-				player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-						.append(ESMessages.JAILS_ADD_NEW.get())
-						.replace("<jail>", ESJail.getButtonJail(jail_new.get()))
-						.build());
+				ESMessages.JAILS_ADD_NEW.sender()
+					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.sendTo(player);
 				return true;
 			} else {
-				player.sendMessage(ESMessages.PREFIX.get() + ESMessages.JAILS_ADD_CANCEL_NEW.get().replaceAll("<jail>", name));
+				ESMessages.JAILS_ADD_CANCEL_NEW.sender()
+					.replace("<jail>", name)
+					.sendTo(player);
 			}
 		}
 		return false;

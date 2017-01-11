@@ -197,26 +197,22 @@ public class ESBan extends ECommand<EverSanctions> {
 			return false;
 		}
 		
+		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+		replaces.put("<player>", EReplace.of(user.getName()));
+		replaces.put("<staff>", EReplace.of(staff.getName()));
+		replaces.put("<reason>", EReplace.of(reason));
+		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		
+		
 		ESMessages.BAN_TEMP_STAFF.sender()
-			.replace("<player>", user.getName())
-			.replace("<reason>", reason)
-			.replace("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-			.replace("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-			.replace("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-			.replace("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration))
+			.replace(replaces)
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
-			EPlayer player = (EPlayer) user;
-			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-			replaces.put("<staff>", EReplace.of(staff.getName()));
-			replaces.put("<reason>", EReplace.of(reason));
-			replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-			replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-			replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-			replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
-			
-			player.kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText(replaces));
+			((EPlayer) user).kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText(replaces));
 		}
 		return true;
 	}

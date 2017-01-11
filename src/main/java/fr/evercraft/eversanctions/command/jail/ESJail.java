@@ -17,7 +17,9 @@
 package fr.evercraft.eversanctions.command.jail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -30,15 +32,16 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
+import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
+import fr.evercraft.everapi.server.location.LocationSQL;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.manual.SanctionManualProfile;
 import fr.evercraft.everapi.sponge.UtilsDate;
-import fr.evercraft.everapi.text.ETextBuilder;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.ESPermissions;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -118,7 +121,9 @@ public class ESJail extends ECommand<EverSanctions> {
 				resultat = this.commandJail(source, user.get(), args.get(1), args.get(2), args.get(3));
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 			
 		// Nombre d'argument incorrect
@@ -131,29 +136,32 @@ public class ESJail extends ECommand<EverSanctions> {
 	private boolean commandJail(final CommandSource staff, EUser user, final String jail_string, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAIL_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.JAIL_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur a déjà un sanction jail en cours
 		if (user.getManual(SanctionManualProfile.Type.JAIL).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAIL_ERROR_NOEMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.JAIL_ERROR_NOEMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		Optional<Jail> jail = this.plugin.getJailService().get(jail_string);
 		// Aucune prison avec ce nom
 		if (!jail.isPresent()) {
-			staff.sendMessage(ESMessages.PREFIX.getText().concat(ESMessages.JAIL_UNKNOWN.getText()));
+			ESMessages.JAIL_UNKNOWN.sendTo(staff);
 			return false;
 		}
 		
 		// Aucune raison
 		if (reason.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.JAIL_ERROR_REASON.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.JAIL_ERROR_REASON.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -168,8 +176,10 @@ public class ESJail extends ECommand<EverSanctions> {
 		
 		// Temps incorrect
 		if (!time.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.IS_NOT_TIME.get()
-				.replaceAll("<time>", time_string)));
+			EAMessages.IS_NOT_TIME.sender()
+				.prefix(ESMessages.PREFIX)
+				.replace("<time>", time_string)
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -180,94 +190,92 @@ public class ESJail extends ECommand<EverSanctions> {
 	private boolean commandUnlimitedJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final String reason) {
 		// Jail annulé
 		if (!user.jail(jail, creation, Optional.empty(), EChat.of(reason), staff)) {
-			staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAIL_ERROR_CANCEL_UNLIMITED.get()
-							.replaceAll("<player>", user.getName()))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAIL_ERROR_CANCEL_UNLIMITED.sender()
+				.replace("<player>", user.getName())
+				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-				.append(ESMessages.JAIL_UNLIMITED_STAFF.get()
-						.replaceAll("<player>", user.getName())
-						.replaceAll("<reason>", reason))
-				.replace("<jail>", ESJail.getButtonJail(jail))
-				.build());
+		ESMessages.JAIL_UNLIMITED_STAFF.sender()
+			.replace("<player>", user.getName())
+			.replace("<reason>", reason)
+			.replace("<jail>", () -> ESJail.getButtonJail(jail))
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.teleport(jail.getTransform(), true);
-			player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAIL_UNLIMITED_PLAYER.get()
-							.replaceAll("<staff>", staff.getName())
-							.replaceAll("<reason>", reason))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAIL_UNLIMITED_PLAYER.sender()
+				.replace("<staff>", staff.getName())
+				.replace("<reason>", reason)
+				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.sendTo(player);
 		}
 		return true;
 	}
 	
 	private boolean commandTempJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final long expiration, final String reason) {
+		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+		replaces.put("<player>", EReplace.of(user.getName()));
+		replaces.put("<staff>", EReplace.of(staff.getName()));
+		replaces.put("<reason>", EReplace.of(reason));
+		replaces.put("<jail>", EReplace.of(() -> ESJail.getButtonJail(jail)));
+		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		
 		if (!user.jail(jail, creation, Optional.of(expiration), EChat.of(reason), staff)) {
-			staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAIL_ERROR_CANCEL_TEMP.get()
-							.replaceAll("<player>", user.getName()))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAIL_ERROR_CANCEL_TEMP.sender()
+				.replace(replaces)
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-				.append(ESMessages.JAIL_TEMP_STAFF.get()
-						.replaceAll("<player>", user.getName())
-						.replaceAll("<reason>", reason)
-						.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-						.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-						.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-						.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)))
-				.replace("<jail>", ESJail.getButtonJail(jail))
-				.build());
+		ESMessages.JAIL_TEMP_STAFF.sender()
+			.replace(replaces)
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.teleport(jail.getTransform(), true);
-			player.sendMessage(ETextBuilder.toBuilder(ESMessages.PREFIX.get())
-					.append(ESMessages.JAIL_TEMP_PLAYER.get()
-							.replaceAll("<staff>", staff.getName())
-							.replaceAll("<reason>", reason)
-							.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration))
-							.replaceAll("<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration))
-							.replaceAll("<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration))
-							.replaceAll("<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)))
-					.replace("<jail>", ESJail.getButtonJail(jail))
-					.build());
+			ESMessages.JAIL_TEMP_PLAYER.sender()
+				.replace(replaces)
+				.sendTo(player);
 		}
 		return true;
 	}
 	
 	public static Text getButtonJail(final Jail jail) {
 		Location<World> location = jail.getTransform().getLocation();
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", jail.getName())).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", jail.getName())
-							.replaceAll("<radius>", String.valueOf(jail.getRadius()))
-							.replaceAll("<world>", location.getExtent().getName())
-							.replaceAll("<x>", String.valueOf(location.getBlockX()))
-							.replaceAll("<y>", String.valueOf(location.getBlockY()))
-							.replaceAll("<z>", String.valueOf(location.getBlockZ())))))
+		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+		replaces.put("<world>", EReplace.of(location.getExtent().getName()));
+		replaces.put("<x>", EReplace.of(String.valueOf(location.getBlockX())));
+		replaces.put("<y>", EReplace.of(String.valueOf(location.getBlockY())));
+		replaces.put("<z>", EReplace.of(String.valueOf(location.getBlockZ())));
+		replaces.put("<jail>", EReplace.of(jail.getName()));
+		replaces.put("<name>", EReplace.of(jail.getName()));
+		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+		
+		return ESMessages.JAIL_NAME.getFormat().toText(replaces).toBuilder()
+					.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText(replaces)))
 					.build();
 	}
 	
 	public static Text getButtonJail(final EJail jail) {
-		return EChat.of(ESMessages.JAIL_NAME.get().replaceAll("<name>", jail.getName())).toBuilder()
-					.onHover(TextActions.showText(EChat.of(ESMessages.JAIL_NAME_HOVER.get()
-							.replaceAll("<jail>", jail.getName())
-							.replaceAll("<radius>", String.valueOf(jail.getRadius()))
-							.replaceAll("<world>", jail.getLocationSQL().getWorldName())
-							.replaceAll("<x>", jail.getLocationSQL().getX().toString())
-							.replaceAll("<y>", jail.getLocationSQL().getY().toString())
-							.replaceAll("<z>", jail.getLocationSQL().getZ().toString()))))
-					.build();
+		LocationSQL location = jail.getLocationSQL();
+		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+		replaces.put("<world>", EReplace.of(location.getWorldName()));
+		replaces.put("<x>", EReplace.of(location.getX().toString()));
+		replaces.put("<y>", EReplace.of(location.getY().toString()));
+		replaces.put("<z>", EReplace.of(location.getZ().toString()));
+		replaces.put("<jail>", EReplace.of(jail.getName()));
+		replaces.put("<name>", EReplace.of(jail.getName()));
+		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+		
+		return ESMessages.JAIL_NAME.getFormat().toText(replaces).toBuilder()
+				.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText(replaces)))
+				.build();
 	}
 }

@@ -91,7 +91,9 @@ public class ESSanction extends ECommand<EverSanctions> {
 				}
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 			
 		// Nombre d'argument incorrect

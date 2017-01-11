@@ -116,7 +116,9 @@ public class ESProfile extends ECommand<EverSanctions> {
 				resultat = this.commandProfile(source, (EPlayer) source, Optional.empty());
 			// La source n'est pas un joueur
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR_FOR_PLAYER.getText()));
+				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		} else if (args.size() == 1) {
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
@@ -125,7 +127,9 @@ public class ESProfile extends ECommand<EverSanctions> {
 				resultat = this.commandProfile(source, user.get(), Optional.empty());
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		} else if (args.size() == 2) {
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
@@ -135,12 +139,15 @@ public class ESProfile extends ECommand<EverSanctions> {
 					Optional<Type> type = Optional.ofNullable(Type.valueOf(args.get(1).toUpperCase()));
 					resultat = this.commandProfile(source, user.get(), type);
 				} catch (IllegalArgumentException e) {
-					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PROFILE_ERROR_TYPE.get()
-							.replaceAll("<type>", args.get(1)))); 
+					ESMessages.PROFILE_ERROR_TYPE.sender()
+						.replace("<type>", args.get(1))
+						.sendTo(source);
 				}
 			// Le joueur est introuvable
 			} else {
-				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
+				EAMessages.PLAYER_NOT_FOUND.sender()
+					.prefix(ESMessages.PREFIX)
+					.sendTo(source);
 			}
 		} else {
 			source.sendMessage(this.help(source));
