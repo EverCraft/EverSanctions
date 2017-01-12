@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.spongepowered.api.text.Text;
-import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
 
@@ -66,8 +65,7 @@ public abstract class EAuto implements SanctionAuto {
 	
 	@Override
 	public Text getReason() {
-		// TODO Auto-generated method stub
-		return Text.EMPTY;
+		return this.getLevel().getReason();
 	}
 
 	@Override
@@ -103,11 +101,6 @@ public abstract class EAuto implements SanctionAuto {
 	@Override
 	public SanctionAuto.Reason getReasonSanction() {
 		return this.reason;
-	}
-	
-	@Override
-	public Text getReasonText() {
-		return EChat.of(this.getLevel().getReason());
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import fr.evercraft.everapi.java.UtilsInteger;
+import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.services.jail.Jail;
@@ -187,12 +188,12 @@ public class ESConfig extends EConfig<EverSanctions> {
 						if (type.equals(SanctionAuto.Type.JAIL) || type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
 							Optional<Jail> jail = this.plugin.getJailService().get(jail_default);
 							if (jail.isPresent()) {
-								levels.put(1, new EAutoLevel(type, duration, reason_default, jail.get()));
+								levels.put(1, new EAutoLevel(type, duration, EChat.of(reason_default), jail.get()));
 							} else {
 								this.plugin.getLogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "')");
 							}
 						} else {
-							levels.put(1, new EAutoLevel(type, duration, reason_default));
+							levels.put(1, new EAutoLevel(type, duration, EChat.of(reason_default)));
 						}
 					} catch (IllegalArgumentException e) {
 						this.plugin.getLogger().warn("Config : Type de sanction inconnu '" + type_default + "' : (sanctionauto='" + name + "')");
@@ -216,12 +217,12 @@ public class ESConfig extends EConfig<EverSanctions> {
 									if (type.equals(SanctionAuto.Type.JAIL) || type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
 										Optional<Jail> jail = this.plugin.getJailService().get(jail_name);
 										if (jail.isPresent()) {
-											levels.put(level.get(), new EAutoLevel(type, duration, reason, jail.get()));
+											levels.put(level.get(), new EAutoLevel(type, duration, EChat.of(reason), jail.get()));
 										} else {
 											this.plugin.getLogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "';level='" + level.get() + "')");
 										}
 									} else {
-										levels.put(level.get(), new EAutoLevel(type, duration, reason));
+										levels.put(level.get(), new EAutoLevel(type, duration, EChat.of(reason)));
 									}
 								} catch (IllegalArgumentException e) {
 									this.plugin.getLogger().warn("Config : Type de sanction inconnu '" + type_default + "' : (sanctionauto='" + name + "';level='" + level.get() + "')");

@@ -18,6 +18,8 @@ package fr.evercraft.eversanctions.service.auto;
 
 import java.util.Optional;
 
+import org.spongepowered.api.text.Text;
+
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsDate;
@@ -26,17 +28,17 @@ public class EAutoLevel implements SanctionAuto.Level {
 	
 	private final SanctionAuto.Type type;
 	private final Optional<String> duration;
-	private final String reason;
+	private final Text reason;
 	private final Optional<Jail> jail;
 	
-	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, String reason) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, Text reason) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
 		this.jail = Optional.empty();
 	}
 	
-	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, String reason, Jail jail) {
+	public EAutoLevel(final SanctionAuto.Type type, final Optional<String> duration, Text reason, Jail jail) {
 		this.type = type;
 		this.duration = duration;
 		this.reason = reason;
@@ -62,7 +64,7 @@ public class EAutoLevel implements SanctionAuto.Level {
 	}
 
 	@Override
-	public String getReason() {
+	public Text getReason() {
 		return this.reason;
 	}
 

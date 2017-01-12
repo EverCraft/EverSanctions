@@ -76,6 +76,10 @@ public class ESListener {
 				event.setMessage(ESMessages.CONNECTION_BAN_UNLIMITED.getFormat().toText(replaces));
 			} else {
 				long expiration = profile.get().getExpirationDate().get().toEpochMilli();
+				this.plugin.getEServer().broadcast("Test : ");
+				this.plugin.getEServer().broadcast("" + creation);
+				this.plugin.getEServer().broadcast("" + expiration);
+				replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
 				replaces.put("<expiration_time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
 				replaces.put("<expiration_date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
 				replaces.put("<expiration_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
@@ -102,6 +106,7 @@ public class ESListener {
 				event.setMessage(ESMessages.CONNECTION_BANIP_UNLIMITED.getFormat().toText(replaces));
 			} else {
 				long expiration = ip.get().getExpirationDate().get().toEpochMilli();
+				replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
 				replaces.put("<expiration_time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
 				replaces.put("<expiration_date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
 				replaces.put("<expiration_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));

@@ -233,7 +233,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 					message = ESMessages.PROFILE_LINE_ENABLE_MANUAL.getFormat();
 				}
 				
-				replaces.put("<type>", EReplace.of(this.getType(manual)));
+				replaces.put("<type>", EReplace.of(ESProfile.getType(manual)));
 			// Auto
 			} else if (sanction instanceof SanctionAuto) {
 				SanctionAuto auto = (SanctionAuto) sanction;
@@ -247,7 +247,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 				}
 				
 				
-				replaces.put("<reason>", EReplace.of(this.getType(auto)));
+				replaces.put("<reason>", EReplace.of(ESProfile.getType(auto)));
 				replaces.put("<level>", EReplace.of(String.valueOf(auto.getLevelNumber())));
 			}
 			
@@ -300,7 +300,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 		return (message == null) ? EReplace.of("") : EReplace.of(message);
 	}
 	
-	public Text getType(SanctionAuto sanction) {
+	public static Text getType(SanctionAuto sanction) {
 		if(sanction instanceof SanctionAuto.SanctionBanProfileAndIp) {
 			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.getText();
 		} else if(sanction instanceof SanctionAuto.SanctionBanProfile) {
@@ -317,7 +317,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 		return Text.EMPTY;
 	}
 	
-	public Text getType(SanctionManual sanction) {
+	public static Text getType(SanctionManual sanction) {
 		if(sanction instanceof Sanction.SanctionBanProfile) {
 			return ESMessages.PROFILE_MANUAL_BAN_PROFILE.getText();
 		} else if(sanction instanceof Sanction.SanctionBanIp) {

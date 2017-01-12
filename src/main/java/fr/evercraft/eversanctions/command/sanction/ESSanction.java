@@ -133,12 +133,14 @@ public class ESSanction extends ECommand<EverSanctions> {
 		
 		ESMessages.SANCTION_STAFF.sender()
 			.replace("<player>", user.getName())
+			.replace("<type>", reason.getName())
 			.replace("<reason>", sanction.get().getReason())
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			ESMessages.SANCTION_PLAYER.sender()
 				.replace("<staff>", staff.getName())
+				.replace("<type>", reason.getName())
 				.replace("<reason>", sanction.get().getReason())
 				.sendTo((EPlayer) user);
 		}

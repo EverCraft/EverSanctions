@@ -94,6 +94,8 @@ public class EBanService extends ESanctionService {
 	
 	@Override
 	public Collection<Ban> getBans() {
+		this.removeExpired();
+		
 		Builder<Ban> builder = ImmutableSet.builder();
 		builder.addAll(this.bans_profile.keySet());
 		builder.addAll(this.bans_ip.keySet());
@@ -103,6 +105,8 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public Collection<Ban.Profile> getProfileBans() {
+		this.removeExpired();
+		
 		Builder<Ban.Profile> builder = ImmutableSet.builder();
 		builder.addAll(this.bans_profile.keySet());
 		return builder.build();
@@ -111,6 +115,8 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public Collection<Ban.Ip> getIpBans() {
+		this.removeExpired();
+		
 		Builder<Ban.Ip> builder = ImmutableSet.builder();
 		builder.addAll(this.bans_ip.keySet());
 		return builder.build();
@@ -118,6 +124,8 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public Optional<Ban.Profile> getBanFor(GameProfile profile) {
+		this.removeExpired();
+		
 		Optional<Ban.Profile> ban = Optional.empty();
 		Iterator<Entry<Ban.Profile, UUID>> iterator = this.bans_profile.entrySet().iterator();
 		
@@ -133,6 +141,8 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public Optional<Ban.Ip> getBanFor(InetAddress address) {
+		this.removeExpired();
+		
 		String address_string = UtilsNetwork.getHostString(address);
 		Optional<Ban.Ip> ban = Optional.empty();
 		Iterator<Entry<Ban.Ip, String>> iterator = this.bans_ip.entrySet().iterator();
@@ -152,12 +162,14 @@ public class EBanService extends ESanctionService {
 
 	@Override
 	public boolean isBanned(GameProfile profile) {
+		this.removeExpired();
 		return this.bans_profile.containsValue(profile.getUniqueId());
 	}
 
 
 	@Override
 	public boolean isBanned(InetAddress address) {
+		this.removeExpired();
 		return this.bans_ip.containsValue(UtilsNetwork.getHostString(address));
 	}
 
@@ -250,7 +262,7 @@ public class EBanService extends ESanctionService {
 	
 	public void removeExpired() {
 		long time = System.currentTimeMillis();
-		UtilsMap.removeIf(this.bans_ip, (ban,  uuid) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
+		UtilsMap.removeIf(this.bans_profile, (ban,  uuid) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 		UtilsMap.removeIf(this.bans_ip, (ban,  address) -> ban.getExpirationDate().isPresent() && ban.getExpirationDate().get().toEpochMilli() < time);
 	}
 
