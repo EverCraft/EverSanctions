@@ -40,6 +40,7 @@ import org.spongepowered.api.world.World;
 import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.player.EPlayer;
+import fr.evercraft.everapi.services.sanction.Sanction;
 import fr.evercraft.everapi.services.sanction.Sanction.SanctionJail;
 import fr.evercraft.everapi.services.sanction.Sanction.SanctionMute;
 import fr.evercraft.everapi.services.jail.Jail;
@@ -64,7 +65,7 @@ public class ESListener {
 		if (profile.isPresent()) {
 			long creation = profile.get().getCreationDate().toEpochMilli();
 			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-			replaces.put("<staff>", EReplace.of(EChat.serialize(profile.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN)))));
+			replaces.put("<staff>", EReplace.of(Sanction.getSourceName(profile.get().getBanSource(), this.plugin.getEServer())));
 			replaces.put("<player>", EReplace.of(profile.get().getProfile().getName().orElse(profile.get().getProfile().getUniqueId().toString())));
 			replaces.put("<reason>", EReplace.of(EChat.serialize(profile.get().getReason().orElse(Text.EMPTY))));
 			replaces.put("<creation_time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation)));
@@ -90,7 +91,7 @@ public class ESListener {
 		if (ip.isPresent()) {
 			long creation = ip.get().getCreationDate().toEpochMilli();
 			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-			replaces.put("<staff>", EReplace.of(EChat.serialize(ip.get().getBanSource().orElse(Text.of(SanctionService.UNKNOWN)))));
+			replaces.put("<staff>", EReplace.of(Sanction.getSourceName(ip.get().getBanSource(), this.plugin.getEServer())));
 			replaces.put("<address>", EReplace.of(UtilsNetwork.getHostString(event.getConnection().getAddress().getAddress())));
 			replaces.put("<reason>", EReplace.of(EChat.serialize(ip.get().getReason().orElse(Text.EMPTY))));
 			replaces.put("<creation_time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(creation)));

@@ -27,7 +27,6 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
-import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
@@ -86,8 +85,9 @@ public class ESSanction extends ECommand<EverSanctions> {
 				if (reason.isPresent()) {
 					resultat = this.commandSanction(source, user.get(), reason.get());
 				} else {
-					source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_UNKNOWN.get()
-							.replaceAll("<name>", args.get(0))));
+					ESMessages.SANCTION_ERROR_UNKNOWN.sender()
+						.replace("<name>", args.get(0))
+						.sendTo(source);
 				}
 			// Le joueur est introuvable
 			} else {
@@ -106,15 +106,17 @@ public class ESSanction extends ECommand<EverSanctions> {
 	private boolean commandSanction(final CommandSource staff, EUser user, final SanctionAuto.Reason reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_EQUALS.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.SANCTION_ERROR_EQUALS.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
 		// Le joueur a déjà une sanction en cours
 		if (user.getAuto(reason).isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_NOEMPTY.get()
-				.replaceAll("<player>", user.getName())));
+			ESMessages.SANCTION_ERROR_NOEMPTY.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
@@ -123,20 +125,22 @@ public class ESSanction extends ECommand<EverSanctions> {
 		
 		// Sanction annule
 		if (!sanction.isPresent()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_ERROR_CANCEL.get()
-						.replaceAll("<player>", user.getName())));
+			ESMessages.SANCTION_ERROR_CANCEL.sender()
+				.replace("<player>", user.getName())
+				.sendTo(staff);
 			return false;
 		}
 		
-		staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTION_STAFF.get()
-				.replaceAll("<player>", user.getName())
-				.replaceAll("<reason>", EChat.serialize(sanction.get().getReason()))));
+		ESMessages.SANCTION_STAFF.sender()
+			.replace("<player>", user.getName())
+			.replace("<reason>", sanction.get().getReason())
+			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
-			EPlayer player = (EPlayer) user;
-			player.sendMessage(EChat.of(ESMessages.SANCTION_PLAYER.get()
-					.replaceAll("<staff>", staff.getName())
-					.replaceAll("<reason>", EChat.serialize(sanction.get().getReason()))));
+			ESMessages.SANCTION_PLAYER.sender()
+				.replace("<staff>", staff.getName())
+				.replace("<reason>", sanction.get().getReason())
+				.sendTo((EPlayer) user);
 		}
 		return true;
 	}

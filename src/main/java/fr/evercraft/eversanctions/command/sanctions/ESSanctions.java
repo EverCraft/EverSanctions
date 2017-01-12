@@ -17,7 +17,9 @@
 package fr.evercraft.eversanctions.command.sanctions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.spongepowered.api.command.CommandException;
@@ -27,7 +29,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
-import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.command.ECommand;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
@@ -80,8 +82,9 @@ public class ESSanctions extends ECommand<EverSanctions> {
 			if (reason.isPresent()) {
 				resultat = this.commandSanctions(source, reason.get());
 			} else {
-				source.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.SANCTIONS_REASON_UNKNOWN.get()
-						.replaceAll("<name>", args.get(0))));
+				ESMessages.SANCTIONS_REASON_UNKNOWN.sender()
+					.replace("<name>", args.get(0))
+					.sendTo(source);
 			}
 		} else {
 			source.sendMessage(this.help(source));
@@ -92,13 +95,13 @@ public class ESSanctions extends ECommand<EverSanctions> {
 	private boolean commandSanctions(final CommandSource staff) {
 		List<Text> list = new ArrayList<Text>();
 		this.plugin.getSanctionService().getAllReasons().forEach(reason -> {
-			list.add(EChat.of(ESMessages.SANCTIONS_LIST_LINE.get()
-					.replaceAll("<name>", reason.getName())
-					.replaceAll("<count>", String.valueOf(reason.getLevels().size())))
+			list.add(ESMessages.SANCTIONS_LIST_LINE.getFormat().toText(
+						"<name>", reason.getName(),
+						"<count>", String.valueOf(reason.getLevels().size()))
 				.toBuilder()
 				.onClick(TextActions.runCommand("/sanctions \"" + reason.getName() + "\""))
-				.onHover(TextActions.showText(EChat.of(ESMessages.SANCTIONS_LIST_LINE_HOVER.get()
-					.replaceAll("<name>", reason.getName()))))
+				.onHover(TextActions.showText(ESMessages.SANCTIONS_LIST_LINE_HOVER.getFormat()
+					.toText("<name>", reason.getName())))
 				.build());
 		});
 		
@@ -107,7 +110,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
-				EChat.of(ESMessages.SANCTIONS_LIST_TITLE.get()).toBuilder()
+				ESMessages.SANCTIONS_LIST_TITLE.getText().toBuilder()
 					.onClick(TextActions.runCommand("/sanctions"))
 					.build(), 
 				list, staff);
@@ -117,60 +120,67 @@ public class ESSanctions extends ECommand<EverSanctions> {
 	private boolean commandSanctions(final CommandSource staff, final SanctionAuto.Reason reason) {
 		List<Text> list = new ArrayList<Text>();
 		reason.getLevels().forEach((num, level) -> {
-			String message = "";
+			
+			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
+			replaces.put("<num>", EReplace.of(String.valueOf(num)));
+			replaces.put("<type>", EReplace.of(this.getType(level.getType())));
+			replaces.put("<reason>", EReplace.of(level.getReason()));
+			replaces.put("<count>", EReplace.of(String.valueOf(reason.getLevels().size())));
+			
+			ESMessages message = null;
 			if (level.isIndefinite()) {
 				if (level.getJail().isPresent()) {
-					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED_JAIL.get()
-							.replaceAll("<jail>", level.getJail().get().getName());
+					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED_JAIL;
+					replaces.put("<jail>", EReplace.of(level.getJail().get().getName()));
 				} else {
-					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED.get();
+					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED;
 				}
 			} else {
 				if (level.getJail().isPresent()) {
-					message = ESMessages.SANCTIONS_REASON_LINE_TEMP_JAIL.get()
-							.replaceAll("<jail>", level.getJail().get().getName());
+					message = ESMessages.SANCTIONS_REASON_LINE_TEMP_JAIL;
+					replaces.put("<jail>", EReplace.of(level.getJail().get().getName()));
 				} else {
-					message = ESMessages.SANCTIONS_REASON_LINE_TEMP.get();
+					message = ESMessages.SANCTIONS_REASON_LINE_TEMP;
 				}
-				message = message.replaceAll("<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR"));
+				replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR")));
 			}
 			
-			list.add(EChat.of(message
-					.replaceAll("<num>", String.valueOf(num))
-					.replaceAll("<type>", this.getType(level.getType()))
-					.replaceAll("<reason>", level.getReason())
-					.replaceAll("<count>", String.valueOf(reason.getLevels().size()))));
+			if (message != null) {
+				list.add(message.getFormat().toText(replaces));
+			}
 		});
 		
 		if (list.isEmpty()) {
-			staff.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.COMMAND_ERROR.get()));
+			EAMessages.COMMAND_ERROR.sender()
+				.prefix(ESMessages.PREFIX)
+				.sendTo(staff);
 			return false;
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
-				EChat.of(ESMessages.SANCTIONS_REASON_TITLE.get()
-						.replaceAll("<name>", reason.getName())
-						.replaceAll("<count>", String.valueOf(reason.getLevels().size()))).toBuilder()
+				ESMessages.SANCTIONS_REASON_TITLE.getFormat().toText(
+							"<name>", reason.getName(),
+							"<count>", String.valueOf(reason.getLevels().size())).toBuilder()
 					.onClick(TextActions.runCommand("/sanctions \"" + reason.getName() + "\""))
 					.build(), 
 				list, staff);
 		return true;
 	}
 	
-	public String getType(SanctionAuto.Type type) {
+	public Text getType(SanctionAuto.Type type) {
 		if(type.equals(SanctionAuto.Type.BAN_PROFILE_AND_IP)) {
-			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.get();
+			return ESMessages.PROFILE_AUTO_BAN_PROFILE_AND_IP.getText();
 		} else if(type.equals(SanctionAuto.Type.BAN_PROFILE)) {
-			return ESMessages.PROFILE_AUTO_BAN_PROFILE.get();
+			return ESMessages.PROFILE_AUTO_BAN_PROFILE.getText();
 		} else if(type.equals(SanctionAuto.Type.BAN_IP)) {
-			return ESMessages.PROFILE_AUTO_BAN_IP.get();
+			return ESMessages.PROFILE_AUTO_BAN_IP.getText();
 		} else if(type.equals(SanctionAuto.Type.MUTE_AND_JAIL)) {
-			return ESMessages.PROFILE_AUTO_MUTE_AND_JAIL.get();
+			return ESMessages.PROFILE_AUTO_MUTE_AND_JAIL.getText();
 		} else if(type.equals(SanctionAuto.Type.MUTE)) {
-			return ESMessages.PROFILE_AUTO_MUTE.get();
+			return ESMessages.PROFILE_AUTO_MUTE.getText();
 		} else if(type.equals(SanctionAuto.Type.JAIL)) {
-			return ESMessages.PROFILE_AUTO_JAIL.get();
+			return ESMessages.PROFILE_AUTO_JAIL.getText();
 		}
-		return "";
+		return Text.EMPTY;
 	}
 }
