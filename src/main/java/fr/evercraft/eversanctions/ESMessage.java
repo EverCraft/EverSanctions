@@ -23,6 +23,7 @@ import fr.evercraft.everapi.message.EMessageFormat;
 import fr.evercraft.everapi.message.format.EFormatString;
 import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.plugin.file.EnumMessage;
+import fr.evercraft.everapi.services.sanction.SanctionService;
 
 public class ESMessage extends EMessage<EverSanctions> {
 
@@ -155,7 +156,10 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAIL_DISABLE_COMMAND_TEMP("jail.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
 		JAIL_DISABLE_COMMAND_UNLIMITED("jail.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
 		JAIL_DISABLE_MOVE("jail.disableMove", 										"&4Ne vous éloignez pas de votre prison."),
-		JAIL_DISABLE_INTERACT("jail.disableInteract", 								"&4Vous ne pouvez pas intéragir car vous êtes en prison."),
+		JAIL_DISABLE_INTERACT("jail.disableInteract", 								EMessageFormat.builder()
+																						.actionbarMessage("&4Vous ne pouvez pas intéragir car vous êtes en prison.")
+																						.actionbarStay(3 * 1000)
+																						.actionbarPriority(SanctionService.MESSAGE_JAIL)),
 		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
 		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
 		

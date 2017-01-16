@@ -299,7 +299,7 @@ public class ESListener {
 			return false;
 		}
 		
-		player.sendActionBar(SanctionService.MESSAGE_JAIL, 3, ESMessages.JAIL_DISABLE_INTERACT.getText());
+		ESMessages.JAIL_DISABLE_INTERACT.sendTo(player);
 		return true;
 	}
 	
