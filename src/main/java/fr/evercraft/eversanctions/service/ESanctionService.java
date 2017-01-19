@@ -32,12 +32,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
-import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.sanction.SanctionIpSubject;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.SanctionUserSubject;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsNetwork;
+import fr.evercraft.everapi.util.Chronometer;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.service.auto.EAutoReason;
 import fr.evercraft.eversanctions.service.subject.EIpSubject;
