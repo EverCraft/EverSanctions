@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public List<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		return new ArrayList<String>();
 	}
 	

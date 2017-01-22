@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.profile;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +97,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1){
 			suggests.addAll(this.getAllUsers(source));

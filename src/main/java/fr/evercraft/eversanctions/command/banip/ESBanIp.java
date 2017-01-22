@@ -19,6 +19,7 @@ package fr.evercraft.eversanctions.command.banip;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1){
 			suggests.addAll(this.getAllUsers(source));
