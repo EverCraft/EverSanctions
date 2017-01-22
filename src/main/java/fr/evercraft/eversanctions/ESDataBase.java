@@ -127,7 +127,6 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 	}	
 
 	public Map<Ban.Profile, UUID> getBansProfile(Connection connection) {
-		this.plugin.getLogger().warn("getBansProfile");
 		Map<Ban.Profile, UUID> bans = new HashMap<Ban.Profile, UUID>();
 		PreparedStatement preparedStatement = null;
 		try {
