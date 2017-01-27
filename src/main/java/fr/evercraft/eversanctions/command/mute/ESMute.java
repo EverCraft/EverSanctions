@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.mute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -69,17 +70,14 @@ public class ESMute extends ECommand<EverSanctions> {
 	
 	@Override
 	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1){
-			suggests.addAll(this.getAllUsers(source));
+			return this.getAllUsers(args.get(0));
 		} else if (args.size() == 2) {
-			suggests.add(SanctionService.UNLIMITED);
-			suggests.add("\"1mo 7d 12h\"");
-			suggests.add("1h");
+			return Arrays.asList(SanctionService.UNLIMITED, "\"1mo 7d 12h\"", "1h");
 		} else if (args.size() == 3) {
-			suggests.add("reason...");
+			return Arrays.asList("reason...");
 		}
-		return suggests;
+		return Arrays.asList();
 	}
 	
 	@Override
