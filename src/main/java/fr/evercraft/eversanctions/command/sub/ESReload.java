@@ -16,7 +16,7 @@
  */
 package fr.evercraft.eversanctions.command.sub;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class ESReload extends ESubCommand<EverSanctions> {
 	}
 	
 	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		return new ArrayList<String>();
+		return Arrays.asList();
 	}
 
 	public Text help(final CommandSource source) {

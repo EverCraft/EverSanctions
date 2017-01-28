@@ -18,6 +18,7 @@ package fr.evercraft.eversanctions.command.banip;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,8 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 	public ESUnBanIp(final EverSanctions plugin) {
         super(plugin, "unbanip", "pardon-ip");
         
-        // TODO Remove command : pardon-ip
+        this.plugin.getGame().getCommandManager().get("pardon-ip").ifPresent(command ->
+        	this.plugin.getGame().getCommandManager().removeMapping(command));
     }
 	
 	@Override
@@ -63,7 +65,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.getString() + "|" + EAMessages.ARGS_IP.getString() + "> <" + EAMessages.ARGS_REASON.getString() + ">")
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_USER.getString() + "|" + EAMessages.ARGS_IP.getString() + "> <" + EAMessages.ARGS_REASON.getString() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -71,18 +73,19 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 	
 	@Override
 	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1) {
+			List<String> suggests = new ArrayList<String>();
 			for (Ban.Profile ban : this.plugin.getSanctionService().getProfileBans()) {
 				suggests.add(ban.getProfile().getName().orElse(ban.getProfile().getUniqueId().toString()));
 			}
 			for (Ban.Ip ban : this.plugin.getSanctionService().getIpBans()) {
 				suggests.add(UtilsNetwork.getHostString(ban.getAddress()));
 			}
+			return suggests;
 		} else if (args.size() == 2) {
-			suggests.add("reason...");
+			return Arrays.asList("reason...");
 		}
-		return suggests;
+		return Arrays.asList();
 	}
 	
 	@Override

@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.sanctions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -63,11 +64,12 @@ public class ESSanctions extends ECommand<EverSanctions> {
 	
 	@Override
 	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
-		if (args.size() == 1){
+		if (args.size() == 1) {
+			List<String> suggests = new ArrayList<String>();
 			this.plugin.getSanctionService().getAllReasons().forEach(sanction -> suggests.add(sanction.getName()));
+			return suggests;
 		}
-		return suggests;
+		return Arrays.asList();
 	}
 	
 	@Override

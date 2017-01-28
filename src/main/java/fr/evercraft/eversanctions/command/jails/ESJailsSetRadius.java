@@ -17,6 +17,7 @@
 package fr.evercraft.eversanctions.command.jails;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -63,11 +64,14 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	
 	@Override
 	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1) {
+			List<String> suggests = new ArrayList<String>();
 			this.plugin.getJailService().getAll().forEach(jail -> suggests.add(jail.getName()));
+			return suggests;
+		} else if (args.size() == 2) {
+			return Arrays.asList("10");
 		}
-		return suggests;
+		return Arrays.asList();
 	}
 	
 	@Override

@@ -67,7 +67,7 @@ public class ESJail extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_PLAYER.getString() + "> <" + EAMessages.ARGS_JAIL.getString() + "> "
+		return Text.builder("/" + this.getName() + " <" + EAMessages.ARGS_USER.getString() + "> <" + EAMessages.ARGS_JAIL.getString() + "> "
 				+ "<" + EAMessages.ARGS_TIME.getString() + "> <" + EAMessages.ARGS_REASON.getString() + ">")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
@@ -84,6 +84,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			if (suggests.isEmpty()) {
 				source.sendMessage(ESMessages.PREFIX.getText().concat(ESMessages.JAIL_EMPTY.getText()));
 			}
+			return suggests;
 		} else if (args.size() == 3) {
 			return Arrays.asList(SanctionService.UNLIMITED, "\"1mo 7d 12h\"", "1h");
 		} else if (args.size() == 4) {

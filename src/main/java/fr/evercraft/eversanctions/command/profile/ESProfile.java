@@ -91,7 +91,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 
 	@Override
 	public Text help(final CommandSource source) {
-		return Text.builder("/" + this.getName() + " [" + EAMessages.ARGS_PLAYER.getString() + "|" + EAMessages.ARGS_IP.getString() + "] [" + EAMessages.ARGS_TYPE.getString() + "]")
+		return Text.builder("/" + this.getName() + " [" + EAMessages.ARGS_USER.getString() + "|" + EAMessages.ARGS_IP.getString() + "] [" + EAMessages.ARGS_TYPE.getString() + "]")
 				.onClick(TextActions.suggestCommand("/" + this.getName() + " "))
 				.color(TextColors.RED)
 				.build();
@@ -106,6 +106,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			for(Type type : Type.values()) {
 				suggests.add(type.name());
 			}
+			return suggests;
 		}
 		return Arrays.asList();
 	}

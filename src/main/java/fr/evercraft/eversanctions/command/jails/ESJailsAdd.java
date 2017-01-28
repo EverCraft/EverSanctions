@@ -16,7 +16,7 @@
  */
 package fr.evercraft.eversanctions.command.jails;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -64,13 +64,12 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 	
 	@Override
 	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
 		if (args.size() == 1) {
-			suggests.add("jail...");
+			return Arrays.asList("jail...");
 		} else if (args.size() == 2) {
-			suggests.add(String.valueOf(this.plugin.getConfigs().getJailRadius()));
+			return Arrays.asList(String.valueOf(this.plugin.getConfigs().getJailRadius()));
 		}
-		return suggests;
+		return Arrays.asList();
 	}
 	
 	@Override
