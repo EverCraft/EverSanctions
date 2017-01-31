@@ -34,7 +34,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
-import fr.evercraft.everapi.server.location.LocationSQL;
+import fr.evercraft.everapi.server.location.VirtualLocation;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.jail.JailService;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -106,7 +106,7 @@ public class EJailService implements JailService {
 		Preconditions.checkNotNull(radius, "radius");
 		
 		if (!this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(this.plugin, identifier, radius, new LocationSQL(this.plugin, location));
+			final EJail jail = new EJail(this.plugin, identifier, radius, new VirtualLocation(this.plugin, location));
 			this.jails.put(identifier, jail);
 			this.plugin.getThreadAsync().execute(() -> this.addAsync(jail));
 			return Optional.of(jail);
@@ -156,7 +156,7 @@ public class EJailService implements JailService {
 					radius = Optional.empty();
 				}
 				
-				LocationSQL location = new LocationSQL(this.plugin,	list.getString("world"), 
+				VirtualLocation location = new VirtualLocation(this.plugin,	list.getString("world"), 
 														list.getDouble("x"),
 														list.getDouble("y"),
 														list.getDouble("z"),
@@ -189,9 +189,9 @@ public class EJailService implements JailService {
 			preparedStatement.setString(1, jail.getName());
 			preparedStatement.setInt(2, jail.getRadius());
 			preparedStatement.setString(3, jail.getLocationSQL().getWorldUUID());
-			preparedStatement.setDouble(4, jail.getLocationSQL().getX());
-			preparedStatement.setDouble(5, jail.getLocationSQL().getY());
-			preparedStatement.setDouble(6, jail.getLocationSQL().getZ());
+			preparedStatement.setDouble(4, jail.getLocationSQL().getFloorX());
+			preparedStatement.setDouble(5, jail.getLocationSQL().getFloorY());
+			preparedStatement.setDouble(6, jail.getLocationSQL().getFloorZ());
 			preparedStatement.setDouble(7, jail.getLocationSQL().getYaw());
 			preparedStatement.setDouble(8, jail.getLocationSQL().getPitch());
 			

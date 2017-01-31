@@ -34,7 +34,7 @@ import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
-import fr.evercraft.everapi.server.location.LocationSQL;
+import fr.evercraft.everapi.server.location.VirtualLocation;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -135,7 +135,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 					.build();
 	}
 	
-	private Text getButtonDelete(final String name, final LocationSQL location){
+	private Text getButtonDelete(final String name, final VirtualLocation location){
 		return ESMessages.JAILS_LIST_DELETE.getText().toBuilder()
 					.onHover(TextActions.showText(ESMessages.JAILS_LIST_DELETE_HOVER.getFormat()
 							.toText("<jail>", name)))

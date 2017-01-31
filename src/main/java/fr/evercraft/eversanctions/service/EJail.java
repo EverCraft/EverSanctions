@@ -25,7 +25,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
-import fr.evercraft.everapi.server.location.LocationSQL;
+import fr.evercraft.everapi.server.location.VirtualLocation;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.eversanctions.EverSanctions;
 
@@ -35,9 +35,9 @@ public class EJail implements Jail {
 	
 	private final String name;
 	private Optional<Integer> radius;
-	private LocationSQL location;
+	private VirtualLocation location;
 	
-	public EJail(final EverSanctions plugin, final String name, final Optional<Integer> radius, final LocationSQL location) {
+	public EJail(final EverSanctions plugin, final String name, final Optional<Integer> radius, final VirtualLocation location) {
 		this.plugin = plugin;
 		this.name = name;
 		this.radius = radius;
@@ -59,12 +59,12 @@ public class EJail implements Jail {
 		return this.location.getTransform().orElse(null);
 	}
 
-	public LocationSQL getLocationSQL() {
+	public VirtualLocation getLocationSQL() {
 		return this.location;
 	}
 
 	public boolean update(final Transform<World> transform) {
-		this.location = new LocationSQL(this.plugin, transform);
+		this.location = new VirtualLocation(this.plugin, transform);
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
 		return true;
 	}
@@ -76,7 +76,7 @@ public class EJail implements Jail {
 	}
 	
 	public boolean update(final Transform<World> transform, final Optional<Integer> radius) {
-		this.location = new LocationSQL(this.plugin, transform);
+		this.location = new VirtualLocation(this.plugin, transform);
 		this.radius = radius;
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
 		return true;
@@ -99,9 +99,9 @@ public class EJail implements Jail {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, this.getRadius());
 			preparedStatement.setString(2, this.getLocationSQL().getWorldUUID());
-			preparedStatement.setDouble(3, this.getLocationSQL().getX());
-			preparedStatement.setDouble(4, this.getLocationSQL().getY());
-			preparedStatement.setDouble(5, this.getLocationSQL().getZ());
+			preparedStatement.setDouble(3, this.getLocationSQL().getFloorX());
+			preparedStatement.setDouble(4, this.getLocationSQL().getFloorY());
+			preparedStatement.setDouble(5, this.getLocationSQL().getFloorZ());
 			preparedStatement.setDouble(6, this.getLocationSQL().getYaw());
 			preparedStatement.setDouble(7, this.getLocationSQL().getPitch());
 			preparedStatement.setString(8, this.getName());
