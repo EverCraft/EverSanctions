@@ -34,7 +34,7 @@ import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
-import fr.evercraft.everapi.server.location.VirtualLocation;
+import fr.evercraft.everapi.server.location.VirtualTransform;
 import fr.evercraft.eversanctions.ESMessage.ESMessages;
 import fr.evercraft.eversanctions.command.jail.ESJail;
 import fr.evercraft.eversanctions.ESPermissions;
@@ -95,7 +95,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 				Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
 				replaces.put("<jail>", EReplace.of(() -> ESJail.getButtonJail(jail)));
 				replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
-				replaces.put("<delete>", EReplace.of(() -> this.getButtonDelete(jail.getName(), jail.getLocationSQL())));
+				replaces.put("<delete>", EReplace.of(() -> this.getButtonDelete(jail.getName(), jail.getVirtualTransform())));
 				
 				if (jail.getTransform() != null) {
 					replaces.put("<teleport>", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
@@ -135,7 +135,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 					.build();
 	}
 	
-	private Text getButtonDelete(final String name, final VirtualLocation location){
+	private Text getButtonDelete(final String name, final VirtualTransform location){
 		return ESMessages.JAILS_LIST_DELETE.getText().toBuilder()
 					.onHover(TextActions.showText(ESMessages.JAILS_LIST_DELETE_HOVER.getFormat()
 							.toText("<jail>", name)))

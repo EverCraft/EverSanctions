@@ -25,7 +25,8 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
-import fr.evercraft.everapi.server.location.VirtualLocation;
+import fr.evercraft.everapi.server.location.EVirtualTransform;
+import fr.evercraft.everapi.server.location.VirtualTransform;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.eversanctions.EverSanctions;
 
@@ -35,9 +36,9 @@ public class EJail implements Jail {
 	
 	private final String name;
 	private Optional<Integer> radius;
-	private VirtualLocation location;
+	private VirtualTransform location;
 	
-	public EJail(final EverSanctions plugin, final String name, final Optional<Integer> radius, final VirtualLocation location) {
+	public EJail(final EverSanctions plugin, final String name, final Optional<Integer> radius, final VirtualTransform location) {
 		this.plugin = plugin;
 		this.name = name;
 		this.radius = radius;
@@ -59,12 +60,12 @@ public class EJail implements Jail {
 		return this.location.getTransform().orElse(null);
 	}
 
-	public VirtualLocation getLocationSQL() {
+	public VirtualTransform getVirtualTransform() {
 		return this.location;
 	}
 
 	public boolean update(final Transform<World> transform) {
-		this.location = new VirtualLocation(this.plugin, transform);
+		this.location = new EVirtualTransform(this.plugin, transform);
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
 		return true;
 	}
@@ -76,7 +77,7 @@ public class EJail implements Jail {
 	}
 	
 	public boolean update(final Transform<World> transform, final Optional<Integer> radius) {
-		this.location = new VirtualLocation(this.plugin, transform);
+		this.location = new EVirtualTransform(this.plugin, transform);
 		this.radius = radius;
 		this.plugin.getThreadAsync().execute(() -> this.updateAsync());
 		return true;
@@ -98,12 +99,12 @@ public class EJail implements Jail {
     						+ "WHERE `identifier` = ? ;";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, this.getRadius());
-			preparedStatement.setString(2, this.getLocationSQL().getWorldUUID());
-			preparedStatement.setDouble(3, this.getLocationSQL().getFloorX());
-			preparedStatement.setDouble(4, this.getLocationSQL().getFloorY());
-			preparedStatement.setDouble(5, this.getLocationSQL().getFloorZ());
-			preparedStatement.setDouble(6, this.getLocationSQL().getYaw());
-			preparedStatement.setDouble(7, this.getLocationSQL().getPitch());
+			preparedStatement.setString(2, this.location.getWorldIdentifier());
+			preparedStatement.setDouble(3, this.location.getPosition().getFloorX());
+			preparedStatement.setDouble(4, this.location.getPosition().getFloorY());
+			preparedStatement.setDouble(5, this.location.getPosition().getFloorZ());
+			preparedStatement.setDouble(6, this.location.getYaw());
+			preparedStatement.setDouble(7, this.location.getPitch());
 			preparedStatement.setString(8, this.getName());
 			
 			preparedStatement.execute();

@@ -34,7 +34,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
-import fr.evercraft.everapi.server.location.VirtualLocation;
+import fr.evercraft.everapi.server.location.EVirtualTransform;
+import fr.evercraft.everapi.server.location.VirtualTransform;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.jail.JailService;
 import fr.evercraft.eversanctions.EverSanctions;
@@ -106,7 +107,7 @@ public class EJailService implements JailService {
 		Preconditions.checkNotNull(radius, "radius");
 		
 		if (!this.jails.containsKey(identifier)) {
-			final EJail jail = new EJail(this.plugin, identifier, radius, new VirtualLocation(this.plugin, location));
+			final EJail jail = new EJail(this.plugin, identifier, radius, new EVirtualTransform(this.plugin, location));
 			this.jails.put(identifier, jail);
 			this.plugin.getThreadAsync().execute(() -> this.addAsync(jail));
 			return Optional.of(jail);
@@ -156,7 +157,7 @@ public class EJailService implements JailService {
 					radius = Optional.empty();
 				}
 				
-				VirtualLocation location = new VirtualLocation(this.plugin,	list.getString("world"), 
+				VirtualTransform location = new EVirtualTransform(this.plugin,	list.getString("world"), 
 														list.getDouble("x"),
 														list.getDouble("y"),
 														list.getDouble("z"),
@@ -188,12 +189,12 @@ public class EJailService implements JailService {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, jail.getName());
 			preparedStatement.setInt(2, jail.getRadius());
-			preparedStatement.setString(3, jail.getLocationSQL().getWorldUUID());
-			preparedStatement.setDouble(4, jail.getLocationSQL().getFloorX());
-			preparedStatement.setDouble(5, jail.getLocationSQL().getFloorY());
-			preparedStatement.setDouble(6, jail.getLocationSQL().getFloorZ());
-			preparedStatement.setDouble(7, jail.getLocationSQL().getYaw());
-			preparedStatement.setDouble(8, jail.getLocationSQL().getPitch());
+			preparedStatement.setString(3, jail.getVirtualTransform().getWorldIdentifier());
+			preparedStatement.setDouble(4, jail.getVirtualTransform().getPosition().getX());
+			preparedStatement.setDouble(5, jail.getVirtualTransform().getPosition().getY());
+			preparedStatement.setDouble(6, jail.getVirtualTransform().getPosition().getZ());
+			preparedStatement.setDouble(7, jail.getVirtualTransform().getYaw());
+			preparedStatement.setDouble(8, jail.getVirtualTransform().getPitch());
 			
 			preparedStatement.execute();
 			this.plugin.getLogger().debug("Adding to the database : (jail='" + jail.getName() + "';radius='" + jail.getRadius() + "';location='" + jail.getName() + "')");

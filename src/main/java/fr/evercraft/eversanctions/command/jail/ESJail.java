@@ -37,7 +37,7 @@ import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.message.replace.EReplace;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ECommand;
-import fr.evercraft.everapi.server.location.VirtualLocation;
+import fr.evercraft.everapi.server.location.VirtualTransform;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everapi.server.user.EUser;
 import fr.evercraft.everapi.services.jail.Jail;
@@ -265,12 +265,12 @@ public class ESJail extends ECommand<EverSanctions> {
 	}
 	
 	public static Text getButtonJail(final EJail jail) {
-		VirtualLocation location = jail.getLocationSQL();
+		VirtualTransform location = jail.getVirtualTransform();
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
 		replaces.put("<world>", EReplace.of(location.getWorldName()));
-		replaces.put("<x>", EReplace.of(location.getFloorX().toString()));
-		replaces.put("<y>", EReplace.of(location.getFloorY().toString()));
-		replaces.put("<z>", EReplace.of(location.getFloorZ().toString()));
+		replaces.put("<x>", EReplace.of(String.valueOf(location.getPosition().getFloorX())));
+		replaces.put("<y>", EReplace.of(String.valueOf(location.getPosition().getFloorY())));
+		replaces.put("<z>", EReplace.of(String.valueOf(location.getPosition().getFloorZ())));
 		replaces.put("<jail>", EReplace.of(jail.getName()));
 		replaces.put("<name>", EReplace.of(jail.getName()));
 		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
