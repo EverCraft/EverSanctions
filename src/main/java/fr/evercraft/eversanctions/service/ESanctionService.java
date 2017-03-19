@@ -77,7 +77,7 @@ public abstract class ESanctionService implements SanctionService {
 			        	
 			        	EUserSubject subject = new EUserSubject(ESanctionService.this.plugin, uuid);
 			        	
-			        	ESanctionService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+			        	ESanctionService.this.plugin.getELogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 			            return subject;
 			        }
 			    });
@@ -95,7 +95,7 @@ public abstract class ESanctionService implements SanctionService {
 			        	Optional<InetAddress> address = UtilsNetwork.getHost(address_string);
 			        	if(address.isPresent()) {
 				        	EIpSubject subject = new EIpSubject(ESanctionService.this.plugin, address.get());
-				        	ESanctionService.this.plugin.getLogger().debug("Loading ip '" + address_string + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+				        	ESanctionService.this.plugin.getELogger().debug("Loading ip '" + address_string + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 				            return subject;
 			        	}
 			        	return null;
@@ -139,7 +139,7 @@ public abstract class ESanctionService implements SanctionService {
 	    	}
 	    	return Optional.ofNullable(this.users.get(uuid));
 		} catch (Exception e) {
-			this.plugin.getLogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
+			this.plugin.getELogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
 			return Optional.empty();
 		}
 	}
@@ -165,13 +165,13 @@ public abstract class ESanctionService implements SanctionService {
 		// Si le joueur est dans le cache
 		if (player != null) {
 			this.users.putIfAbsent(uuid, player);
-			this.plugin.getLogger().debug("Loading player cache : " + uuid.toString());
+			this.plugin.getELogger().debug("Loading player cache : " + uuid.toString());
 		// Si le joueur n'est pas dans le cache
 		} else {
 			Chronometer chronometer = new Chronometer();
 			player = new EUserSubject(this.plugin, uuid);
 			this.users.putIfAbsent(uuid, player);
-			this.plugin.getLogger().debug("Loading player '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
+			this.plugin.getELogger().debug("Loading player '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
 		}
 	}
 	
@@ -186,7 +186,7 @@ public abstract class ESanctionService implements SanctionService {
 		// Si le joueur existe
 		if (player != null) {
 			this.users_cache.put(uuid, player);
-			this.plugin.getLogger().debug("Unloading the player : " + uuid.toString());
+			this.plugin.getELogger().debug("Unloading the player : " + uuid.toString());
 		}
 	}
 	
@@ -204,7 +204,7 @@ public abstract class ESanctionService implements SanctionService {
 		try {
 			return Optional.of(this.ips_cache.get(UtilsNetwork.getHostString(address)));
 		} catch (ExecutionException e) {
-			this.plugin.getLogger().warn("Error : Loading user (identifier='" + address.toString() + "';message='" + e.getMessage() + "')");
+			this.plugin.getELogger().warn("Error : Loading user (identifier='" + address.toString() + "';message='" + e.getMessage() + "')");
 			return Optional.empty();
 		}
 	}

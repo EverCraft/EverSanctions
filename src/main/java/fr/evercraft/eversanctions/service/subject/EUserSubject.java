@@ -722,7 +722,7 @@ public class EUserSubject implements SanctionUserSubject {
 				}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
+	    	this.plugin.getELogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
@@ -767,7 +767,7 @@ public class EUserSubject implements SanctionUserSubject {
 				preparedStatement.setString(10, null);
 			}
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (uuid ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Adding to the database : (uuid ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "type='" + ban.getType().name() + "';"
@@ -778,7 +778,7 @@ public class EUserSubject implements SanctionUserSubject {
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("null") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -814,13 +814,13 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(4, this.getIdentifier());
 			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -844,7 +844,7 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "type='" + ban.getType().name() + "';"
@@ -854,7 +854,7 @@ public class EUserSubject implements SanctionUserSubject {
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("null") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -875,9 +875,9 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(1, this.getIdentifier());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
+			this.plugin.getELogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
@@ -970,7 +970,7 @@ public class EUserSubject implements SanctionUserSubject {
 				}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
+	    	this.plugin.getELogger().warn("Error during a change of manual_ip : (identifier='" + this.getIdentifier() + "'): " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }
@@ -1008,7 +1008,7 @@ public class EUserSubject implements SanctionUserSubject {
 				preparedStatement.setString(10, null);
 			}
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (identifier ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Adding to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 					 											  + "type='" + ban.getTypeSanction().name() + "';"
@@ -1019,7 +1019,7 @@ public class EUserSubject implements SanctionUserSubject {
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("null") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -1055,13 +1055,13 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(4, this.getIdentifier());
 			preparedStatement.setDouble(5, ban.getCreationDate());
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Updating to the database : (identifier ='" + this.getIdentifier() + "';"
 					 											  + "creation='" + ban.getCreationDate() + "';"
 					 											  + "pardon_date='" + ban.getPardonDate().orElse(-1L) + "';"
 					 											  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -1085,7 +1085,7 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setDouble(2, ban.getCreationDate());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
+			this.plugin.getELogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';"
 																  + "creation='" + ban.getCreationDate() + "';"
 																  + "expiration='" + ban.getExpirationDate().orElse(-1L) + "';"
 																  + "type='" + ban.getTypeSanction().name() + "';"
@@ -1095,7 +1095,7 @@ public class EUserSubject implements SanctionUserSubject {
 																  + "pardon_reason='" + ban.getPardonReason().orElse(Text.EMPTY) + "';"
 																  + "pardon_source='" + ban.getPardonSource().orElse("") + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of manual : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of manual : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -1116,9 +1116,9 @@ public class EUserSubject implements SanctionUserSubject {
 			preparedStatement.setString(1, this.getIdentifier());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
+			this.plugin.getELogger().debug("Remove from database : (identifier ='" + this.getIdentifier() + "';");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of auto : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of auto : " + e.getMessage());
 		} finally {
 			try {if (preparedStatement != null) preparedStatement.close();} catch (SQLException e) {}
 	    }

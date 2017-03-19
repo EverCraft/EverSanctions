@@ -45,7 +45,7 @@ public class ESManagerEvents {
 	 */
 	
 	public boolean postEnable(EUser user, SanctionJail sanction, Jail jail, CommandSource source) {
-		this.plugin.getLogger().debug("Event SanctionJail.Enable : ("
+		this.plugin.getELogger().debug("Event SanctionJail.Enable : ("
 				+ "uuid='" + user.getIdentifier() + "';"
 				+ "jail='" + sanction.getJailName() + "';"
 				+ "creation='" + sanction.getCreationDate() + "')");
@@ -53,7 +53,7 @@ public class ESManagerEvents {
 	}
 	
 	public void postDisable(UUID uuid, SanctionJail sanction, Optional<CommandSource> pardonSource) {
-		this.plugin.getLogger().debug("Event SanctionJail.Disable : ("
+		this.plugin.getELogger().debug("Event SanctionJail.Disable : ("
 				+ "uuid='" + uuid + "';"
 				+ "jail='" + sanction.getJailName() + "';"
 				+ "expiration='" + sanction.getExpirationDate().orElse(-1L) + "')");
@@ -68,14 +68,14 @@ public class ESManagerEvents {
 	 */
 	
 	public boolean postEnable(EUser user, SanctionMute sanction, CommandSource source) {
-		this.plugin.getLogger().debug("Event SanctionMute.Enable : ("
+		this.plugin.getELogger().debug("Event SanctionMute.Enable : ("
 				+ "uuid='" + user.getIdentifier() + "';"
 				+ "creation='" + sanction.getCreationDate() + "')");
 		return this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createMuteEventEnable(user, sanction, source, this.getCause()));
 	}
 	
 	public void postDisable(UUID uuid, SanctionMute sanction, Optional<CommandSource> pardonSource) {
-		this.plugin.getLogger().debug("Event SanctionMute.Disable : ("
+		this.plugin.getELogger().debug("Event SanctionMute.Disable : ("
 				+ "uuid='" + uuid + "';"
 				+ "expiration='" + sanction.getExpirationDate().orElse(-1L) + "')");
 		Optional<EUser> user = this.plugin.getEServer().getEUser(uuid);

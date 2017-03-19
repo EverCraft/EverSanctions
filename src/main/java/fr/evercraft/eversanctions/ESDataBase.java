@@ -172,7 +172,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("getBansProfile : " + e.getMessage());
+	    	this.plugin.getELogger().warn("getBansProfile : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }
@@ -217,9 +217,9 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 			while(list.next()) {
 				try {
 					Optional<InetAddress> address = UtilsNetwork.getHost(list.getString("context"));
-					this.plugin.getLogger().warn("getBanIpProfile");
+					this.plugin.getELogger().warn("getBanIpProfile");
 					if(address.isPresent()) {
-						this.plugin.getLogger().warn("getBanIpProfile : address");
+						this.plugin.getELogger().warn("getBanIpProfile : address");
 						long creation = list.getLong("creation");
 						
 						Ban.Builder build = Ban.builder()
@@ -238,7 +238,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("getBanIpProfile : " + e.getMessage());
+	    	this.plugin.getELogger().warn("getBanIpProfile : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }
@@ -279,7 +279,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 				} catch (IllegalArgumentException e) {}
 			}
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("getBanIp : " + e.getMessage());
+	    	this.plugin.getELogger().warn("getBanIp : " + e.getMessage());
 		} finally {
 			try { if (preparedStatement != null) preparedStatement.close(); } catch (SQLException e) {}
 	    }

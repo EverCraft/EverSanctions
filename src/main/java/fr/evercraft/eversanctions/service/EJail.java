@@ -108,9 +108,9 @@ public class EJail implements Jail {
 			preparedStatement.setString(8, this.getName());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Updating the database : (jail='" + this.getName() + "';radius='" + this.getRadius() + "';location='" + this.getName() + "')");
+			this.plugin.getELogger().debug("Updating the database : (jail='" + this.getName() + "';radius='" + this.getRadius() + "';location='" + this.getName() + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of jail : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {

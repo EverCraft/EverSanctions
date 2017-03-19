@@ -164,10 +164,10 @@ public class EJailService implements JailService {
 														list.getDouble("yaw"),
 														list.getDouble("pitch"));
 				jails.put(list.getString("identifier"), new EJail(this.plugin, list.getString("identifier"), radius, location));
-				this.plugin.getLogger().debug("Loading : (jail='" + list.getString("identifier") + "';radius='" + radius + "';location='" + location + "')");
+				this.plugin.getELogger().debug("Loading : (jail='" + list.getString("identifier") + "';radius='" + radius + "';location='" + location + "')");
 			}
     	} catch (SQLException e) {
-    		this.plugin.getLogger().warn("Jails error when loading : " + e.getMessage());
+    		this.plugin.getELogger().warn("Jails error when loading : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -197,9 +197,9 @@ public class EJailService implements JailService {
 			preparedStatement.setDouble(8, jail.getVirtualTransform().getPitch());
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Adding to the database : (jail='" + jail.getName() + "';radius='" + jail.getRadius() + "';location='" + jail.getName() + "')");
+			this.plugin.getELogger().debug("Adding to the database : (jail='" + jail.getName() + "';radius='" + jail.getRadius() + "';location='" + jail.getName() + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of jail : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -222,9 +222,9 @@ public class EJailService implements JailService {
 			preparedStatement.setString(1, identifier);
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Remove from database : (jail='" + identifier + "')");
+			this.plugin.getELogger().debug("Remove from database : (jail='" + identifier + "')");
     	} catch (SQLException e) {
-        	this.plugin.getLogger().warn("Error during a change of jail : " + e.getMessage());
+        	this.plugin.getELogger().warn("Error during a change of jail : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -244,9 +244,9 @@ public class EJailService implements JailService {
 			preparedStatement = connection.prepareStatement(query);
 			
 			preparedStatement.execute();
-			this.plugin.getLogger().debug("Removes the database jails");
+			this.plugin.getELogger().debug("Removes the database jails");
     	} catch (SQLException e) {
-    		this.plugin.getLogger().warn("Error jails deletions : " + e.getMessage());
+    		this.plugin.getELogger().warn("Error jails deletions : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {

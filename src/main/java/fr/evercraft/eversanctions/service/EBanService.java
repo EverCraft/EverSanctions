@@ -147,13 +147,13 @@ public class EBanService extends ESanctionService {
 		Optional<Ban.Ip> ban = Optional.empty();
 		Iterator<Entry<Ban.Ip, String>> iterator = this.bans_ip.entrySet().iterator();
 		
-		this.plugin.getLogger().warn("size : " + this.bans_ip.size());
+		this.plugin.getELogger().warn("size : " + this.bans_ip.size());
 		while(!ban.isPresent() && iterator.hasNext()) {
 			Entry<Ban.Ip, String> element = iterator.next();
-			this.plugin.getLogger().warn(address_string + " : " + element.getValue());
+			this.plugin.getELogger().warn(address_string + " : " + element.getValue());
 			if(element.getValue().equalsIgnoreCase(address_string)) {
 				ban = Optional.of(element.getKey());
-				this.plugin.getLogger().warn("true");
+				this.plugin.getELogger().warn("true");
 			}
 		}
 		return ban;
