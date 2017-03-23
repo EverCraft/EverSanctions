@@ -73,7 +73,7 @@ public class ESListener {
 			replaces.put("<creation_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation)));
 			
 			if(profile.get().isIndefinite()) {				
-				event.setMessage(ESMessages.CONNECTION_BAN_UNLIMITED.getFormat().toText(replaces));
+				event.setMessage(ESMessages.CONNECTION_BAN_UNLIMITED.getFormat().toText2(replaces));
 			} else {
 				long expiration = profile.get().getExpirationDate().get().toEpochMilli();
 				this.plugin.getEServer().broadcast("Test : ");
@@ -84,7 +84,7 @@ public class ESListener {
 				replaces.put("<expiration_date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
 				replaces.put("<expiration_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 				
-				event.setMessage(ESMessages.CONNECTION_BAN_TEMP.getFormat().toText(replaces));
+				event.setMessage(ESMessages.CONNECTION_BAN_TEMP.getFormat().toText2(replaces));
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);
@@ -103,7 +103,7 @@ public class ESListener {
 			replaces.put("<creation_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(creation)));
 			
 			if(ip.get().isIndefinite()) {
-				event.setMessage(ESMessages.CONNECTION_BANIP_UNLIMITED.getFormat().toText(replaces));
+				event.setMessage(ESMessages.CONNECTION_BANIP_UNLIMITED.getFormat().toText2(replaces));
 			} else {
 				long expiration = ip.get().getExpirationDate().get().toEpochMilli();
 				replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
@@ -111,7 +111,7 @@ public class ESListener {
 				replaces.put("<expiration_date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
 				replaces.put("<expiration_datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 				
-				event.setMessage(ESMessages.CONNECTION_BANIP_TEMP.getFormat().toText(replaces));
+				event.setMessage(ESMessages.CONNECTION_BANIP_TEMP.getFormat().toText2(replaces));
 			}
 			event.setMessageCancelled(false);
 			event.setCancelled(true);

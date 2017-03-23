@@ -265,7 +265,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			replaces.put("<line_pardon_date>", this.get(line_pardon_date));
 					
 			if (message != null) {
-				list.add(message.toText(replaces));
+				list.add(message.toText2(replaces));
 			}
 		});
 		
@@ -292,7 +292,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
-				title.toText(replaces).toBuilder()
+				title.toText2(replaces).toBuilder()
 					.onClick(TextActions.runCommand("/profile \"" + user.getName() + "\""))
 					.build(), 
 				list, staff);

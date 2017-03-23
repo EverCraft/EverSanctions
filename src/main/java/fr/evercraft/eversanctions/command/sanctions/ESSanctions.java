@@ -149,7 +149,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 			}
 			
 			if (message != null) {
-				list.add(message.getFormat().toText(replaces));
+				list.add(message.getFormat().toText2(replaces));
 			}
 		});
 		

@@ -229,20 +229,20 @@ public class ESJail extends ECommand<EverSanctions> {
 		
 		if (!user.jail(jail, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_TEMP.sender()
-				.replace(replaces)
+				.replaceString(replaces)
 				.sendTo(staff);
 			return false;
 		}
 		
 		ESMessages.JAIL_TEMP_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.teleport(jail.getTransform(), true);
 			ESMessages.JAIL_TEMP_PLAYER.sender()
-				.replace(replaces)
+				.replaceString(replaces)
 				.sendTo(player);
 		}
 		return true;
@@ -259,8 +259,8 @@ public class ESJail extends ECommand<EverSanctions> {
 		replaces.put("<name>", EReplace.of(jail.getName()));
 		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
 		
-		return ESMessages.JAIL_NAME.getFormat().toText(replaces).toBuilder()
-					.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText(replaces)))
+		return ESMessages.JAIL_NAME.getFormat().toText2(replaces).toBuilder()
+					.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText2(replaces)))
 					.build();
 	}
 	
@@ -275,8 +275,8 @@ public class ESJail extends ECommand<EverSanctions> {
 		replaces.put("<name>", EReplace.of(jail.getName()));
 		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
 		
-		return ESMessages.JAIL_NAME.getFormat().toText(replaces).toBuilder()
-				.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText(replaces)))
+		return ESMessages.JAIL_NAME.getFormat().toText2(replaces).toBuilder()
+				.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText2(replaces)))
 				.build();
 	}
 }

@@ -208,12 +208,12 @@ public class ESMute extends ECommand<EverSanctions> {
 		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		ESMessages.MUTE_TEMP_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			ESMessages.MUTE_TEMP_PLAYER.sender()
-				.replace(replaces)
+				.replaceString(replaces)
 				.sendTo((EPlayer) user);
 		}
 		return true;

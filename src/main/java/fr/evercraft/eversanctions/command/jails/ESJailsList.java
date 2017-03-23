@@ -99,9 +99,9 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 				
 				if (jail.getTransform() != null) {
 					replaces.put("<teleport>", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
-					lists.add(ESMessages.JAILS_LIST_LINE_DELETE.getFormat().toText(replaces));
+					lists.add(ESMessages.JAILS_LIST_LINE_DELETE.getFormat().toText2(replaces));
 				} else {
-					lists.add(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.getFormat().toText(replaces));
+					lists.add(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.getFormat().toText2(replaces));
 				}
 			}
 		} else {
@@ -112,7 +112,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 				replaces.put("<teleport>", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
 				
 				if (jail.getTransform() != null) {
-					lists.add(ESMessages.JAILS_LIST_LINE.getFormat().toText(replaces));
+					lists.add(ESMessages.JAILS_LIST_LINE.getFormat().toText2(replaces));
 				}
 			}
 		}

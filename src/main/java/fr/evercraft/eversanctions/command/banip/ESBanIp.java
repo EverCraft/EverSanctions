@@ -229,12 +229,12 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		ESMessages.BANIP_IP_TEMP_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 		
 		this.plugin.getEServer().getOnlineEPlayers().stream()
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), subject.getSocketAddress()))
-			.forEach(player -> player.kick(ESMessages.BANIP_IP_TEMP_PLAYER.getFormat().toText(replaces)));
+			.forEach(player -> player.kick(ESMessages.BANIP_IP_TEMP_PLAYER.getFormat().toText2(replaces)));
 		return true;
 	}
 	
@@ -316,19 +316,19 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Ban annulé
 		if (!user.banIp(address, creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()
-				.replace(replaces)
+				.replaceString(replaces)
 				.sendTo(staff);
 			return false;
 		}
 		
 		ESMessages.BANIP_PLAYER_UNLIMITED_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 
 		InetSocketAddress socket = UtilsNetwork.getSocketAddress(address);
 		this.plugin.getEServer().getOnlineEPlayers().stream()
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
-			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_UNLIMITED_PLAYER.getFormat().toText(replaces)));
+			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_UNLIMITED_PLAYER.getFormat().toText2(replaces)));
 		
 		return true;
 	}
@@ -346,19 +346,19 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		
 		if (!user.banIp(address, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()
-				.replace(replaces)
+				.replaceString(replaces)
 				.sendTo(staff);
 			return false;
 		}
 		
 		ESMessages.BANIP_PLAYER_TEMP_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 		
 		InetSocketAddress socket = UtilsNetwork.getSocketAddress(address);
 		this.plugin.getEServer().getOnlineEPlayers().stream()
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
-			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_TEMP_PLAYER.getFormat().toText(replaces)));
+			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_TEMP_PLAYER.getFormat().toText2(replaces)));
 		
 		return true;
 	}

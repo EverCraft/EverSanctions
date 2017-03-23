@@ -207,11 +207,11 @@ public class ESBan extends ECommand<EverSanctions> {
 		
 		
 		ESMessages.BAN_TEMP_STAFF.sender()
-			.replace(replaces)
+			.replaceString(replaces)
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
-			((EPlayer) user).kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText(replaces));
+			((EPlayer) user).kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText2(replaces));
 		}
 		return true;
 	}
