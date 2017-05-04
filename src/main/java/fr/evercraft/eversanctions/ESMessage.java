@@ -157,7 +157,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAIL_DISABLE_COMMAND_UNLIMITED("jail.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
 		JAIL_DISABLE_MOVE("jail.disableMove", 										"&4Ne vous éloignez pas de votre prison."),
 		JAIL_DISABLE_INTERACT("jail.disableInteract", 								EMessageFormat.builder()
-																						.actionbarMessage("&4Vous ne pouvez pas intéragir car vous êtes en prison.")
+																						.actionbarMessageString("&4Vous ne pouvez pas intéragir car vous êtes en prison.")
 																						.actionbarStay(3 * 1000)
 																						.actionbarPriority(SanctionService.MESSAGE_JAIL)),
 		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
