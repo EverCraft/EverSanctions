@@ -164,7 +164,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
 		
 		// UnJail
-		UNJAIL_DESCRIPTION("unjail.description", 									"Libéré le joueur d'une prison"),
+		UNJAIL_DESCRIPTION("unjail.description", 									"Libère le joueur de prison"),
 		UNJAIL_STAFF("unjail.staff", 												"&7Vous avez libéré &6<player>&7 de prison."),
 		UNJAIL_PLAYER("unjail.player", 												"&6<staff> &7vous as libéré de prison."),
 		UNJAIL_ERROR_REASON("unjail.errorReason", 									"&cErreur : La raison est obligatoire."),
@@ -178,7 +178,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAIL_EMPTY("jail.empty",													"&cErreur : Il y a aucune prison défini sur le serveur."),
 		
 		// Mute		
-		MUTE_DESCRIPTION("mute.description", 										"Mute le joueur"),
+		MUTE_DESCRIPTION("mute.description", 										"Réduit au silence le joueur"),
 		MUTE_UNLIMITED_STAFF("mute.unlimitedStaff", 								"&7Vous avez définitivement rendu muet &6<player> &7pour la raison : &6<reason>"),
 		MUTE_UNLIMITED_PLAYER("mute.unlimitedPlayer", 								"&6<staff> &c&lvous a définitivement rendu muet pour la raison : &6<reason>[RT]"),
 		MUTE_TEMP_STAFF("mute.tempStaff", 											"&7Vous avez rendu muet &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
@@ -242,7 +242,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		JAILS_SETRADIUS_CANCEL_VALUE("jails.setradius.cancelValue", 				"&cErreur : Impossible de définir le rayon de la prison <jail> &cpour le moment."),
 		
 		// Auto
-		SANCTION_DESCRIPTION("sanction.description", 								"Sanctionné un joueur"),
+		SANCTION_DESCRIPTION("sanction.description", 								"Sanctionne un joueur"),
 		SANCTION_STAFF("sanction.staff", 											"&7Vous avez sanctionné &6<player> &7pour la raison : &6<reason>"),
 		SANCTION_PLAYER("sanction.player", 											"&6<staff> &c&lvous a sanctionné &6&l<type> &c&lpour avoir : &6<reason>"),
 		SANCTION_ERROR_REASON("sanction.errorReason", 								"&cErreur : La raison est obligatoire."),
@@ -251,13 +251,13 @@ public class ESMessage extends EMessage<EverSanctions> {
 		SANCTION_ERROR_NOEMPTY("sanction.errorNoEmpty", 							"&cErreur : &6<player> &cest déjà mute."),
 		SANCTION_ERROR_UNKNOWN("sanction.errorUnknown",								"&cErreur : Il y n'y a pas de sanction &6<name>&c."),
 		
-		UNSANCTION_DESCRIPTION("unsanction.description", 							"Annulé une sanction à un joueur"),
+		UNSANCTION_DESCRIPTION("unsanction.description", 							"Annule une sanction à un joueur"),
 		
 		SANCTIONS_DESCRIPTION("sanctions.description", 								"Affiche la liste des sanctions disponibles"),
-		SANCTIONS_LIST_EMPTY("sanctions.list.empty", 								"&7Aucune sanctions"),
+		SANCTIONS_LIST_EMPTY("sanctions.list.empty", 								"&7Aucune sanction"),
 		SANCTIONS_LIST_TITLE("sanctions.list.title", 								"&aListe des sanctions"),
 		SANCTIONS_LIST_LINE("sanctions.list.line", 									"    &6&l➤  &6<name>"),
-		SANCTIONS_LIST_LINE_HOVER("sanctions.list.lineHover", 						"&cCliquer ici pour avoir plus d'information sur la sanction &6<name>"),
+		SANCTIONS_LIST_LINE_HOVER("sanctions.list.lineHover", 						"&cCliquez ici pour avoir plus d'informations sur la sanction &6<name>"),
 		SANCTIONS_REASON_UNKNOWN("sanctions.reason.unknown", 						"&cErreur : Il y n'y a pas de sanction &6<name>&c."),
 		SANCTIONS_REASON_TITLE("sanctions.reason.title", 							"&aSanction &6<name>"),
 		SANCTIONS_REASON_LINE_TEMP("sanctions.reason.temp", 						"    &6&l➤  &6Niveau &c<num> &6:[RT]"
@@ -278,12 +278,12 @@ public class ESMessage extends EMessage<EverSanctions> {
 																				  + "        &7Prison : &c<jail>[RT]"
 																				  + "        &7Temps : &cUNLIMITED[RT]"
 																				  + "        &7Raison : &c<reason>"),
-		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 					"Ban le compte du joueur"),
+		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 					"Ban le joueur"),
 		SANCTIONS_TYPE_BAN_IP("sanctions.type.banIP", 								"Ban l'adresse IP"),
-		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 		"Ban le compte du joueur et son adresse IP"),
-		SANCTIONS_TYPE_MUTE("sanctions.type.mute", 									"Rend muet le compte du joueur"),
-		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 									"Met en prison le compte du joueur"),
-		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet et met en prison le compte du joueur");
+		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 		"Ban le joueur et son adresse IP"),
+		SANCTIONS_TYPE_MUTE("sanctions.type.mute", 									"Rend muet le joueur"),
+		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 									"Met en prison le joueur"),
+		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet et met en prison le joueur");
 		
 		private final String path;
 	    private final EMessageBuilder french;
