@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -73,17 +74,14 @@ public class ESSanctions extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.isEmpty()) {
-			resultat = this.commandSanctions(source);
+			return this.commandSanctions(source);
 		} else if (args.size() == 1) {
 			Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(0));
 			if (reason.isPresent()) {
-				resultat = this.commandSanctions(source, reason.get());
+				return this.commandSanctions(source, reason.get());
 			} else {
 				ESMessages.SANCTIONS_REASON_UNKNOWN.sender()
 					.replace("<name>", args.get(0))
@@ -92,10 +90,10 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandSanctions(final CommandSource staff) {
+	private CompletableFuture<Boolean> commandSanctions(final CommandSource staff) {
 		List<Text> list = new ArrayList<Text>();
 		this.plugin.getSanctionService().getAllReasons().forEach(reason -> {
 			list.add(ESMessages.SANCTIONS_LIST_LINE.getFormat().toText(
@@ -117,10 +115,10 @@ public class ESSanctions extends ECommand<EverSanctions> {
 					.onClick(TextActions.runCommand("/sanctions"))
 					.build(), 
 				list, staff);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandSanctions(final CommandSource staff, final SanctionAuto.Reason reason) {
+	private CompletableFuture<Boolean> commandSanctions(final CommandSource staff, final SanctionAuto.Reason reason) {
 		List<Text> list = new ArrayList<Text>();
 		reason.getLevels().forEach((num, level) -> {
 			
@@ -157,7 +155,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 			EAMessages.COMMAND_ERROR.sender()
 				.prefix(ESMessages.PREFIX)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
@@ -167,7 +165,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 					.onClick(TextActions.runCommand("/sanctions \"" + reason.getName() + "\""))
 					.build(), 
 				list, staff);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
 	public Text getType(SanctionAuto.Type type) {

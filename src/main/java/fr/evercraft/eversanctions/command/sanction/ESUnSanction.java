@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -92,10 +93,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 3) {
 			
@@ -104,7 +102,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			if (user.isPresent()) {
 				Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(1));
 				if (reason.isPresent()) {
-					resultat = this.commandUnSanction(source, user.get(), reason.get(), args.get(0));
+					return this.commandUnSanction(source, user.get(), reason.get(), args.get(0));
 				} else {
 					ESMessages.SANCTION_ERROR_UNKNOWN.sender()
 						.replace("<name>", args.get(0))
@@ -122,15 +120,15 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandUnSanction(final CommandSource staff, EUser user, SanctionAuto.Reason reason, String reason_string) {
+	private CompletableFuture<Boolean> commandUnSanction(final CommandSource staff, EUser user, SanctionAuto.Reason reason, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNMUTE_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName());
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Text reason_text = EChat.of(reason_string);
@@ -138,7 +136,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur n'a pas de sanction en cours
@@ -146,7 +144,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_ERROR_EMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Si l'event a été cancel
@@ -155,7 +153,7 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNMUTE_STAFF.sender()
@@ -169,6 +167,6 @@ public class ESUnSanction extends ECommand<EverSanctions> {
 				.replace("<reason>", reason_string)
 				.sendTo((EPlayer) user);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

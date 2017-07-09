@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -95,17 +96,14 @@ public class ESBan extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 3) {
 			
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandBan(source, user.get(), args.get(1), args.get(2));
+				return this.commandBan(source, user.get(), args.get(1), args.get(2));
 			// Le joueur est introuvable
 			} else {
 				source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
@@ -115,16 +113,16 @@ public class ESBan extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandBan(final CommandSource staff, EUser user, final String time_string, final String reason) {
+	private CompletableFuture<Boolean> commandBan(final CommandSource staff, EUser user, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.BAN_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà un ban en cours
@@ -132,7 +130,7 @@ public class ESBan extends ECommand<EverSanctions> {
 			ESMessages.BAN_ERROR_NOEMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Aucune raison
@@ -140,7 +138,7 @@ public class ESBan extends ECommand<EverSanctions> {
 			ESMessages.BAN_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		long creation = System.currentTimeMillis();
@@ -158,20 +156,20 @@ public class ESBan extends ECommand<EverSanctions> {
 				.prefix(ESMessages.PREFIX)
 				.replace("<time>", time_string)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Ban tempotaire
 		return this.commandTempBan(staff, user, creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedBan(final CommandSource staff, final EUser user, final long creation, final String reason) {
+	private CompletableFuture<Boolean> commandUnlimitedBan(final CommandSource staff, final EUser user, final long creation, final String reason) {
 		// Ban annulé
 		if (!user.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.BAN_ERROR_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.BAN_UNLIMITED_STAFF.sender()
@@ -185,15 +183,15 @@ public class ESBan extends ECommand<EverSanctions> {
 				"<staff>", staff.getName(),
 				"<reason>", reason));
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandTempBan(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
+	private CompletableFuture<Boolean> commandTempBan(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
 		if (!user.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BAN_ERROR_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
@@ -213,6 +211,6 @@ public class ESBan extends ECommand<EverSanctions> {
 		if(user instanceof EPlayer) {
 			((EPlayer) user).kick(ESMessages.BAN_TEMP_PLAYER.getFormat().toText2(replaces));
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

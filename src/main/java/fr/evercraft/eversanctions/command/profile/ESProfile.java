@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -112,15 +113,12 @@ public class ESProfile extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.isEmpty()) {
 			// Si la source est un joueur
 			if (source instanceof EPlayer) {
-				resultat = this.commandProfile(source, (EPlayer) source, Optional.empty());
+				return this.commandProfile(source, (EPlayer) source, Optional.empty());
 			// La source n'est pas un joueur
 			} else {
 				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
@@ -131,7 +129,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()) {
-				resultat = this.commandProfile(source, user.get(), Optional.empty());
+				return this.commandProfile(source, user.get(), Optional.empty());
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
@@ -144,7 +142,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			if (user.isPresent()) {
 				try {
 					Optional<Type> type = Optional.ofNullable(Type.valueOf(args.get(1).toUpperCase()));
-					resultat = this.commandProfile(source, user.get(), type);
+					return this.commandProfile(source, user.get(), type);
 				} catch (IllegalArgumentException e) {
 					ESMessages.PROFILE_ERROR_TYPE.sender()
 						.replace("<type>", args.get(1))
@@ -159,10 +157,10 @@ public class ESProfile extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandProfile(final CommandSource staff, EUser user, final Optional<Type> type) {
+	private CompletableFuture<Boolean> commandProfile(final CommandSource staff, EUser user, final Optional<Type> type) {
 		TreeSet<Sanction> valid = new TreeSet<Sanction>(ESProfile.COMPARATOR);
 
 		if (type.isPresent()) {
@@ -296,7 +294,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 					.onClick(TextActions.runCommand("/profile \"" + user.getName() + "\""))
 					.build(), 
 				list, staff);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
 	public EReplace<?> get(Text message) {

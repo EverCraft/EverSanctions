@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -103,10 +104,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 3) {
 			
@@ -114,7 +112,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			if (InetAddresses.isInetAddress(args.get(0)) && address.isPresent()) {
 				Optional<SanctionIpSubject> subject = this.plugin.getSanctionService().get(address.get());
 				if (subject.isPresent()) {
-					resultat = this.commandBanIP(source, subject.get(), args.get(1), args.get(2));
+					return this.commandBanIP(source, subject.get(), args.get(1), args.get(2));
 				} else {
 					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.COMMAND_ERROR.getText()));
 				}
@@ -122,7 +120,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 				Optional<EUser> user = this.plugin.getEServer().getEUser(args.get(0));
 				// Le joueur existe
 				if (user.isPresent()){
-					resultat = this.commandBanIP(source, user.get(), args.get(1), args.get(2));
+					return this.commandBanIP(source, user.get(), args.get(1), args.get(2));
 				// Le joueur est introuvable
 				} else {
 					source.sendMessage(ESMessages.PREFIX.getText().concat(EAMessages.PLAYER_NOT_FOUND.getText()));
@@ -133,20 +131,20 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
 	/*
 	 * Ip
 	 */
 	
-	private boolean commandBanIP(final CommandSource staff, final SanctionIpSubject subject, final String time_string, final String reason) {
+	private CompletableFuture<Boolean> commandBanIP(final CommandSource staff, final SanctionIpSubject subject, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(subject.getAddress()))) {
 			ESMessages.BANIP_IP_ERROR_EQUALS.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà un ban en cours
@@ -154,7 +152,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_IP_ERROR_NOEMPTY.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Aucune raison
@@ -162,7 +160,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_IP_ERROR_REASON.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		long creation = System.currentTimeMillis();
@@ -180,20 +178,20 @@ public class ESBanIp extends ECommand<EverSanctions> {
 				.prefix(ESMessages.PREFIX)
 				.replace("<time>", time_string)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Ban tempotaire
 		return this.commandTempBanIP(staff, subject, creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedBanIP(final CommandSource staff, final SanctionIpSubject subject, final long creation, final String reason) {
+	private CompletableFuture<Boolean> commandUnlimitedBanIP(final CommandSource staff, final SanctionIpSubject subject, final long creation, final String reason) {
 		// Ban annulé
 		if (!subject.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.BANIP_IP_ERROR_CANCEL.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.BANIP_IP_UNLIMITED_STAFF.sender()
@@ -208,15 +206,15 @@ public class ESBanIp extends ECommand<EverSanctions> {
 						"<staff>", staff.getIdentifier(),
 						"<reason>", reason))
 			);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandTempBanIP(final CommandSource staff, final SanctionIpSubject subject, final long creation, final long expiration, final String reason) {
+	private CompletableFuture<Boolean> commandTempBanIP(final CommandSource staff, final SanctionIpSubject subject, final long creation, final long expiration, final String reason) {
 		if (!subject.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BANIP_IP_ERROR_CANCEL.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
@@ -235,21 +233,21 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		this.plugin.getEServer().getOnlineEPlayers().stream()
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), subject.getSocketAddress()))
 			.forEach(player -> player.kick(ESMessages.BANIP_IP_TEMP_PLAYER.getFormat().toText2(replaces)));
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
 	/*
 	 * Player
 	 */
 	
-	private boolean commandBanIP(final CommandSource staff, EUser user, final String time_string, final String reason) {		
+	private CompletableFuture<Boolean> commandBanIP(final CommandSource staff, EUser user, final String time_string, final String reason) {		
 		Optional<InetAddress> last = user.getLastIP();
 		// Aucune adresse IP
 		if (!last.isPresent()) {
 			ESMessages.BANIP_PLAYER_ERROR_IP.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Optional<SanctionIpSubject> subject = this.plugin.getSanctionService().get(last.get());
@@ -258,7 +256,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			EAMessages.COMMAND_ERROR.sender()
 				.prefix(ESMessages.PREFIX)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le staff et le joueur sont identique
@@ -266,7 +264,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_PLAYER_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà un ban en cours
@@ -274,7 +272,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_PLAYER_ERROR_NOEMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Aucune raison
@@ -282,7 +280,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_PLAYER_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 
 		long creation = System.currentTimeMillis();
@@ -299,14 +297,14 @@ public class ESBanIp extends ECommand<EverSanctions> {
 				.prefix(ESMessages.PREFIX)
 				.replace("<time>", time_string)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Ban tempotaire
 		return this.commandTempPlayerBanIP(staff, user, last.get(), creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final String reason) {
+	private CompletableFuture<Boolean> commandUnlimitedPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
 		replaces.put("<player>", EReplace.of(user.getName()));
 		replaces.put("<staff>", EReplace.of(staff.getName()));
@@ -318,7 +316,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()
 				.replaceString(replaces)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.BANIP_PLAYER_UNLIMITED_STAFF.sender()
@@ -330,10 +328,10 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
 			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_UNLIMITED_PLAYER.getFormat().toText2(replaces)));
 		
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandTempPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final long expiration, final String reason) {
+	private CompletableFuture<Boolean> commandTempPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final long expiration, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
 		replaces.put("<player>", EReplace.of(user.getName()));
 		replaces.put("<staff>", EReplace.of(staff.getName()));
@@ -348,7 +346,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()
 				.replaceString(replaces)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.BANIP_PLAYER_TEMP_STAFF.sender()
@@ -360,6 +358,6 @@ public class ESBanIp extends ECommand<EverSanctions> {
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), socket))
 			.forEach(player -> player.kick(ESMessages.BANIP_PLAYER_TEMP_PLAYER.getFormat().toText2(replaces)));
 		
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

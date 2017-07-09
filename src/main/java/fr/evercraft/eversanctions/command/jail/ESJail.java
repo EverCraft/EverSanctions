@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -109,17 +110,14 @@ public class ESJail extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 4) {
 			
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandJail(source, user.get(), args.get(1), args.get(2), args.get(3));
+				return this.commandJail(source, user.get(), args.get(1), args.get(2), args.get(3));
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
@@ -131,16 +129,16 @@ public class ESJail extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJail(final CommandSource staff, EUser user, final String jail_string, final String time_string, final String reason) {
+	private CompletableFuture<Boolean> commandJail(final CommandSource staff, EUser user, final String jail_string, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.JAIL_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà un sanction jail en cours
@@ -148,14 +146,14 @@ public class ESJail extends ECommand<EverSanctions> {
 			ESMessages.JAIL_ERROR_NOEMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Optional<Jail> jail = this.plugin.getJailService().get(jail_string);
 		// Aucune prison avec ce nom
 		if (!jail.isPresent()) {
 			ESMessages.JAIL_UNKNOWN.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Aucune raison
@@ -163,7 +161,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			ESMessages.JAIL_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		long creation = System.currentTimeMillis();
@@ -181,21 +179,21 @@ public class ESJail extends ECommand<EverSanctions> {
 				.prefix(ESMessages.PREFIX)
 				.replace("<time>", time_string)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Ban tempotaire
 		return this.commandTempJail(staff, user, jail.get(), creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final String reason) {
+	private CompletableFuture<Boolean> commandUnlimitedJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final String reason) {
 		// Jail annulé
 		if (!user.jail(jail, creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_UNLIMITED.sender()
 				.replace("<player>", user.getName())
 				.replace("<jail>", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.JAIL_UNLIMITED_STAFF.sender()
@@ -213,10 +211,10 @@ public class ESJail extends ECommand<EverSanctions> {
 				.replace("<jail>", () -> ESJail.getButtonJail(jail))
 				.sendTo(player);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandTempJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final long expiration, final String reason) {
+	private CompletableFuture<Boolean> commandTempJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final long expiration, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
 		replaces.put("<player>", EReplace.of(user.getName()));
 		replaces.put("<staff>", EReplace.of(staff.getName()));
@@ -231,7 +229,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			ESMessages.JAIL_ERROR_CANCEL_TEMP.sender()
 				.replaceString(replaces)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.JAIL_TEMP_STAFF.sender()
@@ -245,7 +243,7 @@ public class ESJail extends ECommand<EverSanctions> {
 				.replaceString(replaces)
 				.sendTo(player);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
 	public static Text getButtonJail(final Jail jail) {

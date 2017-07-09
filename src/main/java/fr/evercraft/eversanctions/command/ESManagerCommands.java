@@ -19,7 +19,7 @@ package fr.evercraft.eversanctions.command;
 import java.util.HashSet;
 
 import fr.evercraft.everapi.plugin.command.ECommand;
-import fr.evercraft.everapi.plugin.command.EReloadCommand;
+import fr.evercraft.everapi.plugin.command.ReloadCommand;
 import fr.evercraft.eversanctions.ESCommand;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.command.ban.*;
@@ -80,8 +80,8 @@ public class ESManagerCommands extends HashSet<ECommand<EverSanctions>> {
 	
 	public void reload(){
 		for (ECommand<EverSanctions> command : this) {
-			if (command instanceof EReloadCommand) {
-				((EReloadCommand<EverSanctions>) command).reload();
+			if (command instanceof ReloadCommand) {
+				((ReloadCommand) command).reload();
 			}
 		}
 	}

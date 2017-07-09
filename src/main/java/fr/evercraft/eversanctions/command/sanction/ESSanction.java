@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -74,10 +75,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 2) {
 			
@@ -86,7 +84,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 			if (user.isPresent()){
 				Optional<SanctionAuto.Reason> reason = this.plugin.getSanctionService().getReason(args.get(1));
 				if (reason.isPresent()) {
-					resultat = this.commandSanction(source, user.get(), reason.get());
+					return this.commandSanction(source, user.get(), reason.get());
 				} else {
 					ESMessages.SANCTION_ERROR_UNKNOWN.sender()
 						.replace("<name>", args.get(0))
@@ -103,16 +101,16 @@ public class ESSanction extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandSanction(final CommandSource staff, EUser user, final SanctionAuto.Reason reason) {
+	private CompletableFuture<Boolean> commandSanction(final CommandSource staff, EUser user, final SanctionAuto.Reason reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.SANCTION_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà une sanction en cours
@@ -120,7 +118,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 			ESMessages.SANCTION_ERROR_NOEMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		long creation = System.currentTimeMillis();
@@ -131,7 +129,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 			ESMessages.SANCTION_ERROR_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.SANCTION_STAFF.sender()
@@ -147,6 +145,6 @@ public class ESSanction extends ECommand<EverSanctions> {
 				.replace("<reason>", sanction.get().getReason())
 				.sendTo((EPlayer) user);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

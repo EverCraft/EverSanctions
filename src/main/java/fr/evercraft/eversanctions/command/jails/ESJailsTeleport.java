@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -63,7 +64,7 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			List<String> suggests = new ArrayList<String>();
 			this.plugin.getJailService().getAll().forEach(jail -> suggests.add(jail.getName()));
@@ -73,14 +74,11 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean subExecute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			// Si la source est un joueur
 			if (source instanceof EPlayer) {
-				resultat = this.commandJailTeleport((EPlayer) source, args.get(0)); 
+				return this.commandJailTeleport((EPlayer) source, args.get(0)); 
 			// La source n'est pas un joueur
 			} else {
 				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
@@ -92,10 +90,10 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailTeleport(final EPlayer player, final String jail_name) {
+	private CompletableFuture<Boolean> commandJailTeleport(final EPlayer player, final String jail_name) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<Jail> jail = this.plugin.getJailService().get(name);
@@ -104,7 +102,7 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_TELEPORT_PLAYER.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			} else {
 				ESMessages.JAILS_TELEPORT_PLAYER_ERROR.sender()
 					.replace("<jail>", name)
@@ -115,6 +113,6 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 				.replace("<jail>", name)
 				.sendTo(player);
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 }

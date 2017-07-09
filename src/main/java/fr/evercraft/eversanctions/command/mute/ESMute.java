@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -95,17 +96,14 @@ public class ESMute extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 3) {
 			
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandMute(source, user.get(), args.get(1), args.get(2));
+				return this.commandMute(source, user.get(), args.get(1), args.get(2));
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
@@ -117,16 +115,16 @@ public class ESMute extends ECommand<EverSanctions> {
 		} else {
 			source.sendMessage(this.help(source));
 		}
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandMute(final CommandSource staff, EUser user, final String time_string, final String reason) {
+	private CompletableFuture<Boolean> commandMute(final CommandSource staff, EUser user, final String time_string, final String reason) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.MUTE_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur a déjà un mute en cours
@@ -134,7 +132,7 @@ public class ESMute extends ECommand<EverSanctions> {
 			ESMessages.MUTE_ERROR_NOEMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Aucune raison
@@ -142,7 +140,7 @@ public class ESMute extends ECommand<EverSanctions> {
 			ESMessages.MUTE_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		long creation = System.currentTimeMillis();
@@ -160,20 +158,20 @@ public class ESMute extends ECommand<EverSanctions> {
 				.prefix(ESMessages.PREFIX)
 				.replace("<time>", time_string)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Ban tempotaire
 		return this.commandTempMute(staff, user, creation, time.get(), reason);
 	}
 	
-	private boolean commandUnlimitedMute(final CommandSource staff, final EUser user, final long creation, final String reason) {
+	private CompletableFuture<Boolean> commandUnlimitedMute(final CommandSource staff, final EUser user, final long creation, final String reason) {
 		// Ban annulé
 		if (!user.mute(creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.MUTE_ERROR_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.MUTE_UNLIMITED_STAFF.sender()
@@ -187,15 +185,15 @@ public class ESMute extends ECommand<EverSanctions> {
 				.replace("<reason>", reason)
 				.sendTo((EPlayer) user);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandTempMute(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
+	private CompletableFuture<Boolean> commandTempMute(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
 		if (!user.mute(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.MUTE_ERROR_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
@@ -216,6 +214,6 @@ public class ESMute extends ECommand<EverSanctions> {
 				.replaceString(replaces)
 				.sendTo((EPlayer) user);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

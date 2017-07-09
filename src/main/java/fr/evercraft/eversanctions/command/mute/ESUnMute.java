@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -87,17 +88,14 @@ public class ESUnMute extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 2) {
 			
 			Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 			// Le joueur existe
 			if (user.isPresent()){
-				resultat = this.commandUnMute(source, user.get(), args.get(1));
+				return this.commandUnMute(source, user.get(), args.get(1));
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
@@ -110,16 +108,16 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandUnMute(final CommandSource staff, EUser user, String reason_string) {
+	private CompletableFuture<Boolean> commandUnMute(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNMUTE_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Text reason = EChat.of(reason_string);
@@ -127,7 +125,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur n'a pas de ban en cours
@@ -135,7 +133,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_ERROR_EMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Si l'event a été cancel
@@ -144,7 +142,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			ESMessages.UNMUTE_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNMUTE_CANCEL.sender()
@@ -158,6 +156,6 @@ public class ESUnMute extends ECommand<EverSanctions> {
 				.replace("<reason>", reason_string)
 				.sendTo((EPlayer) user);
 		}
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -63,7 +64,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			List<String> suggests = new ArrayList<String>();
 			this.plugin.getJailService().getAll().forEach(jail -> suggests.add(jail.getName()));
@@ -75,23 +76,20 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean subExecute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
-			resultat = this.commandJailSetRadius((EPlayer) source, args.get(0), Optional.empty());
+			return this.commandJailSetRadius((EPlayer) source, args.get(0), Optional.empty());
 		} else if (args.size() == 2) {
-			resultat = this.commandJailSetRadius((EPlayer) source, args.get(0), Optional.of(args.get(1)));
+			return this.commandJailSetRadius((EPlayer) source, args.get(0), Optional.of(args.get(1)));
 		// Nombre d'argument incorrect
 		} else {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailSetRadius(final CommandSource staff, final String jail_name, final Optional<String> radius_string) {
+	private CompletableFuture<Boolean> commandJailSetRadius(final CommandSource staff, final String jail_name, final Optional<String> radius_string) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
@@ -99,7 +97,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 			ESMessages.JAIL_UNKNOWN.sender()
 				.replace("<jail>", jail_name)
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		if (!radius_string.isPresent()) {
@@ -114,38 +112,38 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 					.sendTo(staff);
 			}
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailSetRadius(final CommandSource staff, final EJail jail) {
+	private CompletableFuture<Boolean> commandJailSetRadius(final CommandSource staff, final EJail jail) {
 		if (jail.update(Optional.empty())) {
 			ESMessages.JAILS_SETRADIUS_DEFAULT.sender()
 				.replace("<radius>", String.valueOf(jail.getRadius()))
 				.replace("<jail>", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
-			return true;
+			return CompletableFuture.completedFuture(true);
 		} else {
 			ESMessages.JAILS_SETRADIUS_CANCEL_DEFAULT.sender()
 				.replace("<radius>", String.valueOf(jail.getRadius()))
 				.replace("<jail>", jail.getName())
 				.sendTo(staff);
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 
-	private boolean commandJailSetRadius(final CommandSource staff, final EJail jail, final int radius) {
+	private CompletableFuture<Boolean> commandJailSetRadius(final CommandSource staff, final EJail jail, final int radius) {
 		if (jail.update(Optional.of(radius))) {
 			ESMessages.JAILS_SETRADIUS_VALUE.sender()
 				.replace("<radius>", String.valueOf(jail.getRadius()))
 				.replace("<jail>", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
-			return true;
+			return CompletableFuture.completedFuture(true);
 		} else {
 			ESMessages.JAILS_SETRADIUS_CANCEL_VALUE.sender()
 				.replace("<radius>", String.valueOf(jail.getRadius()))
 				.replace("<jail>", jail.getName())
 				.sendTo(staff);
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 }

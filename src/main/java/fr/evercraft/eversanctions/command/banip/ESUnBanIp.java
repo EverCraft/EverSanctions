@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.spongepowered.api.command.CommandException;
@@ -102,10 +103,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean execute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		// Nombre d'argument correct
 		if (args.size() == 2) {
 			
@@ -113,7 +111,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			if (InetAddresses.isInetAddress(args.get(0)) && address.isPresent()) {
 				Optional<SanctionIpSubject> subject = this.plugin.getSanctionService().get(address.get());
 				if (subject.isPresent()) {
-					resultat = this.commandUnBanIP(source, subject.get(), args.get(1));
+					return this.commandUnBanIP(source, subject.get(), args.get(1));
 				} else {
 					EAMessages.COMMAND_ERROR.sender()
 						.prefix(ESMessages.PREFIX)
@@ -123,7 +121,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 				Optional<EUser> user = this.plugin.getEServer().getOrCreateEUser(args.get(0));
 				// Le joueur existe
 				if (user.isPresent()){
-					resultat = this.commandUnBanIP(source, user.get(), args.get(1));
+					return this.commandUnBanIP(source, user.get(), args.get(1));
 				// Le joueur est introuvable
 				} else {
 					EAMessages.PLAYER_NOT_FOUND.sender()
@@ -137,16 +135,16 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandUnBanIP(final CommandSource staff, SanctionIpSubject subject, String reason_string) {
+	private CompletableFuture<Boolean> commandUnBanIP(final CommandSource staff, SanctionIpSubject subject, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(subject.getAddress()))) {
 			ESMessages.UNBANIP_IP_ERROR_EQUALS.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Text reason = EChat.of(reason_string);
@@ -154,7 +152,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_IP_ERROR_REASON.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur n'a pas de ban en cours
@@ -162,7 +160,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_IP_ERROR_EMPTY.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Si l'event a été cancel
@@ -170,23 +168,23 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_IP_CANCEL.sender()
 				.replace("<address>", subject.getIdentifier())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNBANIP_IP_STAFF.sender()
 			.replace("<reason>", reason_string)
 			.replace("<address>", subject.getIdentifier())
 			.sendTo(staff);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
-	private boolean commandUnBanIP(final CommandSource staff, EUser user, String reason_string) {
+	private CompletableFuture<Boolean> commandUnBanIP(final CommandSource staff, EUser user, String reason_string) {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNBANIP_PLAYER_ERROR_EQUALS.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		Text reason = EChat.of(reason_string);
@@ -194,7 +192,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_PLAYER_ERROR_REASON.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Le joueur n'a pas de ban en cours
@@ -202,7 +200,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_PLAYER_ERROR_EMPTY.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		// Si l'event a été cancel
@@ -210,13 +208,13 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 			ESMessages.UNBANIP_PLAYER_CANCEL.sender()
 				.replace("<player>", user.getName())
 				.sendTo(staff);
-			return false;
+			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNBANIP_PLAYER_STAFF.sender()
 			.replace("<reason>", reason_string)
 			.replace("<player>", user.getName())
 			.sendTo(staff);
-		return true;
+		return CompletableFuture.completedFuture(true);
 	}
 }

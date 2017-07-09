@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -63,7 +64,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			List<String> suggests = new ArrayList<String>();
 			this.plugin.getJailService().getAll().forEach(jail -> suggests.add(jail.getName()));
@@ -73,23 +74,20 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean subExecute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
-			resultat = this.commandJailDelete((EPlayer) source, args.get(0)); 
+			return this.commandJailDelete((EPlayer) source, args.get(0)); 
 		} else if (args.size() == 2 && args.get(1).equalsIgnoreCase("confirmation")) {
-			resultat = this.commandJailDeleteConfirmation((EPlayer) source, args.get(0)); 
+			return this.commandJailDeleteConfirmation((EPlayer) source, args.get(0)); 
 		// Nombre d'argument incorrect
 		} else {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailDelete(final EPlayer player, final String jail_name) {
+	private CompletableFuture<Boolean> commandJailDelete(final EPlayer player, final String jail_name) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
@@ -105,10 +103,10 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 				.replace("<jail>", name)
 				.sendTo(player);
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailDeleteConfirmation(final EPlayer player, final String jail_name) {
+	private CompletableFuture<Boolean> commandJailDeleteConfirmation(final EPlayer player, final String jail_name) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
@@ -119,7 +117,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_DELETE_DELETE.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			// La prison n'a pas été supprimer
 			} else {
 				ESMessages.JAILS_DELETE_CANCEL.sender()
@@ -132,7 +130,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 				.replace("<jail>", name)
 				.sendTo(player);
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 	
 	private Text getButtonConfirmation(final String name){

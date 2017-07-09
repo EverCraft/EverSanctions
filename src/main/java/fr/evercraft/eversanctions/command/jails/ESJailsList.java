@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -66,26 +67,23 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		return Arrays.asList();
 	}
 	
 	@Override
-	public boolean subExecute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 0) {
-			resultat = this.commandJailList(source);
+			return this.commandJailList(source);
 		// Nombre d'argument incorrect
 		} else {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	public boolean commandJailList(final CommandSource player) throws CommandException {
+	public CompletableFuture<Boolean> commandJailList(final CommandSource player) throws CommandException {
 		TreeSet<EJail> jails = new TreeSet<EJail>((o1, o2) -> o1.getName().compareTo(o2.getName()));
 		jails.addAll(this.plugin.getJailService().getAllEJail());
 		
@@ -123,7 +121,7 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(ESMessages.JAILS_LIST_TITLE.getText().toBuilder()
 				.onClick(TextActions.runCommand("/" + this.getName())).build(), lists, player);			
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 	
 

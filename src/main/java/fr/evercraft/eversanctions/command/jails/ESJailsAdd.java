@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
@@ -63,7 +64,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public Collection<String> subTabCompleter(final CommandSource source, final List<String> args) throws CommandException {
+	public Collection<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			return Arrays.asList("jail...");
 		} else if (args.size() == 2) {
@@ -73,14 +74,11 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 	}
 	
 	@Override
-	public boolean subExecute(final CommandSource source, final List<String> args) throws CommandException {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
+	public CompletableFuture<Boolean> execute(final CommandSource source, final List<String> args) throws CommandException {
 		if (args.size() == 1) {
 			// Si la source est un joueur
 			if (source instanceof EPlayer) {
-				resultat = this.commandJailSet((EPlayer) source, args.get(0)); 
+				return this.commandJailSet((EPlayer) source, args.get(0)); 
 			// La source n'est pas un joueur
 			} else {
 				EAMessages.COMMAND_ERROR_FOR_PLAYER.sender()
@@ -91,7 +89,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			// Si la source est un joueur
 			if (source instanceof EPlayer) {
 				try {
-					resultat = this.commandJailSet((EPlayer) source, args.get(0), Integer.parseInt(args.get(1))); 
+					return this.commandJailSet((EPlayer) source, args.get(0), Integer.parseInt(args.get(1))); 
 				} catch (NumberFormatException e) {
 					EAMessages.IS_NOT_NUMBER.sender()
 						.prefix(ESMessages.PREFIX)
@@ -109,10 +107,10 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			source.sendMessage(this.help(source));
 		}
 		
-		return resultat;
+		return CompletableFuture.completedFuture(false);
 	}
 	
-	private boolean commandJailSet(final EPlayer player, final String jail_name) {
+	private CompletableFuture<Boolean> commandJailSet(final EPlayer player, final String jail_name) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
@@ -121,7 +119,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_ADD_REPLACE.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			} else {
 				ESMessages.JAILS_ADD_CANCEL_REPLACE.sender()
 					.replace("<jail>", name)
@@ -133,17 +131,17 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_ADD_NEW.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			} else {
 				ESMessages.JAILS_ADD_CANCEL_NEW.sender()
 					.replace("<jail>", name)
 					.sendTo(player);
 			}
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 
-	private boolean commandJailSet(final EPlayer player, final String jail_name, final int radius) {
+	private CompletableFuture<Boolean> commandJailSet(final EPlayer player, final String jail_name, final int radius) {
 		String name = EChat.fixLength(jail_name, this.plugin.getEverAPI().getConfigs().getMaxCaractere());
 		
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
@@ -152,7 +150,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_ADD_REPLACE.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			} else {
 				ESMessages.JAILS_ADD_CANCEL_REPLACE.sender()
 					.replace("<jail>", name)
@@ -164,13 +162,13 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 				ESMessages.JAILS_ADD_NEW.sender()
 					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
-				return true;
+				return CompletableFuture.completedFuture(true);
 			} else {
 				ESMessages.JAILS_ADD_CANCEL_NEW.sender()
 					.replace("<jail>", name)
 					.sendTo(player);
 			}
 		}
-		return false;
+		return CompletableFuture.completedFuture(false);
 	}
 }
