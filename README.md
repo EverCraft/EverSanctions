@@ -1,4 +1,4 @@
-EverChat
+EverSanctions
 =============
 
 A minecraft plugin for Sponge platforms.

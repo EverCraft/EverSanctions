@@ -145,14 +145,14 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			return CompletableFuture.completedFuture(false);
 		}
 		
-		ESMessages.UNMUTE_CANCEL.sender()
+		ESMessages.UNMUTE_STAFF.sender()
 			.replace("<player>", user.getName())
 			.replace("<reason>", reason_string)
 			.sendTo(staff);
 		
 		if (user instanceof EPlayer && !user.isMute()) {
 			ESMessages.UNMUTE_PLAYER.sender()
-				.replace("<player>", user.getName())
+				.replace("<staff>", staff.getName())
 				.replace("<reason>", reason_string)
 				.sendTo((EPlayer) user);
 		}

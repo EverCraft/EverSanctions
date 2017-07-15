@@ -294,7 +294,7 @@ public class ESListener {
 			
 			SanctionMute sanction = optSanction.get();
 			if (sanction.isIndefinite()) {
-				ESMessages.MUTE_DISABLE_CHAT_TEMP.sender()
+				ESMessages.MUTE_DISABLE_CHAT_UNLIMITED.sender()
 					.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 					.replace("<reason>", sanction.getReason())
 					.replace("<duration>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
@@ -306,7 +306,7 @@ public class ESListener {
 					.replace("<expiration_datetime>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()))
 					.sendTo(player);
 			} else {
-				ESMessages.MUTE_DISABLE_CHAT_UNLIMITED.sender()
+				ESMessages.MUTE_DISABLE_CHAT_TEMP.sender()
 					.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 					.replace("<reason>", sanction.getReason())
 					.replace("<creation_time>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
@@ -328,7 +328,7 @@ public class ESListener {
 			
 			SanctionMute sanction = optSanctionMute.get();
 			if (sanction.isIndefinite()) {
-				ESMessages.MUTE_DISABLE_COMMAND_TEMP.sender()
+				ESMessages.MUTE_DISABLE_COMMAND_UNLIMITED.sender()
 					.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 					.replace("<reason>", sanction.getReason())
 					.replace("<duration>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()))
@@ -340,7 +340,7 @@ public class ESListener {
 					.replace("<expiration_datetime>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()))
 					.sendTo(player);
 			} else {
-				ESMessages.MUTE_DISABLE_COMMAND_UNLIMITED.sender()
+				ESMessages.MUTE_DISABLE_COMMAND_TEMP.sender()
 					.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 					.replace("<reason>", sanction.getReason())
 					.replace("<creation_time>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()))
@@ -359,7 +359,7 @@ public class ESListener {
 				event.setCancelled(true);
 				
 				if (sanction.isIndefinite()) {
-					ESMessages.JAIL_DISABLE_COMMAND_TEMP.sender()
+					ESMessages.JAIL_DISABLE_COMMAND_UNLIMITED.sender()
 						.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 						.replace("<jail_name>",jail.get().getName())
 						.replace("<reason>", sanction.getReason())
@@ -373,7 +373,7 @@ public class ESListener {
 						.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
 						.sendTo(player);
 				} else {
-					ESMessages.JAIL_DISABLE_COMMAND_UNLIMITED.sender()
+					ESMessages.JAIL_DISABLE_COMMAND_TEMP.sender()
 						.replace("<staff>", sanction.getSourceName(this.plugin.getEServer()))
 						.replace("<reason>", sanction.getReason())
 						.replace("<jail_name>",jail.get().getName())
