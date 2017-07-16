@@ -143,15 +143,15 @@ public class ESMessage extends EMessage<EverSanctions> {
 		
 		// Jail	
 		JAIL_DESCRIPTION("jail.description", 										"Emprisonne le joueur"),
-		JAIL_UNLIMITED_STAFF("jail.unlimitedStaff", 								"&7Vous avez emprissonner définitivement &6<player> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
-		JAIL_UNLIMITED_PLAYER("jail.unlimitedPlayer", 								"&c&lVous avez été emprissonner par &6<staff> &c&lpour la raison : &6<reason>"),
-		JAIL_TEMP_STAFF("jail.tempStaff", 											"&7Vous avez emprissonner &6<player> &7pendant une durée de &7<duration> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
-		JAIL_TEMP_PLAYER("jail.tempPlayer", 										"&c&lVous avez été emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
+		JAIL_UNLIMITED_STAFF("jail.unlimitedStaff", 								"&7Vous avez emprissonné définitivement &6<player> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
+		JAIL_UNLIMITED_PLAYER("jail.unlimitedPlayer", 								"&c&lVous avez été emprissonné par &6<staff> &c&lpour la raison : &6<reason>"),
+		JAIL_TEMP_STAFF("jail.tempStaff", 											"&7Vous avez emprissonné &6<player> &7pendant une durée de &7<duration> &7dans la prison &6<jail> &7pour la raison : &6<reason>"),
+		JAIL_TEMP_PLAYER("jail.tempPlayer", 										"&c&lVous avez été emprissonné par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
 		JAIL_ERROR_REASON("jail.errorReason", 										"&cErreur : La raison est obligatoire."),
 		JAIL_ERROR_CANCEL_UNLIMITED("jail.errorCancelUnlimited", 					"&cErreur : Impossible d'emprissonner &6<player> &cpour le moment."),
 		JAIL_ERROR_CANCEL_TEMP("jail.errorCancelTemp", 								"&cErreur : Impossible d'emprissonner &6<player> &cpour le moment."),
 		JAIL_ERROR_EQUALS("jail.errorEquals", 										"&cErreur : Impossible de vous emprissonner vous-même."),
-		JAIL_ERROR_NOEMPTY("jail.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà emprissonner."),
+		JAIL_ERROR_NOEMPTY("jail.errorNoEmpty", 									"&cErreur : &6<player> &cest déjà emprissonné."),
 		
 		JAIL_DISABLE_COMMAND_TEMP("jail.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
 		JAIL_DISABLE_COMMAND_UNLIMITED("jail.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes en prison."),
@@ -160,22 +160,22 @@ public class ESMessage extends EMessage<EverSanctions> {
 																						.actionbarMessageString("&4Vous ne pouvez pas intéragir car vous êtes en prison.")
 																						.actionbarStay(3 * 1000)
 																						.actionbarPriority(SanctionService.MESSAGE_JAIL)),
-		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonner par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
-		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonner définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
+		JAIL_CONNECTION_TEMP("jail.connectionTemp", 								"&c&lVous êtes emprissonné par &6<staff> &c&lpendant une durée &6<duration> &c&lpour la raison : &6<reason>"),
+		JAIL_CONNECTION_UNLIMITED("jail.connectionUnlimited", 						"&c&lVous êtes emprissonné définitivement par &6<staff> &c&lpour la raison : &6<reason>"),
 		
 		// UnJail
 		UNJAIL_DESCRIPTION("unjail.description", 									"Libère le joueur de prison"),
 		UNJAIL_STAFF("unjail.staff", 												"&7Vous avez libéré &6<player>&7 de prison."),
 		UNJAIL_PLAYER("unjail.player", 												"&6<staff> &7vous as libéré de prison."),
 		UNJAIL_ERROR_REASON("unjail.errorReason", 									"&cErreur : La raison est obligatoire."),
-		UNJAIL_ERROR_EQUALS("unjail.errorEquals", 									"&cErreur : Impossible de vous libéré vous-même."),
+		UNJAIL_ERROR_EQUALS("unjail.errorEquals", 									"&cErreur : Impossible de vous libérer vous-même."),
 		UNJAIL_ERROR_EMPTY("unjail.errorEmpty", 									"&cErreur : &6<player> &cn'est pas emprisonné."),
 		UNJAIL_CANCEL("unjail.cancel", 												"&cErreur : Impossible de libérer &6<player> &cpour le moment."),
 
 		JAIL_NAME("jail.name", 														"&6&l<name>"),
 		JAIL_NAME_HOVER("jail.nameHover", 											"&cRayon : &6<radius> block(s)[RT]&cMonde : &6<world>[RT]&cX : &6<x>[RT]&cY : &6<y>[RT]&cZ : &6<z>"),
-		JAIL_UNKNOWN("jail.unknown", 												"&cErreur : Impossible de trouver un prison avec le nom &6<jail>&c."),
-		JAIL_EMPTY("jail.empty",													"&cErreur : Il y a aucune prison défini sur le serveur."),
+		JAIL_UNKNOWN("jail.unknown", 												"&cErreur : Impossible de trouver une prison avec le nom &6<jail>&c."),
+		JAIL_EMPTY("jail.empty",													"&cErreur : Il y a aucune prison définie sur le serveur."),
 		
 		// Mute		
 		MUTE_DESCRIPTION("mute.description", 										"Réduit au silence le joueur"),
@@ -192,7 +192,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		MUTE_DISABLE_CHAT_UNLIMITED("mute.disableChatUnlimited",					"&cVous muet indéfiniment &cpour &6<reason>&c."),
 		MUTE_DISABLE_COMMAND_TEMP("mute.disableCommandTemp", 						"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
 		MUTE_DISABLE_COMMAND_UNLIMITED("mute.disableCommandUnlimited", 				"&cVous ne pouvez pas utiliser cette commande quand vous êtes muet."),
-		MUTE_CONNECTION_TEMP("mute.connectionTemp", 								"&c&lVous êtes muet pour avoir pendant encore &6<duration> &c&lpour avoir : &6<reason>"),
+		MUTE_CONNECTION_TEMP("mute.connectionTemp", 								"&c&lVous êtes muet pendant encore &6<duration> &c&lpour avoir : &6<reason>"),
 		MUTE_CONNECTION_UNLIMITED("mute.connectionUnlimited", 						"&c&lVous êtes définitivement muet pour avoir : &6<reason>[RT]"),
 		
 		// UnMute
@@ -201,7 +201,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		UNMUTE_PLAYER("unmute.player", 												"&7Vous pouvez désormais reparler grâce à &6<staff>&7."),
 		UNMUTE_ERROR_REASON("unmute.errorReason", 									"&cErreur : La raison est obligatoire."),
 		UNMUTE_ERROR_EQUALS("unmute.errorEquals", 									"&cErreur : Impossible de vous débannir vous-même."),
-		UNMUTE_ERROR_EMPTY("unmute.errorEmpty", 									"&cErreur : &6<player> &cn'est pas mute."),
+		UNMUTE_ERROR_EMPTY("unmute.errorEmpty", 									"&cErreur : &6<player> &cn'est pas muet."),
 		UNMUTE_CANCEL("unmute.cancel", 												"&cErreur : Impossible de débannir &6<player> &cpour le moment."),
 		
 		// Jails
@@ -248,7 +248,7 @@ public class ESMessage extends EMessage<EverSanctions> {
 		SANCTION_ERROR_REASON("sanction.errorReason", 								"&cErreur : La raison est obligatoire."),
 		SANCTION_ERROR_CANCEL("sanction.errorCancel", 								"&cErreur : Impossible de rendre muet &6<player> &cpour le moment."),
 		SANCTION_ERROR_EQUALS("sanction.errorEquals", 								"&cErreur : Impossible de vous rendre muet."),
-		SANCTION_ERROR_NOEMPTY("sanction.errorNoEmpty", 							"&cErreur : &6<player> &cest déjà mute."),
+		SANCTION_ERROR_NOEMPTY("sanction.errorNoEmpty", 							"&cErreur : &6<player> &cest déjà muet."),
 		SANCTION_ERROR_UNKNOWN("sanction.errorUnknown",								"&cErreur : Il y n'y a pas de sanction &6<name>&c."),
 		
 		UNSANCTION_DESCRIPTION("unsanction.description", 							"Annule une sanction à un joueur"),
@@ -278,12 +278,12 @@ public class ESMessage extends EMessage<EverSanctions> {
 																				  + "        &7Prison : &c<jail>[RT]"
 																				  + "        &7Temps : &cUNLIMITED[RT]"
 																				  + "        &7Raison : &c<reason>"),
-		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 					"Ban le joueur"),
-		SANCTIONS_TYPE_BAN_IP("sanctions.type.banIP", 								"Ban l'adresse IP"),
-		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 		"Ban le joueur et son adresse IP"),
+		SANCTIONS_TYPE_BAN_PROFILE("sanctions.type.banProfile", 					"Bannit le joueur"),
+		SANCTIONS_TYPE_BAN_IP("sanctions.type.banIP", 								"Bannit l'adresse IP"),
+		SANCTIONS_TYPE_BAN_PROFILE_AND_IP("sanctions.type.banProfileAndIP", 		"Bannit le joueur et son adresse IP"),
 		SANCTIONS_TYPE_MUTE("sanctions.type.mute", 									"Rend muet le joueur"),
-		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 									"Met en prison le joueur"),
-		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet et met en prison le joueur");
+		SANCTIONS_TYPE_JAIL("sanctions.type.jail", 									"Met le joueur en prison"),
+		SANCTIONS_TYPE_MUTE_AND_JAIL("sanctions.type.muteAndJail", 					"Rend muet emprisonne le joueur");
 		
 		private final String path;
 	    private final EMessageBuilder french;
