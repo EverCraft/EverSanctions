@@ -101,6 +101,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
+					.replace("<player>", args.get(0))
 					.sendTo(source);
 			}
 			
