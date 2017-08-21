@@ -52,7 +52,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 
 	public boolean init() throws ServerDisableException {
 		this.table_manual_profile = "manual_profile";
-		String manual_profile = "CREATE TABLE IF NOT EXISTS <table> (" +
+		String manual_profile = "CREATE TABLE IF NOT EXISTS {table} (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
 							"`expiration` DOUBLE DEFAULT NULL," +
@@ -67,7 +67,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		initTable(this.getTableManualProfile(), manual_profile);
 		
 		this.table_manual_ip = "manual_ip";
-		String manual_ip = 	"CREATE TABLE IF NOT EXISTS <table> (" +
+		String manual_ip = 	"CREATE TABLE IF NOT EXISTS {table} (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
 							"`expiration` DOUBLE DEFAULT NULL," +
@@ -80,7 +80,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		initTable(this.getTableManualIp(), manual_ip);
 		
 		this.table_auto = "auto";
-		String auto = 	"CREATE TABLE IF NOT EXISTS <table> (" +
+		String auto = 	"CREATE TABLE IF NOT EXISTS {table} (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`creation` DOUBLE NOT NULL," + 
 							"`expiration` DOUBLE DEFAULT NULL," +
@@ -95,7 +95,7 @@ public class ESDataBase extends EDataBase<EverSanctions> {
 		initTable(this.getTableAuto(), auto);
 		
 		this.table_jails = "jails";
-		String ignores = 	"CREATE TABLE IF NOT EXISTS <table> (" +
+		String ignores = 	"CREATE TABLE IF NOT EXISTS {table} (" +
 							"`identifier` VARCHAR(36) NOT NULL," +
 							"`radius` INTEGER DEFAULT NULL," +
 							"`world` VARCHAR(36) NOT NULL," +
