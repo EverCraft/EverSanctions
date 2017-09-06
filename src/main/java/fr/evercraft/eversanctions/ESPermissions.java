@@ -23,52 +23,51 @@ import com.google.common.base.Preconditions;
 import fr.evercraft.everapi.plugin.EnumPermission;
 
 public enum ESPermissions implements EnumPermission {
-	EVERSANCTIONS("plugin.command"),
+	EVERSANCTIONS("commands.execute"),
+	HELP("commands.help"),
+	RELOAD("commands.reload"),
 	
-	HELP("plugin.help"),
-	RELOAD("plugin.reload"),
-	
-	PROFILE("profile.command"),
-	PROFILE_OTHERS("profile.others"),
+	PROFILE("commands.profile.execute"),
+	PROFILE_OTHERS("commands.profile.others"),
 	
 	
 	// Auto
-	SANCTIONS("sanction.command"),
+	SANCTIONS("commands.sanctions.execute"),
 	
-	SANCTION("sanction.command"),
-	SANCTION_OFFLINE("sanction.offline"),
+	SANCTION("commands.sanction.execute"),
+	SANCTION_OFFLINE("commands.sanction.offline"),
 	
-	UNSANCTION("unban.command"),
+	UNSANCTION("commands.unsanction.execute"),
 	
 	
 	// Manual
-	BAN("ban.command"),
-	BAN_UNLIMITED("ban.unlimited"),
-	BAN_OFFLINE("ban.offline"),
+	BAN("commands.ban.execute"),
+	BAN_UNLIMITED("commands.ban.unlimited"),
+	BAN_OFFLINE("commands.ban.offline"),
 	
-	BANIP("banip.command"),
-	BANIP_UNLIMITED("banip.unlimited"),
-	BANIP_OFFLINE("banip.offline"),
+	BANIP("commands.banip.execute"),
+	BANIP_UNLIMITED("commands.banip.unlimited"),
+	BANIP_OFFLINE("commands.banip.offline"),
 	
-	MUTE("mute.command"),
-	MUTE_UNLIMITED("mute.unlimited"),
-	MUTE_OFFLINE("mute.offline"),
+	MUTE("commands.mute.execute"),
+	MUTE_UNLIMITED("commands.mute.unlimited"),
+	MUTE_OFFLINE("commands.mute.offline"),
 	
-	JAIL("jail.command"),
-	JAIL_UNLIMITED("jail.command"),
-	JAIL_OFFLINE("jail.offline"),
+	JAIL("commands.jail.execute"),
+	JAIL_UNLIMITED("commands.jail.execute"),
+	JAIL_OFFLINE("commands.jail.offline"),
 	
-	JAILS("jails.command"),
-	JAILS_ADD("jails.add"),
-	JAILS_DELETE("jails.delete"),
-	JAILS_LIST("jails.list"),
-	JAILS_TELEPORT("jails.teleport"),
-	JAILS_SETRADIUS("jails.setradius"),
+	JAILS("commands.jails.execute"),
+	JAILS_ADD("commands.jails.add"),
+	JAILS_DELETE("commands.jails.delete"),
+	JAILS_LIST("commands.jails.list"),
+	JAILS_TELEPORT("commands.jails.teleport"),
+	JAILS_SETRADIUS("commands.jails.setradius"),
 	
-	UNBAN("unban.command"),
-	UNBANIP("unbanip.command"),
-	UNMUTE("unmute.command"),
-	UNJAIL("unjail.command");
+	UNBAN("commands.unban.execute"),
+	UNBANIP("commands.unbanip.execute"),
+	UNMUTE("commands.unmute.execute"),
+	UNJAIL("commands.unjail.execute");
 	
 	private final static String prefix = "eversanctions";
 	
