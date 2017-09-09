@@ -178,9 +178,9 @@ public class ESMessage extends EMessage<EverSanctions> {
 		// Mute		
 		MUTE_DESCRIPTION("muteDescription", 										"Réduit au silence le joueur"),
 		MUTE_UNLIMITED_STAFF("muteUnlimitedStaff", 									"&7Vous avez définitivement rendu muet &6<player> &7pour la raison : &6<reason>"),
-		MUTE_UNLIMITED_PLAYER("muteUnlimitedPlayer", 								"&6<staff> &c&lvous a définitivement rendu muet pour la raison : &6<reason>[RT]"),
+		MUTE_UNLIMITED_PLAYER("muteUnlimitedPlayer", 								"&6<staff> &cvous a définitivement rendu muet pour la raison : &6<reason>[RT]"),
 		MUTE_TEMP_STAFF("muteTempStaff", 											"&7Vous avez rendu muet &6<player> &7pendant une durée de &7<duration> &7pour la raison : &6<reason>"),
-		MUTE_TEMP_PLAYER("muteTempPlayer", 											"&6<staff> &c&lvous a rendu muet pendant &6<duration> &c&lpour la raison : &6<reason>"),
+		MUTE_TEMP_PLAYER("muteTempPlayer", 											"&6<staff> &cvous a rendu muet pendant &6<duration> &cpour la raison : &6<reason>"),
 		MUTE_ERROR_REASON("muteErrorReason", 										"&cErreur : La raison est obligatoire."),
 		MUTE_ERROR_CANCEL("muteErrorCancel", 										"&cErreur : Impossible de rendre muet &6<player> &cpour le moment."),
 		MUTE_ERROR_EQUALS("muteErrorEquals", 										"&cErreur : Impossible de vous rendre muet."),
