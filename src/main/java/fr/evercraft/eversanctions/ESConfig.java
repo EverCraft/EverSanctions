@@ -47,6 +47,14 @@ public class ESConfig extends EConfig<EverSanctions> {
 	}
 	
 	@Override
+	public List<String> getHeader() {
+		return 	Arrays.asList(	"####################################################### #",
+								"                EverSanctions (By rexbut)                #",
+								"    For more information : https://docs.evercraft.fr     #",
+								"####################################################### #");
+	}
+	
+	@Override
 	public void loadDefault() {
 		this.configDefault();
 		this.sqlDefault();
