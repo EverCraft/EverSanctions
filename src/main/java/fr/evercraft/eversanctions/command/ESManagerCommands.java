@@ -19,7 +19,6 @@ package fr.evercraft.eversanctions.command;
 import java.util.HashSet;
 
 import fr.evercraft.everapi.plugin.command.ECommand;
-import fr.evercraft.everapi.plugin.command.ReloadCommand;
 import fr.evercraft.eversanctions.ESCommand;
 import fr.evercraft.eversanctions.EverSanctions;
 import fr.evercraft.eversanctions.command.ban.*;
@@ -76,14 +75,6 @@ public class ESManagerCommands extends HashSet<ECommand<EverSanctions>> {
 		jail.add(new ESJailsSetRadius(this.plugin, jail));
 		jail.add(new ESJailsTeleport(this.plugin, jail));
 		register(jail);
-	}
-	
-	public void reload(){
-		for (ECommand<EverSanctions> command : this) {
-			if (command instanceof ReloadCommand) {
-				((ReloadCommand) command).reload();
-			}
-		}
 	}
 	
 	private void register(ECommand<EverSanctions> command) {

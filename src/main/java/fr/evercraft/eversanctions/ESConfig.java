@@ -26,13 +26,13 @@ import java.util.Optional;
 import fr.evercraft.everapi.java.UtilsInteger;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.file.EConfig;
-import fr.evercraft.everapi.plugin.file.EMessage;
 import fr.evercraft.everapi.services.jail.Jail;
 import fr.evercraft.everapi.services.sanction.SanctionService;
 import fr.evercraft.everapi.services.sanction.auto.SanctionAuto;
 import fr.evercraft.everapi.sponge.UtilsDate;
 import fr.evercraft.eversanctions.service.auto.EAutoLevel;
 import fr.evercraft.eversanctions.service.auto.EAutoReason;
+
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 public class ESConfig extends EConfig<EverSanctions> {
@@ -48,17 +48,8 @@ public class ESConfig extends EConfig<EverSanctions> {
 	
 	@Override
 	public void loadDefault() {
-		addDefault("DEBUG", false, "Displays plugin performance in the logs");
-		addDefault("LANGUAGE", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
-		
-		// SQL
-		addComment("SQL", 				"Save the user in a database : ",
-										" H2 : \"jdbc:h2:" + this.plugin.getPath().toAbsolutePath() + "/data\"",
-										" SQL : \"jdbc:mysql://[login[:password]@]<host>:<port>/<database>\"",
-										" Default users are saving in the 'data.mv.db'");
-		addDefault("SQL.enable", false);
-		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
-		addDefault("SQL.prefix", "eversanctions_");
+		this.configDefault();
+		this.sqlDefault();
 		
 		// Manual
 		addDefault("manual.ban.max-time", "5y");

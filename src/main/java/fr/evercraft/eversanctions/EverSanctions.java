@@ -22,6 +22,7 @@ import org.spongepowered.api.service.ban.BanService;
 
 import fr.evercraft.everapi.EverAPI;
 import fr.evercraft.everapi.exception.PluginDisableException;
+import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.jail.JailService;
 import fr.evercraft.everapi.services.sanction.SanctionService;
@@ -81,13 +82,12 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 		this.ban_service.reload();
 	}
 
-	protected void onReload() throws PluginDisableException {
-		this.reloadConfigurations();
+	protected void onReload() throws PluginDisableException, ServerDisableException {
+		super.onReload();
 		
 		this.database.reload();
 		this.ban_service.reload();
 		this.jail_service.reload();
-		this.commands.reload();
 	}
 	
 	protected void onDisable() {
