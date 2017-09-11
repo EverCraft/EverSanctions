@@ -201,10 +201,10 @@ public class ESBan extends ECommand<EverSanctions> {
 		replaces.put("{player}", EReplace.of(user.getName()));
 		replaces.put("{staff}", EReplace.of(staff.getName()));
 		replaces.put("{reason}", EReplace.of(reason));
-		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{duration}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		
 		ESMessages.BAN_TEMP_STAFF.sender()

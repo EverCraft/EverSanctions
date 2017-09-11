@@ -119,7 +119,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 		if (jail.update(Optional.empty())) {
 			ESMessages.JAILS_SETRADIUS_DEFAULT.sender()
 				.replace("{radius}", String.valueOf(jail.getRadius()))
-				.replace("{jail}", () -} ESJail.getButtonJail(jail))
+				.replace("{jail}", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(true);
 		} else {
@@ -135,7 +135,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 		if (jail.update(Optional.of(radius))) {
 			ESMessages.JAILS_SETRADIUS_VALUE.sender()
 				.replace("{radius}", String.valueOf(jail.getRadius()))
-				.replace("{jail}", () -} ESJail.getButtonJail(jail))
+				.replace("{jail}", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(true);
 		} else {

@@ -185,26 +185,26 @@ public class ESProfile extends ECommand<EverSanctions> {
 			Text line_pardon_reason = null; 
 			Text line_pardon_date = null;
 			
-			line_staff = ESMessages.PROFILE_LINE_STAFF.getFormat().toText("{staff}", () -} sanction.getSourceName(this.plugin.getEServer()));
+			line_staff = ESMessages.PROFILE_LINE_STAFF.getFormat().toText("{staff}", () -> sanction.getSourceName(this.plugin.getEServer()));
 			line_reason = ESMessages.PROFILE_LINE_REASON.getFormat().toText("{reason}", EChat.serialize(sanction.getReason()));
 			line_creation = ESMessages.PROFILE_LINE_CREATION.getFormat().toText(
-								"{time}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()),
-								"{date}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()),
-								"{datetime}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()));
+								"{time}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()),
+								"{date}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()),
+								"{datetime}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()));
 			
 			// Pardon
 			if (sanction.isPardon()) {
 				line_pardon_staff = ESMessages.PROFILE_LINE_PARDON_STAFF.getFormat().toText("{staff}", sanction.getPardonSourceName(this.plugin.getEServer()).get());
 				line_pardon_reason = ESMessages.PROFILE_LINE_PARDON_REASON.getFormat().toText("{reason}", EChat.serialize(sanction.getPardonReason().get()));
 				line_pardon_date = ESMessages.PROFILE_LINE_PARDON_DATE.getFormat().toText(
-								"{time}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getPardonDate().get()),
-								"{date}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getPardonDate().get()),
-								"{datetime}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getPardonDate().get()));
+								"{time}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getPardonDate().get()),
+								"{date}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getPardonDate().get()),
+								"{datetime}", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getPardonDate().get()));
 			}
 			
 			// BanIp
 			if (sanction instanceof Sanction.SanctionBanIp) {
-				line_ip = ESMessages.PROFILE_LINE_IP.getFormat().toText("{address}", () -} UtilsNetwork.getHostString(((Sanction.SanctionBanIp) sanction).getAddress()));
+				line_ip = ESMessages.PROFILE_LINE_IP.getFormat().toText("{address}", () -> UtilsNetwork.getHostString(((Sanction.SanctionBanIp) sanction).getAddress()));
 			}
 			
 			// Jail

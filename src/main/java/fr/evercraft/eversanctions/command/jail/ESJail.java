@@ -192,7 +192,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		if (!user.jail(jail, creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_UNLIMITED.sender()
 				.replace("{player}", user.getName())
-				.replace("{jail}", () -} ESJail.getButtonJail(jail))
+				.replace("{jail}", () -> ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -200,7 +200,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		ESMessages.JAIL_UNLIMITED_STAFF.sender()
 			.replace("{player}", user.getName())
 			.replace("{reason}", reason)
-			.replace("{jail}", () -} ESJail.getButtonJail(jail))
+			.replace("{jail}", () -> ESJail.getButtonJail(jail))
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
@@ -209,7 +209,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			ESMessages.JAIL_UNLIMITED_PLAYER.sender()
 				.replace("{staff}", staff.getName())
 				.replace("{reason}", reason)
-				.replace("{jail}", () -} ESJail.getButtonJail(jail))
+				.replace("{jail}", () -> ESJail.getButtonJail(jail))
 				.sendTo(player);
 		}
 		return CompletableFuture.completedFuture(true);
@@ -220,11 +220,11 @@ public class ESJail extends ECommand<EverSanctions> {
 		replaces.put("{player}", EReplace.of(user.getName()));
 		replaces.put("{staff}", EReplace.of(staff.getName()));
 		replaces.put("{reason}", EReplace.of(reason));
-		replaces.put("{jail}", EReplace.of(() -} ESJail.getButtonJail(jail)));
-		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{jail}", EReplace.of(() -> ESJail.getButtonJail(jail)));
+		replaces.put("{duration}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		if (!user.jail(jail, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_TEMP.sender()

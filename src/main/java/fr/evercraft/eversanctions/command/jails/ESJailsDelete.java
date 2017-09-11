@@ -94,8 +94,8 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 		// Le serveur a une prison qui porte ce nom
 		if (jail.isPresent()) {
 			ESMessages.JAILS_DELETE_CONFIRMATION.sender()
-				.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
-				.replace("{confirmation}", () -} this.getButtonConfirmation(name))
+				.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
+				.replace("{confirmation}", () -> this.getButtonConfirmation(name))
 				.sendTo(player);
 		// Le serveur n'a pas de prison qui porte ce nom
 		} else {
@@ -115,7 +115,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 			// Si la prison a bien été supprimer
 			if (this.plugin.getJailService().remove(name)) {
 				ESMessages.JAILS_DELETE_DELETE.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			// La prison n'a pas été supprimer

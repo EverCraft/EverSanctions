@@ -100,7 +100,7 @@ public class ESJailsTeleport extends ESubCommand<EverSanctions> {
 		if (jail.isPresent()) {
 			if (player.teleportSafe(jail.get().getTransform(), true)) {
 				ESMessages.JAILS_TELEPORT_PLAYER.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			} else {

@@ -143,7 +143,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 				} else {
 					message = ESMessages.SANCTIONS_REASON_LINE_TEMP;
 				}
-				replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR")));
+				replaces.put("{duration}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR")));
 			}
 			
 			if (message != null) {

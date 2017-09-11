@@ -117,7 +117,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 		if (jail.isPresent()) {
 			if (jail.get().update(player.getTransform())) {
 				ESMessages.JAILS_ADD_REPLACE.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			} else {
@@ -129,7 +129,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.empty());
 			if (jail_new.isPresent()) {
 				ESMessages.JAILS_ADD_NEW.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			} else {
@@ -148,7 +148,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 		if (jail.isPresent()) {
 			if (jail.get().update(player.getTransform(), Optional.of(radius))) {
 				ESMessages.JAILS_ADD_REPLACE.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			} else {
@@ -160,7 +160,7 @@ public class ESJailsAdd extends ESubCommand<EverSanctions> {
 			Optional<Jail> jail_new = this.plugin.getJailService().add(name, player.getTransform(), Optional.of(radius));
 			if (jail_new.isPresent()) {
 				ESMessages.JAILS_ADD_NEW.sender()
-					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -> ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			} else {

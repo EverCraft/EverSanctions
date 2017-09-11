@@ -91,12 +91,12 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		if (player.hasPermission(ESPermissions.JAILS_DELETE.get())) {
 			for (EJail jail : jails) {
 				Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-				replaces.put("{jail}", EReplace.of(() -} ESJail.getButtonJail(jail)));
+				replaces.put("{jail}", EReplace.of(() -> ESJail.getButtonJail(jail)));
 				replaces.put("{radius}", EReplace.of(String.valueOf(jail.getRadius())));
-				replaces.put("{delete}", EReplace.of(() -} this.getButtonDelete(jail.getName(), jail.getVirtualTransform())));
+				replaces.put("{delete}", EReplace.of(() -> this.getButtonDelete(jail.getName(), jail.getVirtualTransform())));
 				
 				if (jail.getTransform() != null) {
-					replaces.put("{teleport}", EReplace.of(() -} this.getButtonTeleport(jail.getName(), jail.getTransform())));
+					replaces.put("{teleport}", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
 					lists.add(ESMessages.JAILS_LIST_LINE_DELETE.getFormat().toText2(replaces));
 				} else {
 					lists.add(ESMessages.JAILS_LIST_LINE_DELETE_ERROR_WORLD.getFormat().toText2(replaces));
@@ -105,9 +105,9 @@ public class ESJailsList extends ESubCommand<EverSanctions> {
 		} else {
 			for (EJail jail : jails) {
 				Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-				replaces.put("{jail}", EReplace.of(() -} ESJail.getButtonJail(jail)));
+				replaces.put("{jail}", EReplace.of(() -> ESJail.getButtonJail(jail)));
 				replaces.put("{radius}", EReplace.of(String.valueOf(jail.getRadius())));
-				replaces.put("{teleport}", EReplace.of(() -} this.getButtonTeleport(jail.getName(), jail.getTransform())));
+				replaces.put("{teleport}", EReplace.of(() -> this.getButtonTeleport(jail.getName(), jail.getTransform())));
 				
 				if (jail.getTransform() != null) {
 					lists.add(ESMessages.JAILS_LIST_LINE.getFormat().toText2(replaces));

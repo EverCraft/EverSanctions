@@ -224,10 +224,10 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		replaces.put("{staff}", EReplace.of(staff.getIdentifier()));
 		replaces.put("{reason}", EReplace.of(reason));
 		replaces.put("{address}", EReplace.of(subject.getIdentifier()));
-		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{duration}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		ESMessages.BANIP_IP_TEMP_STAFF.sender()
 			.replaceString(replaces)
@@ -312,7 +312,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		replaces.put("{player}", EReplace.of(user.getName()));
 		replaces.put("{staff}", EReplace.of(staff.getName()));
 		replaces.put("{reason}", EReplace.of(reason));
-		replaces.put("{address}", EReplace.of(() -} UtilsNetwork.getHostString(address)));
+		replaces.put("{address}", EReplace.of(() -> UtilsNetwork.getHostString(address)));
 		
 		// Ban annulé
 		if (!user.banIp(address, creation, Optional.empty(), EChat.of(reason), staff)) {
@@ -339,11 +339,11 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		replaces.put("{player}", EReplace.of(user.getName()));
 		replaces.put("{staff}", EReplace.of(staff.getName()));
 		replaces.put("{reason}", EReplace.of(reason));
-		replaces.put("{address}", EReplace.of(() -} UtilsNetwork.getHostString(address)));
-		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{address}", EReplace.of(() -> UtilsNetwork.getHostString(address)));
+		replaces.put("{duration}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		if (!user.banIp(address, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()
