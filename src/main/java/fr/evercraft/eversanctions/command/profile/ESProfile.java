@@ -134,7 +134,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 		} else if (args.size() == 2) {
@@ -146,14 +146,14 @@ public class ESProfile extends ECommand<EverSanctions> {
 					return this.commandProfile(source, user.get(), type);
 				} catch (IllegalArgumentException e) {
 					ESMessages.PROFILE_ERROR_TYPE.sender()
-						.replace("<type>", args.get(1))
+						.replace("{type}", args.get(1))
 						.sendTo(source);
 				}
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 		} else {
@@ -185,41 +185,41 @@ public class ESProfile extends ECommand<EverSanctions> {
 			Text line_pardon_reason = null; 
 			Text line_pardon_date = null;
 			
-			line_staff = ESMessages.PROFILE_LINE_STAFF.getFormat().toText("<staff>", () -> sanction.getSourceName(this.plugin.getEServer()));
-			line_reason = ESMessages.PROFILE_LINE_REASON.getFormat().toText("<reason>", EChat.serialize(sanction.getReason()));
+			line_staff = ESMessages.PROFILE_LINE_STAFF.getFormat().toText("{staff}", () -} sanction.getSourceName(this.plugin.getEServer()));
+			line_reason = ESMessages.PROFILE_LINE_REASON.getFormat().toText("{reason}", EChat.serialize(sanction.getReason()));
 			line_creation = ESMessages.PROFILE_LINE_CREATION.getFormat().toText(
-								"<time>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()),
-								"<date>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()),
-								"<datetime>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()));
+								"{time}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getCreationDate()),
+								"{date}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getCreationDate()),
+								"{datetime}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getCreationDate()));
 			
 			// Pardon
 			if (sanction.isPardon()) {
-				line_pardon_staff = ESMessages.PROFILE_LINE_PARDON_STAFF.getFormat().toText("<staff>", sanction.getPardonSourceName(this.plugin.getEServer()).get());
-				line_pardon_reason = ESMessages.PROFILE_LINE_PARDON_REASON.getFormat().toText("<reason>", EChat.serialize(sanction.getPardonReason().get()));
+				line_pardon_staff = ESMessages.PROFILE_LINE_PARDON_STAFF.getFormat().toText("{staff}", sanction.getPardonSourceName(this.plugin.getEServer()).get());
+				line_pardon_reason = ESMessages.PROFILE_LINE_PARDON_REASON.getFormat().toText("{reason}", EChat.serialize(sanction.getPardonReason().get()));
 				line_pardon_date = ESMessages.PROFILE_LINE_PARDON_DATE.getFormat().toText(
-								"<time>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getPardonDate().get()),
-								"<date>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getPardonDate().get()),
-								"<datetime>", () -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getPardonDate().get()));
+								"{time}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getPardonDate().get()),
+								"{date}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getPardonDate().get()),
+								"{datetime}", () -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getPardonDate().get()));
 			}
 			
 			// BanIp
 			if (sanction instanceof Sanction.SanctionBanIp) {
-				line_ip = ESMessages.PROFILE_LINE_IP.getFormat().toText("<address>", () -> UtilsNetwork.getHostString(((Sanction.SanctionBanIp) sanction).getAddress()));
+				line_ip = ESMessages.PROFILE_LINE_IP.getFormat().toText("{address}", () -} UtilsNetwork.getHostString(((Sanction.SanctionBanIp) sanction).getAddress()));
 			}
 			
 			// Jail
 			if (sanction instanceof Sanction.SanctionJail) {
-				line_jail = ESMessages.PROFILE_LINE_JAIL.getFormat().toText("<jail>", ((Sanction.SanctionJail) sanction).getJailName());
+				line_jail = ESMessages.PROFILE_LINE_JAIL.getFormat().toText("{jail}", ((Sanction.SanctionJail) sanction).getJailName());
 			}
 			
 			// Expiration
 			if (!sanction.isIndefinite()) {
 				EFormat expiration = sanction.isIndefinite() ? ESMessages.PROFILE_LINE_EXPIRATION_UNLIMITED.getFormat() : ESMessages.PROFILE_LINE_EXPIRATION_TEMP.getFormat();
 				line_expiration = expiration.toText(
-						"<duration>", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()),
-						"<time>", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()),
-						"<date>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()),
-						"<datetime>", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()));
+						"{duration}", this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(sanction.getCreationDate(), sanction.getExpirationDate().get()),
+						"{time}", this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(sanction.getExpirationDate().get()),
+						"{date}", this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(sanction.getExpirationDate().get()),
+						"{datetime}", this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(sanction.getExpirationDate().get()));
 			}
 			
 			EFormat message = null;
@@ -236,7 +236,7 @@ public class ESProfile extends ECommand<EverSanctions> {
 					message = ESMessages.PROFILE_LINE_ENABLE_MANUAL.getFormat();
 				}
 				
-				replaces.put("<type>", EReplace.of(ESProfile.getType(manual)));
+				replaces.put("{type}", EReplace.of(ESProfile.getType(manual)));
 			// Auto
 			} else if (sanction instanceof SanctionAuto) {
 				SanctionAuto auto = (SanctionAuto) sanction;
@@ -250,19 +250,19 @@ public class ESProfile extends ECommand<EverSanctions> {
 				}
 				
 				
-				replaces.put("<reason>", EReplace.of(ESProfile.getType(auto)));
-				replaces.put("<level>", EReplace.of(String.valueOf(auto.getLevelNumber())));
+				replaces.put("{reason}", EReplace.of(ESProfile.getType(auto)));
+				replaces.put("{level}", EReplace.of(String.valueOf(auto.getLevelNumber())));
 			}
 			
-			replaces.put("<line_reason>", this.get(line_reason));
-			replaces.put("<line_staff>", this.get(line_staff));
-			replaces.put("<line_creation>", this.get(line_creation));
-			replaces.put("<line_expiration>", this.get(line_expiration));
-			replaces.put("<line_ip>", this.get(line_ip));
-			replaces.put("<line_jail>", this.get(line_jail));
-			replaces.put("<line_pardon_staff>", this.get(line_pardon_staff));
-			replaces.put("<line_pardon_reason>", this.get(line_pardon_reason));
-			replaces.put("<line_pardon_date>", this.get(line_pardon_date));
+			replaces.put("{line_reason}", this.get(line_reason));
+			replaces.put("{line_staff}", this.get(line_staff));
+			replaces.put("{line_creation}", this.get(line_creation));
+			replaces.put("{line_expiration}", this.get(line_expiration));
+			replaces.put("{line_ip}", this.get(line_ip));
+			replaces.put("{line_jail}", this.get(line_jail));
+			replaces.put("{line_pardon_staff}", this.get(line_pardon_staff));
+			replaces.put("{line_pardon_reason}", this.get(line_pardon_reason));
+			replaces.put("{line_pardon_date}", this.get(line_pardon_date));
 					
 			if (message != null) {
 				list.add(message.toText2(replaces));
@@ -275,14 +275,14 @@ public class ESProfile extends ECommand<EverSanctions> {
 		
 		EFormat title;
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<player>", EReplace.of(user.getName()));
+		replaces.put("{player}", EReplace.of(user.getName()));
 		if (type.isPresent()) {
 			if(user.getIdentifier().equals(staff.getIdentifier())) {
 				title = ESMessages.PROFILE_TITLE_EQUALS_TYPE.getFormat();
 			} else {
 				title = ESMessages.PROFILE_TITLE_OTHERS_TYPE.getFormat();
 			}
-			replaces.put("<type>", EReplace.of(type.get().name()));
+			replaces.put("{type}", EReplace.of(type.get().name()));
 		} else {
 			if(user.getIdentifier().equals(staff.getIdentifier())) {
 				title = ESMessages.PROFILE_TITLE_EQUALS.getFormat();

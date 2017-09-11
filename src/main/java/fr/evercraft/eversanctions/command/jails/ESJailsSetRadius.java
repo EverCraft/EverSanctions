@@ -95,7 +95,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 		Optional<EJail> jail = this.plugin.getJailService().getEJail(name);
 		if (!jail.isPresent()) {
 			ESMessages.JAIL_UNKNOWN.sender()
-				.replace("<jail>", jail_name)
+				.replace("{jail}", jail_name)
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -108,7 +108,7 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 			} catch (NumberFormatException e) {
 				EAMessages.IS_NOT_NUMBER.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<number>", radius_string.get())
+					.replace("{number}", radius_string.get())
 					.sendTo(staff);
 			}
 		}
@@ -118,14 +118,14 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	private CompletableFuture<Boolean> commandJailSetRadius(final CommandSource staff, final EJail jail) {
 		if (jail.update(Optional.empty())) {
 			ESMessages.JAILS_SETRADIUS_DEFAULT.sender()
-				.replace("<radius>", String.valueOf(jail.getRadius()))
-				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.replace("{radius}", String.valueOf(jail.getRadius()))
+				.replace("{jail}", () -} ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(true);
 		} else {
 			ESMessages.JAILS_SETRADIUS_CANCEL_DEFAULT.sender()
-				.replace("<radius>", String.valueOf(jail.getRadius()))
-				.replace("<jail>", jail.getName())
+				.replace("{radius}", String.valueOf(jail.getRadius()))
+				.replace("{jail}", jail.getName())
 				.sendTo(staff);
 		}
 		return CompletableFuture.completedFuture(false);
@@ -134,14 +134,14 @@ public class ESJailsSetRadius extends ESubCommand<EverSanctions> {
 	private CompletableFuture<Boolean> commandJailSetRadius(final CommandSource staff, final EJail jail, final int radius) {
 		if (jail.update(Optional.of(radius))) {
 			ESMessages.JAILS_SETRADIUS_VALUE.sender()
-				.replace("<radius>", String.valueOf(jail.getRadius()))
-				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.replace("{radius}", String.valueOf(jail.getRadius()))
+				.replace("{jail}", () -} ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(true);
 		} else {
 			ESMessages.JAILS_SETRADIUS_CANCEL_VALUE.sender()
-				.replace("<radius>", String.valueOf(jail.getRadius()))
-				.replace("<jail>", jail.getName())
+				.replace("{radius}", String.valueOf(jail.getRadius()))
+				.replace("{jail}", jail.getName())
 				.sendTo(staff);
 		}
 		return CompletableFuture.completedFuture(false);

@@ -108,7 +108,7 @@ public class ESMute extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 			
@@ -123,7 +123,7 @@ public class ESMute extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.MUTE_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -131,7 +131,7 @@ public class ESMute extends ECommand<EverSanctions> {
 		// Le joueur a déjà un mute en cours
 		if (user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
 			ESMessages.MUTE_ERROR_NOEMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -139,7 +139,7 @@ public class ESMute extends ECommand<EverSanctions> {
 		// Aucune raison
 		if (reason.isEmpty()) {
 			ESMessages.MUTE_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -157,7 +157,7 @@ public class ESMute extends ECommand<EverSanctions> {
 		if (!time.isPresent()) {
 			EAMessages.IS_NOT_TIME.sender()
 				.prefix(ESMessages.PREFIX)
-				.replace("<time>", time_string)
+				.replace("{time}", time_string)
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -170,20 +170,20 @@ public class ESMute extends ECommand<EverSanctions> {
 		// Ban annulé
 		if (!user.mute(creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.MUTE_ERROR_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.MUTE_UNLIMITED_STAFF.sender()
-			 .replace("<reason>", reason)
-			 .replace("<player>", user.getName())
+			 .replace("{reason}", reason)
+			 .replace("{player}", user.getName())
 			 .sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			ESMessages.MUTE_UNLIMITED_PLAYER.sender()
-				.replace("<staff>", staff.getName())
-				.replace("<reason>", reason)
+				.replace("{staff}", staff.getName())
+				.replace("{reason}", reason)
 				.sendTo((EPlayer) user);
 		}
 		return CompletableFuture.completedFuture(true);
@@ -192,19 +192,19 @@ public class ESMute extends ECommand<EverSanctions> {
 	private CompletableFuture<Boolean> commandTempMute(final CommandSource staff, final EUser user, final long creation, final long expiration, final String reason) {
 		if (!user.mute(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.MUTE_ERROR_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<player>", EReplace.of(user.getName()));
-		replaces.put("<staff>", EReplace.of(staff.getName()));
-		replaces.put("<reason>", EReplace.of(reason));
-		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{player}", EReplace.of(user.getName()));
+		replaces.put("{staff}", EReplace.of(staff.getName()));
+		replaces.put("{reason}", EReplace.of(reason));
+		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		ESMessages.MUTE_TEMP_STAFF.sender()
 			.replaceString(replaces)

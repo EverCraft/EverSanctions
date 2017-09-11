@@ -84,7 +84,7 @@ public class ESSanctions extends ECommand<EverSanctions> {
 				return this.commandSanctions(source, reason.get());
 			} else {
 				ESMessages.SANCTIONS_REASON_UNKNOWN.sender()
-					.replace("<name>", args.get(0))
+					.replace("{name}", args.get(0))
 					.sendTo(source);
 			}
 		} else {
@@ -97,12 +97,12 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		List<Text> list = new ArrayList<Text>();
 		this.plugin.getSanctionService().getAllReasons().forEach(reason -> {
 			list.add(ESMessages.SANCTIONS_LIST_LINE.getFormat().toText(
-						"<name>", reason.getName(),
-						"<count>", String.valueOf(reason.getLevels().size()))
+						"{name}", reason.getName(),
+						"{count}", String.valueOf(reason.getLevels().size()))
 				.toBuilder()
 				.onClick(TextActions.runCommand("/sanctions \"" + reason.getName() + "\""))
 				.onHover(TextActions.showText(ESMessages.SANCTIONS_LIST_LINE_HOVER.getFormat()
-					.toText("<name>", reason.getName())))
+					.toText("{name}", reason.getName())))
 				.build());
 		});
 		
@@ -123,27 +123,27 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		reason.getLevels().forEach((num, level) -> {
 			
 			Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-			replaces.put("<num>", EReplace.of(String.valueOf(num)));
-			replaces.put("<type>", EReplace.of(this.getType(level.getType())));
-			replaces.put("<reason>", EReplace.of(level.getReason()));
-			replaces.put("<count>", EReplace.of(String.valueOf(reason.getLevels().size())));
+			replaces.put("{num}", EReplace.of(String.valueOf(num)));
+			replaces.put("{type}", EReplace.of(this.getType(level.getType())));
+			replaces.put("{reason}", EReplace.of(level.getReason()));
+			replaces.put("{count}", EReplace.of(String.valueOf(reason.getLevels().size())));
 			
 			ESMessages message = null;
 			if (level.isIndefinite()) {
 				if (level.getJail().isPresent()) {
 					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED_JAIL;
-					replaces.put("<jail>", EReplace.of(level.getJail().get().getName()));
+					replaces.put("{jail}", EReplace.of(level.getJail().get().getName()));
 				} else {
 					message = ESMessages.SANCTIONS_REASON_LINE_UNLIMITED;
 				}
 			} else {
 				if (level.getJail().isPresent()) {
 					message = ESMessages.SANCTIONS_REASON_LINE_TEMP_JAIL;
-					replaces.put("<jail>", EReplace.of(level.getJail().get().getName()));
+					replaces.put("{jail}", EReplace.of(level.getJail().get().getName()));
 				} else {
 					message = ESMessages.SANCTIONS_REASON_LINE_TEMP;
 				}
-				replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR")));
+				replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDuration(level.getDuration().get()).orElse("ERROR")));
 			}
 			
 			if (message != null) {
@@ -160,8 +160,8 @@ public class ESSanctions extends ECommand<EverSanctions> {
 		
 		this.plugin.getEverAPI().getManagerService().getEPagination().sendTo(
 				ESMessages.SANCTIONS_REASON_TITLE.getFormat().toText(
-							"<name>", reason.getName(),
-							"<count>", String.valueOf(reason.getLevels().size())).toBuilder()
+							"{name}", reason.getName(),
+							"{count}", String.valueOf(reason.getLevels().size())).toBuilder()
 					.onClick(TextActions.runCommand("/sanctions \"" + reason.getName() + "\""))
 					.build(), 
 				list, staff);

@@ -100,7 +100,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 			
@@ -116,7 +116,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNMUTE_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -124,7 +124,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
 			ESMessages.UNMUTE_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -132,7 +132,7 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		// Le joueur n'a pas de ban en cours
 		if (!user.getManual(SanctionManualProfile.Type.MUTE).isPresent()) {
 			ESMessages.UNMUTE_ERROR_EMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -141,20 +141,20 @@ public class ESUnMute extends ECommand<EverSanctions> {
 		Optional<SanctionManualProfile.Mute> pardon = user.pardonMute(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
 			ESMessages.UNMUTE_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNMUTE_STAFF.sender()
-			.replace("<player>", user.getName())
-			.replace("<reason>", reason_string)
+			.replace("{player}", user.getName())
+			.replace("{reason}", reason_string)
 			.sendTo(staff);
 		
 		if (user instanceof EPlayer && !user.isMute()) {
 			ESMessages.UNMUTE_PLAYER.sender()
-				.replace("<staff>", staff.getName())
-				.replace("<reason>", reason_string)
+				.replace("{staff}", staff.getName())
+				.replace("{reason}", reason_string)
 				.sendTo((EPlayer) user);
 		}
 		return CompletableFuture.completedFuture(true);

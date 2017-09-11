@@ -122,7 +122,7 @@ public class ESJail extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 			
@@ -137,7 +137,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.JAIL_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -145,7 +145,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		// Le joueur a déjà un sanction jail en cours
 		if (user.getManual(SanctionManualProfile.Type.JAIL).isPresent()) {
 			ESMessages.JAIL_ERROR_NOEMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -160,7 +160,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		// Aucune raison
 		if (reason.isEmpty()) {
 			ESMessages.JAIL_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -178,7 +178,7 @@ public class ESJail extends ECommand<EverSanctions> {
 		if (!time.isPresent()) {
 			EAMessages.IS_NOT_TIME.sender()
 				.prefix(ESMessages.PREFIX)
-				.replace("<time>", time_string)
+				.replace("{time}", time_string)
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -191,25 +191,25 @@ public class ESJail extends ECommand<EverSanctions> {
 		// Jail annulé
 		if (!user.jail(jail, creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_UNLIMITED.sender()
-				.replace("<player>", user.getName())
-				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.replace("{player}", user.getName())
+				.replace("{jail}", () -} ESJail.getButtonJail(jail))
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.JAIL_UNLIMITED_STAFF.sender()
-			.replace("<player>", user.getName())
-			.replace("<reason>", reason)
-			.replace("<jail>", () -> ESJail.getButtonJail(jail))
+			.replace("{player}", user.getName())
+			.replace("{reason}", reason)
+			.replace("{jail}", () -} ESJail.getButtonJail(jail))
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			EPlayer player = (EPlayer) user;
 			player.teleport(jail.getTransform(), true);
 			ESMessages.JAIL_UNLIMITED_PLAYER.sender()
-				.replace("<staff>", staff.getName())
-				.replace("<reason>", reason)
-				.replace("<jail>", () -> ESJail.getButtonJail(jail))
+				.replace("{staff}", staff.getName())
+				.replace("{reason}", reason)
+				.replace("{jail}", () -} ESJail.getButtonJail(jail))
 				.sendTo(player);
 		}
 		return CompletableFuture.completedFuture(true);
@@ -217,14 +217,14 @@ public class ESJail extends ECommand<EverSanctions> {
 	
 	private CompletableFuture<Boolean> commandTempJail(final CommandSource staff, final EUser user, final Jail jail, final long creation, final long expiration, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<player>", EReplace.of(user.getName()));
-		replaces.put("<staff>", EReplace.of(staff.getName()));
-		replaces.put("<reason>", EReplace.of(reason));
-		replaces.put("<jail>", EReplace.of(() -> ESJail.getButtonJail(jail)));
-		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{player}", EReplace.of(user.getName()));
+		replaces.put("{staff}", EReplace.of(staff.getName()));
+		replaces.put("{reason}", EReplace.of(reason));
+		replaces.put("{jail}", EReplace.of(() -} ESJail.getButtonJail(jail)));
+		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		if (!user.jail(jail, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.JAIL_ERROR_CANCEL_TEMP.sender()
@@ -250,13 +250,13 @@ public class ESJail extends ECommand<EverSanctions> {
 	public static Text getButtonJail(final Jail jail) {
 		Location<World> location = jail.getTransform().getLocation();
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<world>", EReplace.of(location.getExtent().getName()));
-		replaces.put("<x>", EReplace.of(String.valueOf(location.getBlockX())));
-		replaces.put("<y>", EReplace.of(String.valueOf(location.getBlockY())));
-		replaces.put("<z>", EReplace.of(String.valueOf(location.getBlockZ())));
-		replaces.put("<jail>", EReplace.of(jail.getName()));
-		replaces.put("<name>", EReplace.of(jail.getName()));
-		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+		replaces.put("{world}", EReplace.of(location.getExtent().getName()));
+		replaces.put("{x}", EReplace.of(String.valueOf(location.getBlockX())));
+		replaces.put("{y}", EReplace.of(String.valueOf(location.getBlockY())));
+		replaces.put("{z}", EReplace.of(String.valueOf(location.getBlockZ())));
+		replaces.put("{jail}", EReplace.of(jail.getName()));
+		replaces.put("{name}", EReplace.of(jail.getName()));
+		replaces.put("{radius}", EReplace.of(String.valueOf(jail.getRadius())));
 		
 		return ESMessages.JAIL_NAME.getFormat().toText2(replaces).toBuilder()
 					.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText2(replaces)))
@@ -266,13 +266,13 @@ public class ESJail extends ECommand<EverSanctions> {
 	public static Text getButtonJail(final EJail jail) {
 		VirtualTransform location = jail.getVirtualTransform();
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<world>", EReplace.of(location.getWorldName()));
-		replaces.put("<x>", EReplace.of(String.valueOf(location.getPosition().getFloorX())));
-		replaces.put("<y>", EReplace.of(String.valueOf(location.getPosition().getFloorY())));
-		replaces.put("<z>", EReplace.of(String.valueOf(location.getPosition().getFloorZ())));
-		replaces.put("<jail>", EReplace.of(jail.getName()));
-		replaces.put("<name>", EReplace.of(jail.getName()));
-		replaces.put("<radius>", EReplace.of(String.valueOf(jail.getRadius())));
+		replaces.put("{world}", EReplace.of(location.getWorldName()));
+		replaces.put("{x}", EReplace.of(String.valueOf(location.getPosition().getFloorX())));
+		replaces.put("{y}", EReplace.of(String.valueOf(location.getPosition().getFloorY())));
+		replaces.put("{z}", EReplace.of(String.valueOf(location.getPosition().getFloorZ())));
+		replaces.put("{jail}", EReplace.of(jail.getName()));
+		replaces.put("{name}", EReplace.of(jail.getName()));
+		replaces.put("{radius}", EReplace.of(String.valueOf(jail.getRadius())));
 		
 		return ESMessages.JAIL_NAME.getFormat().toText2(replaces).toBuilder()
 				.onHover(TextActions.showText(ESMessages.JAIL_NAME_HOVER.getFormat().toText2(replaces)))

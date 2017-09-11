@@ -189,7 +189,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 							if (jail.isPresent()) {
 								levels.put(1, new EAutoLevel(type, duration, EChat.of(reason_default), jail.get()));
 							} else {
-								this.plugin.getELogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "')");
+								this.plugin.getELogger().warn("Config : Il n'y a de prison '{" + jail_default + "}' (sanctionauto='" + name + "')");
 							}
 						} else {
 							levels.put(1, new EAutoLevel(type, duration, EChat.of(reason_default)));
@@ -218,7 +218,7 @@ public class ESConfig extends EConfig<EverSanctions> {
 										if (jail.isPresent()) {
 											levels.put(level.get(), new EAutoLevel(type, duration, EChat.of(reason), jail.get()));
 										} else {
-											this.plugin.getELogger().warn("Config : Il n'y a de prison '<" + jail_default + ">' (sanctionauto='" + name + "';level='" + level.get() + "')");
+											this.plugin.getELogger().warn("Config : Il n'y a de prison '{" + jail_default + "}' (sanctionauto='" + name + "';level='" + level.get() + "')");
 										}
 									} else {
 										levels.put(level.get(), new EAutoLevel(type, duration, EChat.of(reason)));

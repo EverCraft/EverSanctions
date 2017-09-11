@@ -94,13 +94,13 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 		// Le serveur a une prison qui porte ce nom
 		if (jail.isPresent()) {
 			ESMessages.JAILS_DELETE_CONFIRMATION.sender()
-				.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
-				.replace("<confirmation>", () -> this.getButtonConfirmation(name))
+				.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
+				.replace("{confirmation}", () -} this.getButtonConfirmation(name))
 				.sendTo(player);
 		// Le serveur n'a pas de prison qui porte ce nom
 		} else {
 			ESMessages.JAIL_UNKNOWN.sender()
-				.replace("<jail>", name)
+				.replace("{jail}", name)
 				.sendTo(player);
 		}
 		return CompletableFuture.completedFuture(false);
@@ -115,19 +115,19 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 			// Si la prison a bien été supprimer
 			if (this.plugin.getJailService().remove(name)) {
 				ESMessages.JAILS_DELETE_DELETE.sender()
-					.replace("<jail>", () -> ESJail.getButtonJail(jail.get()))
+					.replace("{jail}", () -} ESJail.getButtonJail(jail.get()))
 					.sendTo(player);
 				return CompletableFuture.completedFuture(true);
 			// La prison n'a pas été supprimer
 			} else {
 				ESMessages.JAILS_DELETE_CANCEL.sender()
-					.replace("<jail>", name)
+					.replace("{jail}", name)
 					.sendTo(player);
 			}
 		// Le serveur n'a pas de prison qui porte ce nom
 		} else {
 			ESMessages.JAIL_UNKNOWN.sender()
-				.replace("<jail>", name)
+				.replace("{jail}", name)
 				.sendTo(player);
 		}
 		return CompletableFuture.completedFuture(false);
@@ -136,7 +136,7 @@ public class ESJailsDelete extends ESubCommand<EverSanctions> {
 	private Text getButtonConfirmation(final String name){
 		return ESMessages.JAILS_DELETE_CONFIRMATION_VALID.getText().toBuilder()
 					.onHover(TextActions.showText(ESMessages.JAILS_DELETE_CONFIRMATION_VALID_HOVER.getFormat()
-							.toText("<jail>", name)))
+							.toText("{jail}", name)))
 					.onClick(TextActions.runCommand("/jails delete \"" + name + "\" confirmation"))
 					.build();
 	}

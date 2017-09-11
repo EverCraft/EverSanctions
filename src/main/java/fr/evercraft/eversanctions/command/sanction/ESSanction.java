@@ -87,14 +87,14 @@ public class ESSanction extends ECommand<EverSanctions> {
 					return this.commandSanction(source, user.get(), reason.get());
 				} else {
 					ESMessages.SANCTION_ERROR_UNKNOWN.sender()
-						.replace("<name>", args.get(0))
+						.replace("{name}", args.get(0))
 						.sendTo(source);
 				}
 			// Le joueur est introuvable
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 			
@@ -109,7 +109,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.SANCTION_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -117,7 +117,7 @@ public class ESSanction extends ECommand<EverSanctions> {
 		// Le joueur a déjà une sanction en cours
 		if (user.getAuto(reason).isPresent()) {
 			ESMessages.SANCTION_ERROR_NOEMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -128,22 +128,22 @@ public class ESSanction extends ECommand<EverSanctions> {
 		// Sanction annule
 		if (!sanction.isPresent()) {
 			ESMessages.SANCTION_ERROR_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.SANCTION_STAFF.sender()
-			.replace("<player>", user.getName())
-			.replace("<type>", reason.getName())
-			.replace("<reason>", sanction.get().getReason())
+			.replace("{player}", user.getName())
+			.replace("{type}", reason.getName())
+			.replace("{reason}", sanction.get().getReason())
 			.sendTo(staff);
 		
 		if(user instanceof EPlayer) {
 			ESMessages.SANCTION_PLAYER.sender()
-				.replace("<staff>", staff.getName())
-				.replace("<type>", reason.getName())
-				.replace("<reason>", sanction.get().getReason())
+				.replace("{staff}", staff.getName())
+				.replace("{type}", reason.getName())
+				.replace("{reason}", sanction.get().getReason())
 				.sendTo((EPlayer) user);
 		}
 		return CompletableFuture.completedFuture(true);

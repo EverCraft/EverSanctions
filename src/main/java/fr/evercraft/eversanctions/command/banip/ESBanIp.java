@@ -125,7 +125,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 				} else {
 					EAMessages.PLAYER_NOT_FOUND.sender()
 						.prefix(ESMessages.PREFIX)
-						.replace("<player>", args.get(0))
+						.replace("{player}", args.get(0))
 						.sendTo(source);
 				}
 			}
@@ -145,7 +145,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(subject.getAddress()))) {
 			ESMessages.BANIP_IP_ERROR_EQUALS.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -153,7 +153,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Le joueur a déjà un ban en cours
 		if (this.plugin.getSanctionService().isBanned(subject.getAddress())) {
 			ESMessages.BANIP_IP_ERROR_NOEMPTY.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -161,7 +161,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Aucune raison
 		if (reason.isEmpty()) {
 			ESMessages.BANIP_IP_ERROR_REASON.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -179,7 +179,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		if (!time.isPresent()) {
 			EAMessages.IS_NOT_TIME.sender()
 				.prefix(ESMessages.PREFIX)
-				.replace("<time>", time_string)
+				.replace("{time}", time_string)
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -192,22 +192,22 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Ban annulé
 		if (!subject.ban(creation, Optional.empty(), EChat.of(reason), staff)) {
 			ESMessages.BANIP_IP_ERROR_CANCEL.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.BANIP_IP_UNLIMITED_STAFF.sender()
-			 .replace("<reason>", reason)
-			 .replace("<address>", subject.getIdentifier())
+			 .replace("{reason}", reason)
+			 .replace("{address}", subject.getIdentifier())
 			 .sendTo(staff);
 		
 		this.plugin.getEServer().getOnlineEPlayers().stream()
 			.filter(player -> UtilsNetwork.equals(player.getConnection().getAddress(), subject.getSocketAddress()))
 			.forEach(player ->
 				player.kick(ESMessages.BANIP_IP_UNLIMITED_PLAYER.getFormat().toText(
-						"<staff>", staff.getIdentifier(),
-						"<reason>", reason))
+						"{staff}", staff.getIdentifier(),
+						"{reason}", reason))
 			);
 		return CompletableFuture.completedFuture(true);
 	}
@@ -215,19 +215,19 @@ public class ESBanIp extends ECommand<EverSanctions> {
 	private CompletableFuture<Boolean> commandTempBanIP(final CommandSource staff, final SanctionIpSubject subject, final long creation, final long expiration, final String reason) {
 		if (!subject.ban(creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BANIP_IP_ERROR_CANCEL.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<staff>", EReplace.of(staff.getIdentifier()));
-		replaces.put("<reason>", EReplace.of(reason));
-		replaces.put("<address>", EReplace.of(subject.getIdentifier()));
-		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{staff}", EReplace.of(staff.getIdentifier()));
+		replaces.put("{reason}", EReplace.of(reason));
+		replaces.put("{address}", EReplace.of(subject.getIdentifier()));
+		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		ESMessages.BANIP_IP_TEMP_STAFF.sender()
 			.replaceString(replaces)
@@ -248,7 +248,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Aucune adresse IP
 		if (!last.isPresent()) {
 			ESMessages.BANIP_PLAYER_ERROR_IP.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -265,7 +265,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(last.get()))) {
 			ESMessages.BANIP_PLAYER_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -273,7 +273,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Le joueur a déjà un ban en cours
 		if (user.isBanIp(last.get())) {
 			ESMessages.BANIP_PLAYER_ERROR_NOEMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -281,7 +281,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		// Aucune raison
 		if (reason.isEmpty()) {
 			ESMessages.BANIP_PLAYER_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -298,7 +298,7 @@ public class ESBanIp extends ECommand<EverSanctions> {
 		if (!time.isPresent()) {
 			EAMessages.IS_NOT_TIME.sender()
 				.prefix(ESMessages.PREFIX)
-				.replace("<time>", time_string)
+				.replace("{time}", time_string)
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -309,10 +309,10 @@ public class ESBanIp extends ECommand<EverSanctions> {
 	
 	private CompletableFuture<Boolean> commandUnlimitedPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<player>", EReplace.of(user.getName()));
-		replaces.put("<staff>", EReplace.of(staff.getName()));
-		replaces.put("<reason>", EReplace.of(reason));
-		replaces.put("<address>", EReplace.of(() -> UtilsNetwork.getHostString(address)));
+		replaces.put("{player}", EReplace.of(user.getName()));
+		replaces.put("{staff}", EReplace.of(staff.getName()));
+		replaces.put("{reason}", EReplace.of(reason));
+		replaces.put("{address}", EReplace.of(() -} UtilsNetwork.getHostString(address)));
 		
 		// Ban annulé
 		if (!user.banIp(address, creation, Optional.empty(), EChat.of(reason), staff)) {
@@ -336,14 +336,14 @@ public class ESBanIp extends ECommand<EverSanctions> {
 	
 	private CompletableFuture<Boolean> commandTempPlayerBanIP(final CommandSource staff, final EUser user, final InetAddress address, final long creation, final long expiration, final String reason) {
 		Map<String, EReplace<?>> replaces = new HashMap<String, EReplace<?>>();
-		replaces.put("<player>", EReplace.of(user.getName()));
-		replaces.put("<staff>", EReplace.of(staff.getName()));
-		replaces.put("<reason>", EReplace.of(reason));
-		replaces.put("<address>", EReplace.of(() -> UtilsNetwork.getHostString(address)));
-		replaces.put("<duration>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
-		replaces.put("<time>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
-		replaces.put("<date>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
-		replaces.put("<datetime>", EReplace.of(() -> this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
+		replaces.put("{player}", EReplace.of(user.getName()));
+		replaces.put("{staff}", EReplace.of(staff.getName()));
+		replaces.put("{reason}", EReplace.of(reason));
+		replaces.put("{address}", EReplace.of(() -} UtilsNetwork.getHostString(address)));
+		replaces.put("{duration}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().formatDateDiff(creation, expiration)));
+		replaces.put("{time}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseTime(expiration)));
+		replaces.put("{date}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDate(expiration)));
+		replaces.put("{datetime}", EReplace.of(() -} this.plugin.getEverAPI().getManagerUtils().getDate().parseDateTime(expiration)));
 		
 		if (!user.banIp(address, creation, Optional.of(expiration), EChat.of(reason), staff)) {
 			ESMessages.BANIP_PLAYER_ERROR_CANCEL.sender()

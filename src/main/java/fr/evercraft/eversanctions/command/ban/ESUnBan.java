@@ -101,7 +101,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 			} else {
 				EAMessages.PLAYER_NOT_FOUND.sender()
 					.prefix(ESMessages.PREFIX)
-					.replace("<player>", args.get(0))
+					.replace("{player}", args.get(0))
 					.sendTo(source);
 			}
 			
@@ -117,7 +117,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNBAN_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -125,7 +125,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
 			ESMessages.UNBAN_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -133,7 +133,7 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		// Le joueur n'a pas de ban en cours
 		if (!user.getManual(SanctionManualProfile.Type.BAN_PROFILE).isPresent()) {
 			ESMessages.UNBAN_ERROR_EMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -142,14 +142,14 @@ public class ESUnBan extends ECommand<EverSanctions> {
 		Optional<SanctionManualProfile.Ban> pardon = user.pardonBan(System.currentTimeMillis(),  reason, staff);
 		if (!pardon.isPresent()) {
 			ESMessages.UNBAN_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNBAN_STAFF.sender()
-			.replace("<reason>", reason_string)
-			.replace("<player>", user.getName())
+			.replace("{reason}", reason_string)
+			.replace("{player}", user.getName())
 			.sendTo(staff);
 		return CompletableFuture.completedFuture(true);
 	}

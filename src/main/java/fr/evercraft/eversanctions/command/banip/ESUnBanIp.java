@@ -126,7 +126,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 				} else {
 					EAMessages.PLAYER_NOT_FOUND.sender()
 						.prefix(ESMessages.PREFIX)
-						.replace("<player>", args.get(0))
+						.replace("{player}", args.get(0))
 						.sendTo(source);
 				}
 			}
@@ -143,7 +143,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff instanceof EPlayer && UtilsNetwork.equals(((EPlayer) staff).getConnection().getAddress(), UtilsNetwork.getSocketAddress(subject.getAddress()))) {
 			ESMessages.UNBANIP_IP_ERROR_EQUALS.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -151,7 +151,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
 			ESMessages.UNBANIP_IP_ERROR_REASON.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -159,7 +159,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Le joueur n'a pas de ban en cours
 		if (!subject.isBanManual()) {
 			ESMessages.UNBANIP_IP_ERROR_EMPTY.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -167,14 +167,14 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Si l'event a été cancel
 		if (!subject.pardonBan(System.currentTimeMillis(),  reason, staff).isEmpty()) {
 			ESMessages.UNBANIP_IP_CANCEL.sender()
-				.replace("<address>", subject.getIdentifier())
+				.replace("{address}", subject.getIdentifier())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNBANIP_IP_STAFF.sender()
-			.replace("<reason>", reason_string)
-			.replace("<address>", subject.getIdentifier())
+			.replace("{reason}", reason_string)
+			.replace("{address}", subject.getIdentifier())
 			.sendTo(staff);
 		return CompletableFuture.completedFuture(true);
 	}
@@ -183,7 +183,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Le staff et le joueur sont identique
 		if (staff.getIdentifier().equals(user.getIdentifier())) {
 			ESMessages.UNBANIP_PLAYER_ERROR_EQUALS.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -191,7 +191,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		Text reason = EChat.of(reason_string);
 		if (reason.isEmpty()) {
 			ESMessages.UNBANIP_PLAYER_ERROR_REASON.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -199,7 +199,7 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Le joueur n'a pas de ban en cours
 		if (!user.isBanIp()) {
 			ESMessages.UNBANIP_PLAYER_ERROR_EMPTY.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
@@ -207,14 +207,14 @@ public class ESUnBanIp extends ECommand<EverSanctions> {
 		// Si l'event a été cancel
 		if (user.pardonBanIp(System.currentTimeMillis(),  reason, staff).isEmpty()) {
 			ESMessages.UNBANIP_PLAYER_CANCEL.sender()
-				.replace("<player>", user.getName())
+				.replace("{player}", user.getName())
 				.sendTo(staff);
 			return CompletableFuture.completedFuture(false);
 		}
 		
 		ESMessages.UNBANIP_PLAYER_STAFF.sender()
-			.replace("<reason>", reason_string)
-			.replace("<player>", user.getName())
+			.replace("{reason}", reason_string)
+			.replace("{player}", user.getName())
 			.sendTo(staff);
 		return CompletableFuture.completedFuture(true);
 	}
