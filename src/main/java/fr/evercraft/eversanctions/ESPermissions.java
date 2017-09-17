@@ -16,74 +16,85 @@
  */
 package fr.evercraft.eversanctions;
 
-import org.spongepowered.api.command.CommandSource;
-
-import com.google.common.base.Preconditions;
-
 import fr.evercraft.everapi.plugin.EnumPermission;
+import fr.evercraft.everapi.plugin.file.EnumMessage;
+import fr.evercraft.eversanctions.ESMessage.ESMessages;
 
 public enum ESPermissions implements EnumPermission {
-	EVERSANCTIONS("commands.execute"),
-	HELP("commands.help"),
-	RELOAD("commands.reload"),
+	EVERSANCTIONS("commands.execute", ESMessages.PERMISSIONS_COMMANDS_EXECUTE),
+	HELP("commands.help", ESMessages.PERMISSIONS_COMMANDS_HELP),
+	RELOAD("commands.reload", ESMessages.PERMISSIONS_COMMANDS_RELOAD),
 	
-	PROFILE("commands.profile.execute"),
-	PROFILE_OTHERS("commands.profile.others"),
+	PROFILE("commands.profile.execute", ESMessages.PERMISSIONS_COMMANDS_PROFILE_EXECUTE),
+	PROFILE_OTHERS("commands.profile.others", ESMessages.PERMISSIONS_COMMANDS_PROFILE_OTHERS),
 	
 	
 	// Auto
-	SANCTIONS("commands.sanctions.execute"),
+	SANCTIONS("commands.sanctions.execute", ESMessages.PERMISSIONS_COMMANDS_SANCTIONS_EXECUTE),
 	
-	SANCTION("commands.sanction.execute"),
-	SANCTION_OFFLINE("commands.sanction.offline"),
+	SANCTION("commands.sanction.execute", ESMessages.PERMISSIONS_COMMANDS_SANCTION_EXECUTE),
+	SANCTION_OFFLINE("commands.sanction.offline", ESMessages.PERMISSIONS_COMMANDS_SANCTION_OFFLINE),
 	
-	UNSANCTION("commands.unsanction.execute"),
+	UNSANCTION("commands.unsanction.execute", ESMessages.PERMISSIONS_COMMANDS_UNSANCTION_EXECUTE),
 	
 	
 	// Manual
-	BAN("commands.ban.execute"),
-	BAN_UNLIMITED("commands.ban.unlimited"),
-	BAN_OFFLINE("commands.ban.offline"),
+	BAN("commands.ban.execute", ESMessages.PERMISSIONS_COMMANDS_BAN_EXECUTE),
+	BAN_UNLIMITED("commands.ban.unlimited", ESMessages.PERMISSIONS_COMMANDS_BAN_UNLIMITED),
+	BAN_OFFLINE("commands.ban.offline", ESMessages.PERMISSIONS_COMMANDS_BAN_OFFLINE),
 	
-	BANIP("commands.banip.execute"),
-	BANIP_UNLIMITED("commands.banip.unlimited"),
-	BANIP_OFFLINE("commands.banip.offline"),
+	BANIP("commands.banip.execute", ESMessages.PERMISSIONS_COMMANDS_BANIP_EXECUTE),
+	BANIP_UNLIMITED("commands.banip.unlimited", ESMessages.PERMISSIONS_COMMANDS_BANIP_UNLIMITED),
+	BANIP_OFFLINE("commands.banip.offline", ESMessages.PERMISSIONS_COMMANDS_BANIP_OFFLINE),
 	
-	MUTE("commands.mute.execute"),
-	MUTE_UNLIMITED("commands.mute.unlimited"),
-	MUTE_OFFLINE("commands.mute.offline"),
+	MUTE("commands.mute.execute", ESMessages.PERMISSIONS_COMMANDS_MUTE_EXECUTE),
+	MUTE_UNLIMITED("commands.mute.unlimited", ESMessages.PERMISSIONS_COMMANDS_MUTE_UNLIMITED),
+	MUTE_OFFLINE("commands.mute.offline", ESMessages.PERMISSIONS_COMMANDS_MUTE_OFFLINE),
 	
-	JAIL("commands.jail.execute"),
-	JAIL_UNLIMITED("commands.jail.execute"),
-	JAIL_OFFLINE("commands.jail.offline"),
+	JAIL("commands.jail.execute", ESMessages.PERMISSIONS_COMMANDS_JAIL_EXECUTE),
+	JAIL_UNLIMITED("commands.jail.unlimited", ESMessages.PERMISSIONS_COMMANDS_JAIL_UNLIMITED),
+	JAIL_OFFLINE("commands.jail.offline", ESMessages.PERMISSIONS_COMMANDS_JAIL_OFFLINE),
 	
-	JAILS("commands.jails.execute"),
-	JAILS_ADD("commands.jails.add"),
-	JAILS_DELETE("commands.jails.delete"),
-	JAILS_LIST("commands.jails.list"),
-	JAILS_TELEPORT("commands.jails.teleport"),
-	JAILS_SETRADIUS("commands.jails.setradius"),
+	JAILS("commands.jails.execute", ESMessages.PERMISSIONS_COMMANDS_JAILS_EXECUTE),
+	JAILS_ADD("commands.jails.add", ESMessages.PERMISSIONS_COMMANDS_JAILS_ADD),
+	JAILS_DELETE("commands.jails.delete", ESMessages.PERMISSIONS_COMMANDS_JAILS_DELETE),
+	JAILS_LIST("commands.jails.list", ESMessages.PERMISSIONS_COMMANDS_JAILS_LIST),
+	JAILS_TELEPORT("commands.jails.teleport", ESMessages.PERMISSIONS_COMMANDS_JAILS_TELEPORT),
+	JAILS_SETRADIUS("commands.jails.setradius", ESMessages.PERMISSIONS_COMMANDS_JAILS_SETRADIUS),
 	
-	UNBAN("commands.unban.execute"),
-	UNBANIP("commands.unbanip.execute"),
-	UNMUTE("commands.unmute.execute"),
-	UNJAIL("commands.unjail.execute");
+	UNBAN("commands.unban.execute", ESMessages.PERMISSIONS_COMMANDS_UNBAN_EXECUTE),
+	UNBANIP("commands.unbanip.execute", ESMessages.PERMISSIONS_COMMANDS_UNBANIP_EXECUTE),
+	UNMUTE("commands.unmute.execute", ESMessages.PERMISSIONS_COMMANDS_UNMUTE_EXECUTE),
+	UNJAIL("commands.unjail.execute", ESMessages.PERMISSIONS_COMMANDS_UNJAIL_EXECUTE);
 	
-	private final static String prefix = "eversanctions";
+	private static final String PREFIX = "eversanctions";
 	
 	private final String permission;
+	private final EnumMessage message;
+	private final boolean value;
     
-    private ESPermissions(final String permission) {   	
-    	Preconditions.checkNotNull(permission, "La permission '" + this.name() + "' n'est pas définit");
-    	
-    	this.permission = permission;
+    private ESPermissions(final String permission, final EnumMessage message) {
+    	this(permission, message, false);
+    }
+    
+    private ESPermissions(final String permission, final EnumMessage message, final boolean value) {   	    	
+    	this.permission = PREFIX + "." + permission;
+    	this.message = message;
+    	this.value = value;
     }
 
+    @Override
     public String get() {
-		return ESPermissions.prefix + "." + this.permission;
+    	return this.permission;
 	}
-    
-    public boolean has(CommandSource player) {
-    	return player.hasPermission(this.get());
-    }
+
+	@Override
+	public boolean getDefault() {
+		return this.value;
+	}
+
+	@Override
+	public EnumMessage getMessage() {
+		return this.message;
+	}
 }
