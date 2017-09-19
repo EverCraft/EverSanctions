@@ -372,4 +372,9 @@ public class ESMessage extends EMessage<EverSanctions> {
 			this.builder = message;
 		}
 	}
+	
+	@Override
+	public EnumMessage getPrefix() {
+		return ESMessages.PREFIX;
+	}
 }
