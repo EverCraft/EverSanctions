@@ -104,6 +104,10 @@ public class EverSanctions extends EPlugin<EverSanctions> {
 	public ESConfig getConfigs() {
 		return this.configs;
 	}
+	
+	public ESPermissions[] getPermissions() {
+		return ESPermissions.values();
+	}
 
 	public ESDataBase getDataBase() {
 		return this.database;
