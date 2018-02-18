@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 
 import com.google.common.base.Preconditions;
@@ -166,7 +165,7 @@ public class EIpSubject implements SanctionIpSubject {
 		final EManualIP ban = new EManualIP(creation, expiration, reason, source.getIdentifier());
 		
 		// Event cancel
-		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban.getBan(this.getAddress())))) {
+		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(this.plugin.getCurrentCause(), ban.getBan(this.getAddress())))) {
 			return false;
 		}
 		

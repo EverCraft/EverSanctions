@@ -34,7 +34,6 @@ import java.util.function.Predicate;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
@@ -242,7 +241,7 @@ public class EUserSubject implements SanctionUserSubject {
 		final Ban.Profile ban = manual.getBan(user.get().getProfile());
 		
 		// Event cancel
-		if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), ban, user.get()))) {
+		if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(this.plugin.getCurrentCause(), ban, user.get()))) {
 			return false;
 		}
 		
@@ -282,7 +281,7 @@ public class EUserSubject implements SanctionUserSubject {
 		final Ban.Ip ban = manual.getBan();
 		
 		// Event cancel
-		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban))) {
+		if (Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(this.plugin.getCurrentCause(), ban))) {
 			return false;
 		}
 		
@@ -552,7 +551,7 @@ public class EUserSubject implements SanctionUserSubject {
 		
 		if(auto instanceof SanctionAuto.SanctionBanProfile) {
 			Ban.Profile ban = ((SanctionAuto.SanctionBanProfile) auto).getBan(user.get().getProfile());
-			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), ban, user.get()))) {
+			if(Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(this.plugin.getCurrentCause(), ban, user.get()))) {
 				return Optional.empty();
 			}
 			this.plugin.getSanctionService().add(ban);
@@ -571,7 +570,7 @@ public class EUserSubject implements SanctionUserSubject {
 			}
 			
 			Ban.Ip ban = ((SanctionAuto.SanctionBanIp) auto).getBan(user.get().getProfile(), user.get().getLastIP().get());
-			if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), ban))) {
+			if(Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(this.plugin.getCurrentCause(), ban))) {
 				return Optional.empty();
 			}
 			
